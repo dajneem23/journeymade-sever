@@ -1,7 +1,7 @@
 {
-  "name": "node-typescript-boilerplate",
-  "version": "0.0.0",
-  "description": "Minimalistic boilerplate to quick-start Node.js development in TypeScript.",
+  "name": "1trading-signal",
+  "version": "0.0.1",
+  "description": "1fox - 1trading signals",
   "type": "module",
   "engines": {
     "node": ">= 18.12 <19"
@@ -22,7 +22,7 @@
     "typescript": "~4.9"
   },
   "scripts": {
-    "start": "node build/src/main.js",
+    "start": "node build/src/index.js",
     "clean": "rimraf coverage build tmp",
     "prebuild": "npm run lint",
     "build": "tsc -p tsconfig.json",
@@ -36,7 +36,26 @@
   "author": "Jakub Synowiec <jsynowiec@users.noreply.github.com>",
   "license": "Apache-2.0",
   "dependencies": {
-    "tslib": "~2.4"
+    "axios": "^1.2.6",
+    "body-parser": "^1.20.1",
+    "chalk": "^5.2.0",
+    "chalk-table": "^1.0.2",
+    "compression": "^1.7.4",
+    "cors": "^2.8.5",
+    "dayjs": "^1.11.7",
+    "dotenv-safe": "^8.2.0",
+    "express": "^4.18.2",
+    "google-spreadsheet": "^3.3.0",
+    "helmet": "^6.0.1",
+    "http-status": "^1.6.2",
+    "method-override": "^3.0.0",
+    "mongoose": "^6.9.0",
+    "morgan": "^1.10.0",
+    "passport": "^0.6.0",
+    "path": "^0.12.7",
+    "technicalindicators": "^3.1.0",
+    "tslib": "~2.4",
+    "winston": "^3.8.2"
   },
   "volta": {
     "node": "18.12.1"
