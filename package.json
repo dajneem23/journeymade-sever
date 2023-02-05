@@ -15,8 +15,7 @@
     "rimraf": "~3.0",
     "ts-jest": "~29.0",
     "tsconfig-paths": "^4.1.2",
-    "tsutils": "~3.21",
-    "ttypescript": "^1.5.15"
+    "tsutils": "~3.21"
   },
   "scripts": {
     "dev": "nodemon",
@@ -63,7 +62,8 @@
     "ts-transformer-keys": "^0.4.4",
     "tslib": "~2.4",
     "typescript": "^4.9.5",
-    "winston": "^3.8.2"
+    "winston": "^3.8.2",
+    "ttypescript": "^1.5.15"
   },
   "volta": {
     "node": "18.12.1"
