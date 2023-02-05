@@ -4,13 +4,14 @@ ENV NODE_ENV=production
 
 WORKDIR /usr/src/app
 
-COPY package.json ./
+COPY package.json tsconfig.json ./
 
 ARG ENV_VARS
 ENV ENV_VARS=$ENV_VARS
 RUN echo $ENV_VARS
 
 # RUN npm install --production --silent && mv node_modules ../
+RUN ls
 RUN yarn install --production --silent
 RUN yarn build
 
