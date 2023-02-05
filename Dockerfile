@@ -11,7 +11,7 @@ ENV ENV_VARS=$ENV_VARS
 RUN echo $ENV_VARS
 
 # RUN npm install --production --silent && mv node_modules ../
-RUN yarn --pure-lockfile
+RUN yarn install --production && yarn build
 
 # Copy all file from current dir to /app in container
 COPY . .
