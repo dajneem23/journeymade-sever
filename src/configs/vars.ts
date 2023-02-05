@@ -46,8 +46,6 @@ export const candlestickCount = 300;
 export const symbolFilters = [];
 export const chartTimeFrames = [
   timeFrameOptions['1min'],
-  // timeFrameOptions['2mins'],
-  // timeFrameOptions['3mins'],
   timeFrameOptions['5mins'],
   timeFrameOptions['15mins'],
   timeFrameOptions['1h'],

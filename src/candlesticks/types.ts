@@ -53,6 +53,7 @@ export type FXOutput = {
   fx_cases?: string;
   fx_point?: number;
   fx_support_per?: number;
+  fx_is_correct?: boolean;
 }
 
 type CandleDataItem = CandleStickItem & MDCIndexOutput & FXOutput;

@@ -86,6 +86,9 @@ const candleStickSchema = new mongoose.Schema(
     fx_support_per: {
       type: Number,
     },
+    fx_is_correct: {
+      type: Boolean,
+    },
     signals: {
       type: [
         {
