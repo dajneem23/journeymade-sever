@@ -1,4 +1,4 @@
-import { CandleStickRaw } from "../types.js";
+import { CandleStickRaw } from "../types";
 
 export const getPriceBySymbol = async (model, symbol: string): Promise<CandleStickRaw> => {
   if (!symbol) return { _id: '', symbol: '', candles: [] };

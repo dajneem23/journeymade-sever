@@ -1,9 +1,9 @@
-import { CandlesDataType } from '../../types.js';
-import { b1, b1c } from './b1.js';
-import { b2, b2c } from './b2.js';
-import { b3, b3c } from './b3.js';
-import { b4, b4c } from './b4.js';
-import { sb1, sb2, sb3, sb4 } from './sb.js';
+import { CandlesDataType } from '../../types';
+import { b1, b1c } from './b1';
+import { b2, b2c } from './b2';
+import { b3, b3c } from './b3';
+import { b4, b4c } from './b4';
+import { sb1, sb2, sb3, sb4 } from './sb';
 
 const bx = (candles: CandlesDataType) => {
   return {

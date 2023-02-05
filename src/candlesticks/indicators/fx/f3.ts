@@ -1,5 +1,5 @@
-import { PatternName } from "../../types.js";
-import { f1 } from "./f1.js";
+import { PatternName } from "../../types";
+import { f1 } from "./f1";
 
 /**
  * f3. Nến Doji ngắn hay dài |c-d| hiện tại /|c-d| trước > 1,2 "

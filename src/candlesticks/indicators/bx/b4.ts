@@ -1,6 +1,6 @@
-import { CandlesDataType, PatternName } from '../../types.js';
-import { sumByFieldOfArray } from '../../utils/index.js';
-import { FXWeight } from '../constants.js';
+import { CandlesDataType, PatternName } from '../../types';
+import { sumByFieldOfArray } from '../../utils/index';
+import { FXWeight } from '../constants';
 
 /**
  * b4. Volume mua hiện tại/Mean (Volume 3 cây trước)>1,4

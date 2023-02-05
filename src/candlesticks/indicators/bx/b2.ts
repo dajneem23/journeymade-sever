@@ -1,6 +1,6 @@
-import { CandlesDataType, PatternName } from '../../types.js';
-import { FXWeight } from '../constants.js';
-import { FXResult } from '../types.js';
+import { CandlesDataType, PatternName } from '../../types';
+import { FXWeight } from '../constants';
+import { FXResult } from '../types';
 
 /**
  * b2. "Sắp chạm đường LB trung bình giá Xu hướng tăng ( d cũng đc, giá cũng đc)"

@@ -1,6 +1,6 @@
-import { CandlesDataType, PatternName } from '../../types.js';
-import { FXWeight } from '../constants.js';
-import { FXResult } from '../types.js';
+import { CandlesDataType, PatternName } from '../../types';
+import { FXWeight } from '../constants';
+import { FXResult } from '../types';
 
 /**
  * t2. |c - UB|/ |UB-BB|=(0;0,2)	"Sắp chạm đường UB trung bình giá Xu hướng Giảm"

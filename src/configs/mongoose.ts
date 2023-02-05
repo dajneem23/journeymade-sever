@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
-import logger from './logger.js';
-import { mongo, nodeEnv } from './vars.js';
+import logger from './logger';
+import { mongo, nodeEnv } from './vars';
 
 // set mongoose Promise to Bluebird
 mongoose.Promise = Promise;

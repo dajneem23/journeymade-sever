@@ -1,5 +1,5 @@
-import { CandlesDataType, PatternName } from '../../types.js';
-import { FXResult } from '../types.js';
+import { CandlesDataType, PatternName } from '../../types';
+import { FXResult } from '../types';
 
 export const st1 = (candles: CandlesDataType): FXResult => {
   const { a, b, c, d } = candles[0];

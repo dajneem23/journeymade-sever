@@ -1,8 +1,11 @@
-import chalk from 'chalk';
+// import chalk from 'chalk';
 import chalkTable from 'chalk-table';
-import { highlightLog, infoLog } from '../../printer/index.js';
+import { highlightLog, infoLog } from '../../printer/index';
+
+const chalk = require('chalk');
 
 export const printLogs = (tableResult, symbol = '') => {
+
   Object.keys(tableResult).forEach((tf) => {
     Object.keys(tableResult[tf]).forEach((key) => {
       if (symbol && key !== symbol) return;

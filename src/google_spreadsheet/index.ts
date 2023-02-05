@@ -1,13 +1,15 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 import { GoogleSpreadsheet } from 'google-spreadsheet';
-import { chartTimeFrames } from '../configs/vars.js';
+import { chartTimeFrames } from '../configs/vars';
 
-const creds = await import(
-  './../configs/private/trading-376401-0c04491b3921.json',
-  {
-    assert: { type: 'json' },
-  }
-);
+// const creds = await import(
+//   './../configs/private/trading-376401-0c04491b3921.json',
+//   {
+//     assert: { type: 'json' },
+//   }
+// );
+
+import creds from './../configs/private/trading-376401-0c04491b3921.json'
 
 const fileID = '1q4pkATL6p0kgWaRMyXSU0WlRkl1IKaZiIqEDVfrl8K0';
 const sheets = []
@@ -21,7 +23,7 @@ const sheetIdx = {
 
 export const initGoogleSpreadsheetService = async () => {
   const doc = new GoogleSpreadsheet(fileID);
-  await doc.useServiceAccountAuth(creds.default);
+  await doc.useServiceAccountAuth(creds);
 
   await doc.loadInfo(); // loads document properties and worksheets
 

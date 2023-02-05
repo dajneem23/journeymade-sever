@@ -1,5 +1,5 @@
 import httpStatus from 'http-status';
-import ExtendableError from './extandable-error.js'
+import ExtendableError from './extandable-error'
 
 /**
  * Class representing an API error.

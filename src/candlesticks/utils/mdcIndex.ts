@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import { CandleStickItem, MDCIndexOutput } from '../types.js';
+import { CandleStickItem, MDCIndexOutput } from '../types';
 
 const configs = {
   fiboRanges: [

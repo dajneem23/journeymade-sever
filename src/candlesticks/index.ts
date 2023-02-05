@@ -1,21 +1,21 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
-import rawDataModel from '../models/rawData.model.js';
+import rawDataModel from '../models/rawData.model';
 import {
   chartTimeFrames,
   symbolFilters
-} from './../configs/vars.js';
-import { calculateFx } from './indicators/index.js';
-import { detectPatterns } from './patterns/index.js';
-import { getAllSymbols } from './services/getAllSymbols.js';
-import { getPriceBySymbol } from './services/getPriceBySymbol.js';
-import { printLogs } from './services/printLogs.js';
-import { saveTableResultToDB } from './services/saveTableResultToDB.js';
-import { CandleStickRaw } from './types.js';
-import { getBB } from './utils/bollingerBands.js';
-import { getMA89 } from './utils/maN.js';
-import { getMdcIndex } from './utils/mdcIndex.js';
-import { getRSI } from './utils/rsi.js';
-import { getDataByTimeFrame } from './utils/timeFrame.js';
+} from './../configs/vars';
+import { calculateFx } from './indicators/index';
+import { detectPatterns } from './patterns/index';
+import { getAllSymbols } from './services/getAllSymbols';
+import { getPriceBySymbol } from './services/getPriceBySymbol';
+import { printLogs } from './services/printLogs';
+import { saveTableResultToDB } from './services/saveTableResultToDB';
+import { CandleStickRaw } from './types';
+import { getBB } from './utils/bollingerBands';
+import { getMA89 } from './utils/maN';
+import { getMdcIndex } from './utils/mdcIndex';
+import { getRSI } from './utils/rsi';
+import { getDataByTimeFrame } from './utils/timeFrame';
 
 export const rawData: CandleStickRaw[] = [];
 export const tableResult = {};

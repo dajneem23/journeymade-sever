@@ -1,5 +1,5 @@
-import { CandlesDataType, PatternName } from '../../types.js';
-import { f1 } from './f1.js';
+import { CandlesDataType, PatternName } from '../../types';
+import { f1 } from './f1';
 
 /**
  * Doji ngắn (ko rõ ràng về giằng co)

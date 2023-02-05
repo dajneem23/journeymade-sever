@@ -1,5 +1,5 @@
-import { CandleStickItem } from "../../../src/candlesticks/types.js";
-import { getMdcIndex } from "../../../src/candlesticks/utils/mdcIndex.js";
+import { CandleStickItem } from "../../../src/candlesticks/types";
+import { getMdcIndex } from "../../../src/candlesticks/utils/mdcIndex";
 
 const data: CandleStickItem[] = [
   {

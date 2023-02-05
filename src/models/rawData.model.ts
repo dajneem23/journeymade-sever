@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import httpStatus from 'http-status';
-import APIError from '../errors/api-error.js';
-import { mongo } from '../configs/vars.js';
+import APIError from '../errors/api-error';
+import { mongo } from '../configs/vars';
 
 /**
  * Candlesticks Roles

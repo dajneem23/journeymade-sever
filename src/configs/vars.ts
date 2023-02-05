@@ -1,11 +1,9 @@
 import path from 'path';
 import env from 'dotenv-safe';
 
-const __dirname = path.resolve();
-
 // import .env variables
 env.config({
-  path: path.join(__dirname, '/.env'),
+  path: path.join(__dirname, '/../../.env'),
   allowEmptyValues: true,
 });
 

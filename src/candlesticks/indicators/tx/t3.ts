@@ -1,6 +1,6 @@
-import { CandlesDataType, PatternName } from '../../types.js';
-import { FXWeight } from '../constants.js';
-import { FXResult } from '../types.js';
+import { CandlesDataType, PatternName } from '../../types';
+import { FXWeight } from '../constants';
+import { FXResult } from '../types';
 
 /**
  "t3. (MA89- Price)/MA89= (- vô cùng, -0,2)

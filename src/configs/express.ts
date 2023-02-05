@@ -5,9 +5,8 @@ import compress from 'compression';
 import methodOverride from 'method-override';
 
 import cors from 'cors';
-import helmet from 'helmet';
 
-import { logs } from './vars.js';
+import { logs } from './vars';
 
 /**
 * Express instance
@@ -28,9 +27,6 @@ app.use(compress());
 // lets you use HTTP verbs such as PUT or DELETE
 // in places where the client doesn't support it
 app.use(methodOverride());
-
-// secure apps by setting various HTTP headers
-app.use(helmet());
 
 // enable CORS - Cross Origin Resource Sharing
 app.use(cors());

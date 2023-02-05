@@ -1,21 +1,23 @@
-import { port, nodeEnv } from './configs/vars.js';
-import logger from './configs/logger.js';
-import mongoose from './configs/mongoose.js';
-import app from './configs/express.js';
-import { initPriceData, watchChangeData } from './candlesticks/index.js';
-import { addRows, initGoogleSpreadsheetService } from './google_spreadsheet/index.js';
+import { port, nodeEnv } from './configs/vars';
+import logger from './configs/logger';
+import mongoose from './configs/mongoose';
+import app from './configs/express';
+import { initPriceData, watchChangeData } from './candlesticks/index';
+import { addRows, initGoogleSpreadsheetService } from './google_spreadsheet/index';
 
 // const { port, nodeEnv } = vars;
 // open mongoose connection
 
-try {
-  await initGoogleSpreadsheetService();
-} catch (error) {
-  console.log('🚀 ~ initGoogleSpreadsheetService ~ error', error);
-}
+// try {
+//   await initGoogleSpreadsheetService();
+// } catch (error) {
+//   console.log('🚀 ~ initGoogleSpreadsheetService ~ error', error);
+// }
 
 mongoose.connect(async () => {
   try {
+    await initGoogleSpreadsheetService();
+
     await initPriceData();
     
     watchChangeData();

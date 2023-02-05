@@ -1,9 +1,9 @@
 import dayjs from 'dayjs';
-import { candlestickCount } from '../../configs/vars.js';
-import { writeJsonFile } from '../../file_helper/index.js';
-import { infoLog } from '../../printer/index.js';
-import { CandleStickItem } from '../types.js';
-import { generateID, sumByFieldOfArray } from './index.js';
+import { candlestickCount } from '../../configs/vars';
+import { writeJsonFile } from '../../file_helper/index';
+import { infoLog } from '../../printer/index';
+import { CandleStickItem } from '../types';
+import { generateID, sumByFieldOfArray } from './index';
 
 export const groupByTimeFrame = (
   candleStickItems: CandleStickItem[],

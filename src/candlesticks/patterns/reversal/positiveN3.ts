@@ -1,9 +1,9 @@
-import { PatternName } from '../../types.js';
+import { PatternName } from '../../types';
 import {
   PatternConfigs,  
   PatternOutput,
   Reliable,
-} from '../types.js';
+} from '../types';
 
 const outputTemplate = {
   invertedHammer_bottom:

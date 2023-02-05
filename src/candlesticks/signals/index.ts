@@ -1,4 +1,4 @@
-import reversalSignals from '../patterns/reversal/index.js';
+import reversalSignals from '../patterns/reversal/index';
 
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 const sumLastItems = (data) => {

@@ -1,7 +1,7 @@
 import httpStatus from 'http-status';
 import mongoose, { Schema } from 'mongoose';
-import { chartTimeFrames } from '../configs/vars.js';
-import APIError from '../errors/api-error.js';
+import { chartTimeFrames } from '../configs/vars';
+import APIError from '../errors/api-error';
 
 /**
  * Candlesticks Roles

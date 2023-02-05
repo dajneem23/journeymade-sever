@@ -1,4 +1,4 @@
-import { CandlesDataType, PatternName } from '../../types.js';
+import { CandlesDataType, PatternName } from '../../types';
 
 /**
  * Nến Doji xuất hiện

@@ -1,4 +1,4 @@
-import CandlestickModels from '../../models/1trading_candlesticks.model.js';
+import CandlestickModels from '../../models/1trading_candlesticks.model';
 
 export const saveTableResultToDB = async (tableResult, only_symbol = '') => {
   await Promise.all(

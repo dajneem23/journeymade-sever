@@ -1,6 +1,6 @@
-import { CandlesDataType, PatternName } from "../../types.js";
-import { FXWeight } from "../constants.js";
-import { FXResult } from "../types.js";
+import { CandlesDataType, PatternName } from "../../types";
+import { FXWeight } from "../constants";
+import { FXResult } from "../types";
 
 /**
  * b1.RSI <30	Quá mua

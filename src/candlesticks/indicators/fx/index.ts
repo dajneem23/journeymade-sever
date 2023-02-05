@@ -1,13 +1,13 @@
-import { CandlesDataType } from '../../types.js';
-import { f1 } from './f1.js';
-import { f2 } from './f2.js';
-import { f3 } from './f3.js';
-import { f4 } from './f4.js';
-import { f5 } from './f5.js';
-import { f6 } from './f6.js';
-import { f7 } from './f7.js';
-import { f8 } from './f8.js';
-import { f9 } from './f9.js';
+import { CandlesDataType } from '../../types';
+import { f1 } from './f1';
+import { f2 } from './f2';
+import { f3 } from './f3';
+import { f4 } from './f4';
+import { f5 } from './f5';
+import { f6 } from './f6';
+import { f7 } from './f7';
+import { f8 } from './f8';
+import { f9 } from './f9';
 
 const fx = (candles: CandlesDataType) => {
   return {

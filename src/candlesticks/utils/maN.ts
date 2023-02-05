@@ -1,5 +1,5 @@
 import { SMA } from 'technicalindicators';
-import { CandlesDataType } from "../types.js";
+import { CandlesDataType } from "../types";
 
 export const getMA89 = (candles: CandlesDataType) => {
   const result = SMA.calculate({

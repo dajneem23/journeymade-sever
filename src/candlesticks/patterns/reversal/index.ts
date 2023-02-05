@@ -1,8 +1,8 @@
-import bx from '../../indicators/bx/index.js';
-import fx from '../../indicators/fx/index.js';
-import tx from '../../indicators/tx/index.js';
+import bx from '../../indicators/bx/index';
+import fx from '../../indicators/fx/index';
+import tx from '../../indicators/tx/index';
 
-export { positiveN3 } from './positiveN3.js';
+export { positiveN3 } from './positiveN3';
 
 const reversalSignals = (candles) => {
   const length = candles.length;

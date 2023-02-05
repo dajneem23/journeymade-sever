@@ -1,6 +1,6 @@
-import { CandlesDataType } from '../types.js';
-import bx from './bx/index.js';
-import tx from './tx/index.js';
+import { CandlesDataType } from '../types';
+import bx from './bx/index';
+import tx from './tx/index';
 
 export const calculateFx = (candles: CandlesDataType) => {
   const length = candles.length;
