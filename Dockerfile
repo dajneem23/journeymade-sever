@@ -4,14 +4,14 @@ ENV NODE_ENV=production
 
 WORKDIR /usr/src/app
 
-COPY package.json yarn.lock ./
+COPY package.json ./
 
 ARG ENV_VARS
 ENV ENV_VARS=$ENV_VARS
 RUN echo $ENV_VARS
 
 # RUN npm install --production --silent && mv node_modules ../
-RUN yarn install --pure-lockfile
+RUN yarn install --production --silent
 RUN yarn build
 
 # Copy all file from current dir to /app in container
