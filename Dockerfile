@@ -4,7 +4,7 @@ ENV NODE_ENV=production
 
 WORKDIR /usr/src/app
 
-COPY package.json tsconfig.json ./
+COPY package.json tsconfig.json .env ./
 
 ARG ENV_VARS
 ENV ENV_VARS=$ENV_VARS
