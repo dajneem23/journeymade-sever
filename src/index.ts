@@ -21,8 +21,8 @@ mongoose.connect(async () => {
     await initPriceData();
     
     watchChangeData();
-  } catch (error) {
-    console.log('🚀 ~ file: index.js:14 ~ mongoose.connect ~ error', error);
+  } catch (error) {    
+    console.log('🚀 ~ file: index.js:14 ~ mongoose.connect ~ error', error);    
   }
 });
 

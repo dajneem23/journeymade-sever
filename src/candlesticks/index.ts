@@ -111,6 +111,7 @@ export const watchChangeData = async () => {
 
           if (key.includes('candles') && foundIdx > -1) {
             rawData[foundIdx].candles.unshift(updatedFields[key]);
+            rawData[foundIdx].candles.splice(rawData[foundIdx].candles.length - 2, 1);
             // writeJsonFile('rawData', rawData);
             // console.log("🚀 ~ file: index.ts:96 ~ Object.keys ~ updatedFields[key]", updatedFields[key])
 
