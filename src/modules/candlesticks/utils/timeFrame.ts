@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
-import { candlestickCount } from '../../configs/vars';
-import { writeJsonFile } from '../../file_helper/index';
-import { infoLog } from '../../printer/index';
+import { candlestickCount } from '../../../configs/vars';
+import { writeJsonFile } from '../../../services/file_helper/index';
+import { infoLog } from '../../../services/printer/index';
 import { CandleStickItem } from '../types';
 import { generateID, sumByFieldOfArray } from './index';
 

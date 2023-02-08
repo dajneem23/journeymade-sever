@@ -1,31 +1,31 @@
-import { port, nodeEnv } from './configs/vars';
-import logger from './configs/logger';
-import mongoose from './configs/mongoose';
 import app from './configs/express';
-import { initPriceData, watchChangeData } from './candlesticks/index';
-import { addRows, initGoogleSpreadsheetService } from './google_spreadsheet/index';
+import logger from './configs/logger';
+import mongoLoader from './configs/mongoose';
+import pgLoader from './configs/postgres';
+import { nodeEnv, port } from './configs/vars';
 
-// const { port, nodeEnv } = vars;
-// open mongoose connection
-
-// try {
-//   await initGoogleSpreadsheetService();
-// } catch (error) {
-//   console.log('🚀 ~ initGoogleSpreadsheetService ~ error', error);
-// }
-
-mongoose.connect(async () => {
+(async () => {
   try {
-    await initGoogleSpreadsheetService();
+    await pgLoader();
 
-    await initPriceData();
-    
-    watchChangeData();
-  } catch (error) {    
-    console.log('🚀 ~ file: index.js:14 ~ mongoose.connect ~ error', error);    
+    await mongoLoader();
+
+    // if (env.MODE == 'production') {
+    //   await (await import('./loaders/telegram.loader')).default();
+    // }
+
+    // // Caching (Redis)
+    // await (await import('./loaders/redis.loader')).default();
+
+    // (await import('./loaders/worker.loader')).default();
+
+    (await import('./modules/debank')).default();
+
+  } catch (err) {
+    console.error(err);
+    process.exit(1);
   }
-});
-
+})();
 
 // listen to requests
 app.listen(port, () =>

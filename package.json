@@ -1,8 +1,8 @@
 {
-  "name": "1trading-signal",
+  "name": "onchain-signal",
   "private": true,
   "version": "0.0.1",
-  "description": "1fox - 1trading signals",
+  "description": "1fox - onchain signals",
   "engines": {
     "node": ">= 18.12 <19"
   },
@@ -50,20 +50,25 @@
     "google-spreadsheet": "^3.3.0",
     "helmet": "^6.0.1",
     "http-status": "^1.6.2",
+    "log4js": "^6.7.1",
     "method-override": "^3.0.0",
     "mongoose": "^6.9.0",
     "morgan": "^1.10.0",
     "node-fetch": "^3.3.0",
+    "node-schedule": "^2.1.1",
     "passport": "^0.6.0",
     "path": "^0.12.7",
+    "pg": "^8.9.0",
     "technicalindicators": "^3.1.0",
+    "tiny-worker": "^2.3.0",
     "ts-node": "^10.9.1",
     "ts-transformer-keys": "^0.4.4",
+    "tsconfig-paths": "^4.1.2",
     "tslib": "~2.4",
-    "typescript": "^4.9.5",
-    "winston": "^3.8.2",
     "ttypescript": "^1.5.15",
-    "tsconfig-paths": "^4.1.2"
+    "typedi": "^0.10.0",
+    "typescript": "^4.9.5",
+    "winston": "^3.8.2"
   },
   "volta": {
     "node": "18.12.1"

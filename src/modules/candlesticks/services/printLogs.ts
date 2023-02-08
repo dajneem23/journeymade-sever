@@ -1,6 +1,6 @@
 // import chalk from 'chalk';
 import chalkTable from 'chalk-table';
-import { highlightLog, infoLog } from '../../printer/index';
+import { highlightLog, infoLog } from '../../../services/printer/index';
 
 const chalk = require('chalk');
 

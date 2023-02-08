@@ -1,7 +1,5 @@
-import httpStatus from 'http-status';
 import mongoose, { Schema } from 'mongoose';
 import { chartTimeFrames } from '../configs/vars';
-import APIError from '../errors/api-error';
 
 /**
  * Candlesticks Roles
@@ -103,34 +101,6 @@ const candleStickSchema = new mongoose.Schema(
   },
 );
 
-/**
- * Statics
- */
-candleStickSchema.statics = {
-  roles: roles as any,
-
-  /**
-   * Get user
-   *
-   * @param {ObjectId} id - The objectId of user.
-   * @returns {Promise<User, APIError>}
-   */
-  async get(symbol) {
-    let data;
-
-    if (symbol) {
-      data = await this.findOne({ symbol }).sort({ created_at: 'desc' }).exec();
-    }
-    if (data) {
-      return data;
-    }
-
-    throw new (APIError as any)({
-      message: 'Symbol does not exist',
-      status: httpStatus.NOT_FOUND,
-    });
-  },
-};
 
 const models = {};
 chartTimeFrames.forEach((tf) => {

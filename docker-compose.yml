@@ -1,8 +1,8 @@
 version: '3.4'
 
 services:
-  1tradingsignal:
-    image: 1tradingsignal
+  onchainsignal:
+    image: onchainsignal
     build:
       context: .
       dockerfile: ./Dockerfile

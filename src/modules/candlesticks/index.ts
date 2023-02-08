@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
-import rawDataModel from '../models/rawData.model';
+import rawDataModel from '../../models/rawData.model';
 import {
   chartTimeFrames,
   symbolFilters
-} from './../configs/vars';
+} from '../../configs/vars';
 import { calculateFx } from './indicators/index';
 import { detectPatterns } from './patterns/index';
 import { getAllSymbols } from './services/getAllSymbols';

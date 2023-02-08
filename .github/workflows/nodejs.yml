@@ -5,7 +5,7 @@ name: Production
 on:
   # Triggers the workflow on push events but only for the master branch
   push:
-    branches: [main1]
+    branches: [main]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -16,9 +16,9 @@ on:
 #2
 env:
   REGISTRY: 'registry.digitalocean.com/wikiblock'
-  IMAGE_NAME: '1trading-signal'
+  IMAGE_NAME: 'onchain-signal'
   APP_ENV: 'production'
-  APP_NAME: '1trading-signal'
+  APP_NAME: 'onchain-signal'
   API_PREFIX: ''
   APP_VERSION: '0.0.1'
   APP_PORT: 3000,

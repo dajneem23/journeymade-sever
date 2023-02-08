@@ -26,6 +26,13 @@ export const mongo = {
   ],
 };
 export const logs = process.env.NODE_ENV === 'production' ? 'combined' : 'dev';
+export const postgresConfig = {
+  host: process.env.POSTGRESQL_HOST,
+  port: process.env.POSTGRESQL_PORT,
+  user: process.env.POSTGRESQL_USERNAME,
+  password: process.env.POSTGRESQL_PASSWORD,
+  database: process.env.POSTGRESQL_DATABASE
+}
 
 /**
  * Time frame options in minutes

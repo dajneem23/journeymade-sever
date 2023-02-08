@@ -7,6 +7,7 @@ import methodOverride from 'method-override';
 import cors from 'cors';
 
 import { logs } from './vars';
+import { getResults } from '@/modules/debank/services/getResults';
 
 /**
 * Express instance
@@ -30,5 +31,11 @@ app.use(methodOverride());
 
 // enable CORS - Cross Origin Resource Sharing
 app.use(cors());
+
+app.get('/onchain/top-holders-segments', async function (req, res) {
+  const result = await getResults();
+
+  res.send(JSON.stringify(result));
+})
 
 export default app;

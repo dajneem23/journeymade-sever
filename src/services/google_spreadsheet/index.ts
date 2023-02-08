@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 import { GoogleSpreadsheet } from 'google-spreadsheet';
-import { chartTimeFrames } from '../configs/vars';
+import { chartTimeFrames } from '../../configs/vars';
 
 // const creds = await import(
 //   './../configs/private/trading-376401-0c04491b3921.json',
@@ -9,7 +9,7 @@ import { chartTimeFrames } from '../configs/vars';
 //   }
 // );
 
-import creds from './../configs/private/trading-376401-0c04491b3921.json'
+import creds from '../../configs/private/trading-376401-0c04491b3921.json'
 
 const fileID = '1q4pkATL6p0kgWaRMyXSU0WlRkl1IKaZiIqEDVfrl8K0';
 const sheets = []

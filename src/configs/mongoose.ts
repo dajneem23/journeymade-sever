@@ -15,7 +15,6 @@ mongoose.connection.on('reconnected', () => {
   logger.error(`MongoDB reconnected: ${new Date()}`);
 });
 
-
 // // print mongoose logs in dev env
 // if (nodeEnv === 'development') {
 //   mongoose.set('debug', true);
@@ -30,20 +29,17 @@ mongoose.set('strictQuery', false);
  * @public
  */
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-const connect = (callback) => {
+const mongoLoader = () => {
   mongoose
     .connect(mongo.uri, {
-      keepAlive: true,   
+      keepAlive: true,
       socketTimeoutMS: 45000,
-      serverSelectionTimeoutMS: 5000,      
+      serverSelectionTimeoutMS: 5000,
     })
     .then(() => {
-      console.log('mongoDB connected...');
-      callback();
+      logger.info('MongoDB connected!')
     });
   return mongoose.connection;
 };
 
-export default {
-  connect,
-};
+export default mongoLoader;

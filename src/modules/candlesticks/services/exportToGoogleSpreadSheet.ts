@@ -1,4 +1,4 @@
-import { addRows, clearRows, getRows } from '../../google_spreadsheet/index';
+import { addRows, clearRows, getRows } from '../../../services/google_spreadsheet/index';
 
 export const exportToGoogleSpreadSheet = async (tableResult, symbol = '') => {
   Object.keys(tableResult).forEach(async (tf) => {
