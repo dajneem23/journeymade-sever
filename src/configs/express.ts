@@ -8,6 +8,7 @@ import cors from 'cors';
 
 import { logs } from './vars';
 import { getResults } from '@/modules/debank/services/getResults';
+import { groupBy } from '@/core/utils';
 
 /**
 * Express instance
@@ -33,15 +34,31 @@ app.use(methodOverride());
 app.use(cors());
 
 app.get('/onchain/top-holders-segments', async function (req, res) {
-  const { limit = 100, offset = 0 } = req.query || {};
+  const { limit = 500, offset = 0, type = null,  show_address = false } = req.query || {};
 
-  if (limit > 100) {
+  if (limit > 500) {
     return res.status(400).send('Invalid query');
   }
 
-  const result = await getResults(limit, offset);
+  const rows = await getResults(limit, offset);
+  let result = rows.map((row: any) => {
+    const { symbol, crawl_id,  count, addresses } = row._doc;
+    return {
+      ...row._doc,
+      addresses: show_address === false ? 'hidden' : addresses,
+      _key: `${symbol}-${crawl_id}`
+    }
+  })
 
-  res.send(JSON.stringify(result));
+  if (type === 'bullish') {
+    result = result.filter(item => item.percentage_change > 0);
+  } else if (type === 'bearish') {
+    result = result.filter(item => item.percentage_change < 0);
+  }
+
+  const groups = groupBy(result, '_key')
+
+  res.send(groups);
 })
 
 app.get('/onchain', async function (req, res) {
