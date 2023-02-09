@@ -8,10 +8,10 @@ services:
       dockerfile: ./Dockerfile
     environment:
       NODE_ENV: production
-      PORT: 3000
+      PORT: 3001
       JWT_SECRET: bA2xcjpf8y5aSUFsNB2qN5yymUBSs6es3qHoFpGkec75RCeBb8cpKauGefw5qy4
       JWT_EXPIRATION_MINUTES: 15
       MONGO_URI: mongodb://doadmin:1U04WibnL2uy6895@db-mongodb-sgp1-16717-4818aaa6.mongo.ondigitalocean.com:27017/admin?ssl=true&replicaSet=db-mongodb-sgp1-16717&readPreference=primary&connectTimeoutMS=10000&authSource=admin&authMechanism=SCRAM-SHA-1
       MONGO_URI_TESTS: mongodb://doadmin:1U04WibnL2uy6895@db-mongodb-sgp1-16717-4818aaa6.mongo.ondigitalocean.com:27017/admin?ssl=true&replicaSet=db-mongodb-sgp1-16717&readPreference=primary&connectTimeoutMS=10000&authSource=admin&authMechanism=SCRAM-SHA-1
     ports:
-      - 3000:3000
+      - 3001:3001

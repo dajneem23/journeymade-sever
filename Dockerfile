@@ -16,6 +16,6 @@ RUN yarn --pure-lockfile
 # Copy all file from current dir to /app in container
 COPY . .
 
-EXPOSE 3000
+EXPOSE 3001
 
 CMD ["yarn", "start"]
