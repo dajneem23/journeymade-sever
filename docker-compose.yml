@@ -3,6 +3,7 @@ version: '3.4'
 services:
   onchainsignal:
     image: onchainsignal
+    restart: on-failure  
     build:
       context: .
       dockerfile: ./Dockerfile
@@ -15,3 +16,9 @@ services:
       MONGO_URI_TESTS: mongodb://doadmin:1U04WibnL2uy6895@db-mongodb-sgp1-16717-4818aaa6.mongo.ondigitalocean.com:27017/admin?ssl=true&replicaSet=db-mongodb-sgp1-16717&readPreference=primary&connectTimeoutMS=10000&authSource=admin&authMechanism=SCRAM-SHA-1
     ports:
       - 3001:3001
+  nginx:
+    build: ./nginx
+    ports:
+    - '80:80'
+    depends_on:
+    - onchainsignal
