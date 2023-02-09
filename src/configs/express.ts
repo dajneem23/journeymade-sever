@@ -33,9 +33,19 @@ app.use(methodOverride());
 app.use(cors());
 
 app.get('/onchain/top-holders-segments', async function (req, res) {
-  const result = await getResults();
+  const { limit = 100, offset = 0 } = req.query || {};
+
+  if (limit > 100) {
+    return res.status(400).send('Invalid query');
+  }
+
+  const result = await getResults(limit, offset);
 
   res.send(JSON.stringify(result));
+})
+
+app.get('/onchain', async function (req, res) {
+  res.send('Hello 1fox: onchain');
 })
 
 export default app;
