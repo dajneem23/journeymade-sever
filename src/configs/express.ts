@@ -34,7 +34,7 @@ app.use(methodOverride());
 app.use(cors());
 
 app.get('/onchain/top-holders-segments', async function (req, res) {
-  const { limit = 500, offset = 0, type = null, symbol, show_address = false } = req.query || {};
+  const { limit = 100, offset = 0, type = null, symbol, show_holders = false } = req.query || {};
 
   if (limit > 500) {
     return res.status(400).send('Invalid query');
@@ -45,7 +45,7 @@ app.get('/onchain/top-holders-segments', async function (req, res) {
     const { symbol, crawl_id, addresses } = row._doc;
     return {
       ...row._doc,
-      addresses: show_address === false ? 'hidden' : addresses,
+      holders: show_holders === false ? 'hidden' : addresses,
       _key: `${symbol}-${crawl_id}`
     }
   })
