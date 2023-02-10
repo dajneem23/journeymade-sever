@@ -22,11 +22,6 @@ export const SegmentOptions = [
     limit: 500
   },
   {
-    id: SegmentID.offset_150_500,
-    offset: 150,
-    limit: 500
-  },
-  {
     id: SegmentID.offset_500_1000,
     offset: 500,
     limit: 1000
@@ -36,7 +31,8 @@ export const SegmentOptions = [
 export type SegmentIDType =
   | SegmentID.offset_0_50
   | SegmentID.offset_50_150
-  | SegmentID.offset_150_500;
+  | SegmentID.offset_150_500
+  | SegmentID.offset_500_1000;
 
 export type Portfolio = {
   user_address: string;
@@ -61,7 +57,7 @@ export type Segment = {
   updated_at: string;
   crawl_id: number;
 
-  addresses: string[];
+  holders: any[];
 };
 
 export type Segments = Segment[];
@@ -71,11 +67,14 @@ export type SegmentResult = {
   updated_at: string;
   count: number;
   crawl_id: number;
-  addresses: string[];
+  crawl_time: string;
+  holders: any[];
 
-  avg_balance: number;
+  total_amount: number;
+  total_usd_value?: number;
   symbol?: string;
   percentage_change?: number; // + increase, - decrease
+  usd_change?: number; // + increase, - decrease
 };
 
 export type SegmentResults = {

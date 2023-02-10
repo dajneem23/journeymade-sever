@@ -13,27 +13,39 @@ const topHoldersSegmentsSchema = new mongoose.Schema(
     segment_id: {
       type: String,
     },
-    updated_at: {
-      type: Schema.Types.Date,
+    crawl_id: {
+      type: Number,
     },
     count: {
       type: Number,
     },
-    crawl_id: {
+    total_amount: {
       type: Number,
     },
-    avg_balance: {
+    total_usd_value: {
       type: Number,
     },
-    addresses: {
+    updated_at: {
+      type: Schema.Types.Date,
+    },
+    crawl_time: {
+      type: Schema.Types.Date,
+    },
+    holders: {
       type: [
         {
-          type: String,
+          type: Schema.Types.Mixed,
         },
       ],
     },
     percentage_change: {
       type: Number
+    },
+    hot_wallets: {
+      type: Schema.Types.Mixed
+    },
+    newbie_wallets: {
+      type: Schema.Types.Mixed
     }
   },
   {

@@ -29,8 +29,9 @@ mongoose.set('strictQuery', false);
  * @public
  */
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-const mongoLoader = () => {
-  mongoose
+const mongoLoader = async () => {
+  await new Promise((resolve) => {
+    mongoose
     .connect(mongo.uri, {
       keepAlive: true,
       socketTimeoutMS: 45000,
@@ -38,7 +39,10 @@ const mongoLoader = () => {
     })
     .then(() => {
       logger.info('MongoDB connected!')
+      resolve(true);
     });
+  })
+  
   return mongoose.connection;
 };
 
