@@ -6,7 +6,7 @@ import topHolders from './topHolders';
 export const getSignals = async (symbol) => {
   const signals = await topHolders({ symbol });
 
-  if (nodeEnv !== 'production') {
+  if (nodeEnv === 'production') {
     signals.map(async (signal) => {
       await addSignalsToMongoDB(signal);
     });

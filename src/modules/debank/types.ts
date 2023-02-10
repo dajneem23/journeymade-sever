@@ -1,8 +1,11 @@
 export enum SegmentID {
   offset_0_50 = 'offset_0_50',
   offset_50_150 = 'offset_50_150',
-  offset_150_500 = 'offset_150_500',
-  offset_500_1000 = 'offset_500_1000'
+  offset_150_300 = 'offset_150_300',
+  offset_300_450 = 'offset_300_450',
+  offset_450_600 = 'offset_450_600',
+  offset_600_750 = 'offset_600_750',
+  offset_750_1000 = 'offset_750_1000'
 }
 
 export const SegmentOptions = [
@@ -14,25 +17,43 @@ export const SegmentOptions = [
   {
     id: SegmentID.offset_50_150,
     offset: 50,
+    limit: 100
+  },
+  {
+    id: SegmentID.offset_150_300,
+    offset: 150,
     limit: 150
   },
   {
-    id: SegmentID.offset_150_500,
-    offset: 150,
-    limit: 500
+    id: SegmentID.offset_300_450,
+    offset: 300,
+    limit: 150
   },
   {
-    id: SegmentID.offset_500_1000,
-    offset: 500,
-    limit: 1000
+    id: SegmentID.offset_450_600,
+    offset: 450,
+    limit: 150
+  },
+  {
+    id: SegmentID.offset_600_750,
+    offset: 600,
+    limit: 150
+  },
+  {
+    id: SegmentID.offset_750_1000,
+    offset: 750,
+    limit: 150
   },
 ];
   
 export type SegmentIDType =
   | SegmentID.offset_0_50
   | SegmentID.offset_50_150
-  | SegmentID.offset_150_500
-  | SegmentID.offset_500_1000;
+  | SegmentID.offset_150_300
+  | SegmentID.offset_300_450
+  | SegmentID.offset_450_600
+  | SegmentID.offset_600_750
+  | SegmentID.offset_750_1000
 
 export type Portfolio = {
   user_address: string;
