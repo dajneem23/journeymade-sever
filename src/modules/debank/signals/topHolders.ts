@@ -25,10 +25,14 @@ const getChangedPercentage = (current, prev, field) => {
 const getHotWallets = (holders) => {
   const list = holders.filter((h) => h.percentage_change !== 0);
   if (list.length === 0) return;
-  
+
   return {
     total_amount: sumArrayByField(list, 'amount'),
-    addresses: sortArray(list, 'abs_percentage_change', 'desc').map((h) => [h.user_address, h.percentage_change]),
+    addresses: sortArray(list, 'abs_percentage_change', 'desc').map((h) => [
+      h.user_address,
+      h.amount,
+      h.percentage_change,
+    ]),
   };
 };
 
@@ -38,7 +42,11 @@ const getNewbieWallets = (holders) => {
 
   return {
     total_amount: sumArrayByField(list, 'amount'),
-    addresses: sortArray(list, 'abs_percentage_change', 'desc').map((h) => [h.user_address, h.percentage_change]),
+    addresses: sortArray(list, 'abs_percentage_change', 'desc').map((h) => [
+      h.user_address,
+      h.amount,
+      h.percentage_change,
+    ]),
   };
 };
 
