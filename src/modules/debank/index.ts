@@ -8,7 +8,7 @@ export default async () => {
   console.log('🚀 ~ file: index.ts:9 ~ nodeEnv', nodeEnv);
 
   if (nodeEnv !== 'production') {
-    init();
+    // init();
     // await getSignals('AMP')
   } else {
     schedule.scheduleJob('*/30 * * * *', async function () {

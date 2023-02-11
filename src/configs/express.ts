@@ -11,9 +11,9 @@ import { getResults } from '@/modules/debank/services/getResults';
 import { groupBy } from '@/core/utils';
 
 /**
-* Express instance
-* @public
-*/
+ * Express instance
+ * @public
+ */
 const app = express();
 
 // request logging. dev: console | production: file
@@ -34,35 +34,49 @@ app.use(methodOverride());
 app.use(cors());
 
 app.get('/onchain/top-holders-segments', async function (req, res) {
-  const { limit = 100, offset = 0, type = null, symbol, show_holders = false } = req.query || {};
+  const {
+    limit = 100,
+    offset = 0,
+    type = null,
+    symbol,
+    show_holders = false,
+    min_pc = 5,
+    max_pc = 10000
+  } = req.query || {};
 
   if (limit > 500) {
     return res.status(400).send('Invalid query');
   }
 
-  const rows = await getResults(symbol, limit, offset);
+  const rows = await getResults({
+    symbol,
+    limit,
+    offset,
+    min_pc,
+    max_pc
+  });
   let result = rows.map((row: any) => {
-    const { symbol, crawl_id, addresses } = row._doc;
+    const { symbol, crawl_id, holders } = row;
     return {
-      ...row._doc,
-      holders: show_holders === false ? 'hidden' : addresses,
-      _key: `${symbol}-${crawl_id}`
-    }
-  })
+      ...row,
+      holders: show_holders === false ? 'hidden' : holders,
+      _key: `${symbol}-${crawl_id}`,
+    };
+  });
 
   if (type === 'bullish') {
-    result = result.filter(item => item.percentage_change > 0);
+    result = result.filter((item) => item.percentage_change > 0);
   } else if (type === 'bearish') {
-    result = result.filter(item => item.percentage_change < 0);
+    result = result.filter((item) => item.percentage_change < 0);
   }
 
-  const groups = groupBy(result, '_key')
+  const groups = groupBy(result, '_key');
 
   res.send(groups);
-})
+});
 
 app.get('/onchain', async function (req, res) {
   res.send('Hello 1fox: onchain');
-})
+});
 
 export default app;
