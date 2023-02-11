@@ -28,7 +28,7 @@ const getHotWallets = (holders) => {
   
   return {
     total_amount: sumArrayByField(list, 'amount'),
-    addresses: list.map((h) => h.user_address),
+    addresses: sortArray(list, 'abs_percentage_change', 'desc').map((h) => [h.user_address, h.percentage_change]),
   };
 };
 
@@ -38,7 +38,7 @@ const getNewbieWallets = (holders) => {
 
   return {
     total_amount: sumArrayByField(list, 'amount'),
-    addresses: list.map((h) => h.user_address),
+    addresses: sortArray(list, 'abs_percentage_change', 'desc').map((h) => [h.user_address, h.percentage_change]),
   };
 };
 
