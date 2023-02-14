@@ -1,6 +1,6 @@
 import { groupBy, sortArray, sumArrayByField } from '@/core/utils';
 import dayjs from '@/core/utils/dayjs';
-import { getTopHoldersBySymbol } from '@/modules/debank/services';
+import { getTopHolders } from '@/modules/debank/services';
 import {
   SegmentIDType,
   SegmentOptions,
@@ -8,8 +8,10 @@ import {
   SegmentResults,
   Segments,
 } from '@/modules/debank/types';
-import { getPortfolioByUserAddress } from '../services/getPortfolioByUserAddress';
-import { getTopHoldersTimeFrame } from '../services/getTopHoldersTimeFrame';
+import {
+  getTopHoldersTimeFrame,
+  getPortfolioBalances,
+} from '@/modules/debank/services';
 
 const getChangedPercentage = (current, prev, field) => {
   let result = 0;
@@ -127,7 +129,7 @@ const getData = async (
   { crawl_id, from_time, to_time },
   { segment_id, symbol, offset, limit },
 ) => {
-  const rawHolders = await getTopHoldersBySymbol({
+  const rawHolders = await getTopHolders({
     symbol,
     offset,
     limit,
@@ -135,7 +137,7 @@ const getData = async (
   });
   const addressList = rawHolders.map(({ user_address }) => user_address);
 
-  const portfolios = await getPortfolioByUserAddress({
+  const portfolios = await getPortfolioBalances({
     symbol,
     user_addresses: addressList,
     min_crawl_time: dayjs(from_time).utc(true).toISOString(),

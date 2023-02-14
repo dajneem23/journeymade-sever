@@ -4,7 +4,7 @@ import logger from '@/configs/logger';
 
 const pgPool = Container.get(pgPoolToken);
 
-export const getTopHoldersBySymbol = async ({
+export const getTopHolders = async ({
   symbol = '',
   offset = 0,
   limit = 50,
@@ -33,7 +33,7 @@ export const getTopHoldersBySymbol = async ({
   } catch (error) {
     logger.error(
       'error',
-      '[getTopHoldersBySymbol:error]',
+      '[getTopHolders:error]',
       JSON.stringify(error),
     );
     throw error;

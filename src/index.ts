@@ -19,7 +19,9 @@ import { nodeEnv, port } from './configs/vars';
 
     // (await import('./loaders/worker.loader')).default();
 
-    (await import('./modules/debank')).default();
+    // (await import('./modules/debank')).default();
+    
+    (await import('./modules/portfolios')).default();
 
   } catch (err) {
     console.error(err);

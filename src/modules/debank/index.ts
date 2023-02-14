@@ -9,7 +9,7 @@ export default async () => {
 
   if (nodeEnv !== 'production') {
     // init();
-    // await getSignals('AMP')
+    await getSignals('BNB');
   } else {
     schedule.scheduleJob('*/30 * * * *', async function () {
       init();

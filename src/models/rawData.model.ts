@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import httpStatus from 'http-status';
-import APIError from '../errors/api-error';
+// import APIError from '../errors/api-error';
 import { mongo } from '../configs/vars';
 
 /**
@@ -88,10 +88,10 @@ candlesticksSchema.statics = {
       return data;
     }
 
-    throw new (APIError as any)({
-      message: 'Symbol does not exist',
-      status: httpStatus.NOT_FOUND,
-    });
+    // throw new (APIError as any)({
+    //   message: 'Symbol does not exist',
+    //   status: httpStatus.NOT_FOUND,
+    // });
   },
 };
 

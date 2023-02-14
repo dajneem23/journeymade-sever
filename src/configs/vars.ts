@@ -12,10 +12,8 @@ export const port = process.env.PORT;
 export const jwtSecret = process.env.JWT_SECRET;
 export const jwtExpirationInterval = process.env.JWT_EXPIRATION_MINUTES;
 export const mongo = {
-  uri:
-    process.env.NODE_ENV === 'test'
-      ? process.env.MONGO_URI_TESTS
-      : process.env.MONGO_URI,
+  uri: process.env.INTERNAL_MONGO_URI
+      || process.env.MONGO_URI,
   rawCollections: [
     'candlesticks_abc_1m',
     'candlesticks_def_1m',
