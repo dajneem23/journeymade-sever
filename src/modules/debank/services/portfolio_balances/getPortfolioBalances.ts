@@ -36,8 +36,7 @@ export const getPortfolioBalances = async ({
   return result;
 };
 
-export const countPortfolioBalancesBySymbolCrawlId = async ({
-  symbol,
+export const countPortfolioBalancesByCrawlId = async ({
   crawl_id,
 }) => {
   let result = 0;
@@ -47,14 +46,13 @@ export const countPortfolioBalancesBySymbolCrawlId = async ({
       SELECT count(*) as count
       FROM "debank-user-asset-portfolio-balances"
       WHERE crawl_id = ${crawl_id}
-      AND SYMBOL = '${symbol}'
       `,
     );
     result = rows[0]?.count;
   } catch (error) {
     logger.error(
       'error',
-      '[countPortfolioBalancesBySymbolCrawlId:error]',
+      '[countPortfolioBalancesByCrawlId:error]',
       JSON.stringify(error),
     );
     throw error;
@@ -63,8 +61,7 @@ export const countPortfolioBalancesBySymbolCrawlId = async ({
   return Number(result);
 };
 
-export const getPortfolioBalancesBySymbolCrawlId = async ({
-  symbol,
+export const getPortfolioBalancesByCrawlId = async ({
   crawl_id,
   limit = 10,
   offset = 0,
@@ -76,8 +73,7 @@ export const getPortfolioBalancesBySymbolCrawlId = async ({
       SELECT user_address, updated_at, is_stable_coin, amount, chain, price, crawl_id, crawl_time, symbol
       FROM "debank-user-asset-portfolio-balances"
       WHERE crawl_id = ${crawl_id}
-      AND SYMBOL = '${symbol}'
-      ORDER BY updated_at DESC
+      ORDER BY crawl_time DESC
       OFFSET ${offset}
       LIMIT ${limit}
       `,

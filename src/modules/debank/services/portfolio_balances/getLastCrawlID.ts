@@ -21,3 +21,23 @@ export const getLastCrawlID = async () => {
 
   return result;
 };
+
+export const getBalancesCrawlId = async () => {
+  let result;
+  try {
+    const { rows } = await pgPool.query(
+      `
+      SELECT crawl_id, min(crawl_time) as min_crawl_time, max(crawl_time) as max_crawl_time, count(*)
+      FROM "debank-user-asset-portfolio-balances"
+      GROUP BY crawl_id
+      ORDER BY crawl_id desc
+      `,
+    );
+    result = rows;
+  } catch (error) {
+    logger.error('error', '[getBalancesCrawlId:error]', JSON.stringify(error));
+    throw error;
+  }
+
+  return result;
+}

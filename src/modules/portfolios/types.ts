@@ -5,6 +5,7 @@ export type AddressSymbolPortfolios = {
   amount: number;
   price: number;
   chain: string;
+  usd_value: number;
 
   dao_id?: string;
   platform_token_id?: string;
@@ -14,16 +15,36 @@ export type AddressSymbolPortfolios = {
   crawl_time: string;
   updated_at?: string;
   crawl_id?: number;
+  source?: string;
 }
 
-// {
-//   user_address: '0x82794da0d1e3d01e190cc59537ac36ba6bfa1415',
-//   updated_at: 2023-02-13T17:15:19.588Z,
-//   is_stable_coin: false,
-//   amount: '0.000003045767345066',
-//   chain: 'doge',
-//   price: '292.8',
-//   crawl_id: '2023021401',
-//   crawl_time: 2023-02-13T17:15:19.566Z,
-//   symbol: 'BNB'
-// },
+export enum DATA_SOURCE {
+  debank = 'debank',
+  binance = 'binance',
+  dexscreener = 'dexscreener'
+}
+
+export enum CRON_TASK {
+  balances = 'balance',
+  projects = 'projects'
+}
+
+export enum CRON_TASK_STATUS {
+  running = 'running',
+  done = 'done',
+  crashed = 'crashed'
+}
+
+export type CronTask = {
+  key: string;
+  crawl_id: string;
+  count: number;
+  from_crawl_time?: string;
+  to_crawl_time?: string;
+  status: CRON_TASK_STATUS,
+  details?: any;
+}
+ export type CronJobProp = {
+  offset: number;
+  limit: number;
+ }

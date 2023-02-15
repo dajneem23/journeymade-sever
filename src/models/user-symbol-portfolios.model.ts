@@ -21,6 +21,9 @@ const userSymbolPortfoliosSchema = new mongoose.Schema(
     chain: {
       type: String,
     },
+    usd_value: {
+      type: Number,
+    },
     dao_id: {
       type: String,
     },
@@ -38,6 +41,9 @@ const userSymbolPortfoliosSchema = new mongoose.Schema(
     },
     crawl_time: {
       type: Date,
+    },
+    source: {
+      type: String,
     },
     updated_at: {
       type: Date,
