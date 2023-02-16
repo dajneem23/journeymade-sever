@@ -40,7 +40,7 @@ const mongoLoader = async () => {
       waitQueueTimeoutMS: 300000
     })
     .then(() => {
-      logger.info('MongoDB connected!')
+      console.log('MongoDB connected!')
       resolve(true);
     });
   })

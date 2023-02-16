@@ -1,6 +1,8 @@
 import { CronQueue } from '@/configs/queue';
+import { telegramBotToken } from '@/configs/telegram';
 import { nodeEnv } from '@/configs/vars';
 import schedule from 'node-schedule';
+import Container from 'typedi';
 import {
   getPortfolioProjectsByCrawlId
 } from '../debank/services';
@@ -104,6 +106,8 @@ const prepareCronJobs = async (forced_crawl_id?) => {
 };
 
 export const initDebankProjectsJobs = async (forced_crawl_id?) => {
+  const telegramBot = Container.get(telegramBotToken);
+  
   const { addJobs } = CronQueue(CRON_TASK.projects, async ({ data }) => {
     return await savePortfolioProjects(data);
   });
@@ -115,20 +119,30 @@ export const initDebankProjectsJobs = async (forced_crawl_id?) => {
   } else {
     schedule.scheduleJob('50 * * * *', async function () {
       const jobs = await prepareCronJobs();
-      console.log('🚀 ~ init', CRON_TASK.projects, jobs.length, new Date());
+ 
+      const msg = `🚀 ~ init': ${CRON_TASK.projects} - ${jobs.length}`;
+      telegramBot.sendMessage(msg);
+      console.log(msg, new Date());
+
       await addJobs(jobs);
     });
   }
 };
 
 export const triggerCronJob = async (forced_crawl_id) => {
+  const telegramBot = Container.get(telegramBotToken);
+    
   const { addJobs } = CronQueue(CRON_TASK.projects, async ({ data }) => {
     return await savePortfolioProjects(data);
   });
 
   if (forced_crawl_id) {
     const jobs = await prepareCronJobs(forced_crawl_id);
-    console.log('🚀 ~ force init', CRON_TASK.balances, forced_crawl_id, jobs.length, new Date());
+
+    const msg = `🚀 ~ force init': ${CRON_TASK.projects} - ${forced_crawl_id}, ${jobs.length}`;
+    telegramBot.sendMessage(msg);
+    console.log(msg, new Date());
+
     return await addJobs(jobs);
   }
 };

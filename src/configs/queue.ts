@@ -5,6 +5,8 @@ import { getJobId } from '@/modules/portfolios/utils';
 // const Queue = require('bee-queue');
 import { Job, Queue, Worker } from 'bullmq';
 import IORedis from 'ioredis';
+import Container from 'typedi';
+import { telegramBotToken } from './telegram';
 
 const port = +process.env.REDIS_PORT
 const host = process.env.REDIS_HOST
@@ -43,10 +45,14 @@ export const CronQueue = (name, job_handler) => {
   });
 
   worker.on('drained', () => {
-    console.log('queue drained, no more jobs left', name);
+    const telegramBot = Container.get(telegramBotToken);
+    
+    const msg = `${name}: queue drained, no more jobs left`
+    telegramBot.sendMessage(msg);
+    console.log(msg);
   });
 
-  const addJobs = async (props: CronJobProp[]) => {
+  const addJobs = async (props: CronJobProp[]) => { 
     const jobs = props.map((prop) => {
       return {
         name,

@@ -1,3 +1,4 @@
+import { initTelegramBot } from '@/configs/telegram';
 import { nodeEnv } from '@/configs/vars';
 import { initDebankBalancesJobs } from './debankBalances';
 import { initDebankProjectsJobs } from './debankProjects';
@@ -8,4 +9,6 @@ export default async () => {
   initDebankBalancesJobs();
 
   initDebankProjectsJobs();
+
+  const { sendMessage } = initTelegramBot();
 };
