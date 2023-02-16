@@ -3,3 +3,4 @@
 
 ## remove queue
 redis-cli KEYS "bull:debank:*" | xargs redis-cli DEL
+
