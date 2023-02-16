@@ -12,7 +12,7 @@ export type AddressSymbolPortfolios = {
   pool_id?: string;
   pool_adapter_id?: string;
 
-  crawl_time: string;
+  crawl_time: number;
   updated_at?: string;
   crawl_id?: number;
   source?: string;
@@ -25,8 +25,8 @@ export enum DATA_SOURCE {
 }
 
 export enum CRON_TASK {
-  balances = 'balance',
-  projects = 'projects'
+  balances = 'debank:balance',
+  projects = 'debank:projects'
 }
 
 export enum CRON_TASK_STATUS {
@@ -45,6 +45,7 @@ export type CronTask = {
   details?: any;
 }
  export type CronJobProp = {
+  crawl_id: number;
   offset: number;
   limit: number;
  }

@@ -12,7 +12,7 @@ export const countPortfolioProjectsByCrawlId = async ({
     const { rows } = await pgPool.query(
       `
       SELECT count(*) as count
-      FROM "debank-user-asset-portfolio-projects"
+      FROM "debank-portfolio-projects"
       WHERE crawl_id = ${crawl_id}
       `,
     );
@@ -39,7 +39,7 @@ export const getPortfolioProjectsByCrawlId = async ({
     const { rows } = await pgPool.query(
       `
       SELECT *
-      FROM "debank-user-asset-portfolio-projects"
+      FROM "debank-portfolio-projects"
       WHERE crawl_id = ${crawl_id}
       ORDER BY crawl_time DESC
       OFFSET ${offset}

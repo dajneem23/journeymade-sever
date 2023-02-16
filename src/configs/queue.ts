@@ -1,74 +1,65 @@
 import { CronJobProp } from '@/modules/portfolios/types';
+import { getJobId } from '@/modules/portfolios/utils';
 
 // worker queues running on the worker server
-const Queue = require('bee-queue');
+// const Queue = require('bee-queue');
+import { Job, Queue, Worker } from 'bullmq';
+import IORedis from 'ioredis';
 
-export const CronQueue = (name, prefix, job_handler) => {
+const connection = new IORedis();
+
+export const CronQueue = (name, job_handler) => {
   const queue = new Queue(name, {
-    prefix: prefix,
-    stallInterval: 5000,
-    nearTermWindow: 1200000,
-    redis: {
-      host: process.env.REDIS_HOST,
-      port: process.env.REDIS_PORT,
-      db: process.env.REDIS_DB,
-      options: {},
+    connection,
+    defaultJobOptions: {
+      // The total number of attempts to try the job until it completes
+      attempts: 5,
+      // Backoff setting for automatic retries if the job fails
+      backoff: { type: 'fixed', delay: 10 * 1000 },
+      removeOnComplete: {
+        // 6 hour
+        age: 60 * 60 * 6,
+      },
+      removeOnFail: {
+        age: 60 * 60 * 8,
+      },
     },
-    isWorker: true,
-    getEvents: true,
-    sendEvents: true,
-    storeJobs: true,
-    ensureScripts: true,
-    activateDelayedJobs: false,
-    removeOnSuccess: false,
-    removeOnFailure: false,
-    redisScanCount: 100,
   });
 
-  queue.on('ready', () => {
-    console.log('queue now ready to start doing things');
+  const worker = new Worker(
+    name,
+    job_handler,
+    { connection, concurrency: 15 },
+  );
+
+  worker.on('completed', (job: Job) => {
+    console.log('job has completed:', name, job.id, job.finishedOn - job.processedOn);
   });
 
-  queue.process(async (job) => {
-    return job_handler(job);
+  worker.on('failed', (job: Job) => {
+    console.log('job has failed:', name, job.id);
   });
 
-  queue.on('succeeded', (job, result) => {
-    console.log(`Job ${job.id} succeeded: ${result}`);
+  worker.on('drained', () => {
+    console.log('queue drained, no more jobs left', name);
   });
 
-  queue.on('error', (err) => {
-    console.log(`A queue error happened: ${err.message}`);
-  });
-
-  queue.on('retrying', (job, err) => {
-    console.log(
-      `Job ${job.id} failed with error ${err.message} but is being retried!`,
-    );
-  });
-
-  queue.on('failed', (job, err) => {
-    console.log(`Job ${job.id} failed with error ${err.message}`);
-  });
-
-  queue.on('stalled', (jobId) => {
-    console.log(`Job ${jobId} stalled and will be reprocessed`);
-  });
-
-  const addJobs = (props: CronJobProp[]) => {
-    const jobs = props.map((prop) =>
-      queue.createJob(prop).timeout(20000).retries(2).save(),
-    );
-
-    queue.saveAll(jobs).then((errors) => {
-      if (errors && Object.keys(errors).length > 0) {
-        console.log('🚀 ~ errors', errors);
-      }
-      // The errors value is a Map associating Jobs with Errors. This will often be an empty Map.
+  const addJobs = async (props: CronJobProp[]) => {
+    const jobs = props.map((prop) => {
+      return {
+        name,
+        data: prop,
+        opts: {
+          jobId: getJobId(prop),
+        },
+      };
     });
+
+    await queue.addBulk(jobs);
   };
 
   return {
+    worker,
     addJobs,
   };
 };

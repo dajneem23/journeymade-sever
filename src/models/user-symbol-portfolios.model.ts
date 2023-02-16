@@ -26,6 +26,7 @@ const userSymbolPortfoliosSchema = new mongoose.Schema(
     },
     dao_id: {
       type: String,
+
     },
     platform_token_id: {
       type: String,
@@ -40,7 +41,7 @@ const userSymbolPortfoliosSchema = new mongoose.Schema(
       type: Number,
     },
     crawl_time: {
-      type: Date,
+      type: Number,
     },
     source: {
       type: String,
@@ -59,7 +60,7 @@ const userSymbolPortfoliosSchema = new mongoose.Schema(
 );
 
 const db = 'onchain';
-const name = 'user-symbol-portfolios';
+const name = 'user-portfolios';
 const model = mongoose.connection
   .useDb(db)
   .model(name, userSymbolPortfoliosSchema, name);

@@ -35,8 +35,8 @@ const mongoLoader = async () => {
     .connect(mongo.uri, {
       maxPoolSize: 100,
       keepAlive: true,
-      socketTimeoutMS: 45000,
-      serverSelectionTimeoutMS: 10000,
+      socketTimeoutMS: 90000,
+      serverSelectionTimeoutMS: 90000,
       waitQueueTimeoutMS: 300000
     })
     .then(() => {
