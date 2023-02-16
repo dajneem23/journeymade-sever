@@ -7,6 +7,21 @@ env.config({
   allowEmptyValues: true,
 });
 
+/**
+ * Loads ENV config
+ */
+(() => {
+  let envConfig: { [key: string]: string };
+  if (process.env.ENV_VARS) {
+    // Load config variables from CI/CD server
+    envConfig = JSON.parse(process.env.ENV_VARS);
+  } 
+  
+  if (typeof envConfig === 'object') {
+    Object.keys(envConfig).forEach((key) => (process.env[key] = envConfig[key]));
+  }
+})();
+
 export const nodeEnv = process.env.NODE_ENV;
 export const port = process.env.PORT;
 export const jwtSecret = process.env.JWT_SECRET;
