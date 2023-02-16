@@ -2,9 +2,9 @@ import Container from 'typedi';
 import { pgPoolToken } from '@/configs/postgres';
 import logger from '@/configs/logger';
 
-const pgPool = Container.get(pgPoolToken);
-
 export const getCoinList = async () => {
+  const pgPool = Container.get(pgPoolToken);
+
   let result = [];
   try {
     const { rows } = await pgPool.query(`SELECT symbol FROM "debank-coins"`);

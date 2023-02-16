@@ -2,7 +2,6 @@ import Container from 'typedi';
 import { pgPoolToken } from '@/configs/postgres';
 import logger from '@/configs/logger';
 
-const pgPool = Container.get(pgPoolToken);
 
 export const getTopHolders = async ({
   symbol = '',
@@ -10,6 +9,7 @@ export const getTopHolders = async ({
   limit = 50,
   crawl_id = 0
 }) => {
+  const pgPool = Container.get(pgPoolToken);
   let result = [];
   try {
     const { rows } = await pgPool.query(

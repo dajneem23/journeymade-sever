@@ -2,14 +2,13 @@ import Container from 'typedi';
 import { pgPoolToken } from '@/configs/postgres';
 import logger from '@/configs/logger';
 
-const pgPool = Container.get(pgPoolToken);
-
 export const getPortfolioBalances = async ({
   symbol = '',
   user_addresses = [],
   min_crawl_time,
   max_crawl_time,
 }) => {
+  const pgPool = Container.get(pgPoolToken);
   let result = [];
   try {
     const { rows } = await pgPool.query(
@@ -36,9 +35,8 @@ export const getPortfolioBalances = async ({
   return result;
 };
 
-export const countPortfolioBalancesByCrawlId = async ({
-  crawl_id,
-}) => {
+export const countPortfolioBalancesByCrawlId = async ({ crawl_id }) => {
+  const pgPool = Container.get(pgPoolToken);
   let result = 0;
   try {
     const { rows } = await pgPool.query(
@@ -66,6 +64,7 @@ export const getPortfolioBalancesByCrawlId = async ({
   limit = 10,
   offset = 0,
 }) => {
+  const pgPool = Container.get(pgPoolToken);
   let result = [];
   try {
     const { rows } = await pgPool.query(

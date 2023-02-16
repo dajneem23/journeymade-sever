@@ -2,11 +2,11 @@ import Container from 'typedi';
 import { pgPoolToken } from '@/configs/postgres';
 import logger from '@/configs/logger';
 
-const pgPool = Container.get(pgPoolToken);
 
 export const countPortfolioProjectsByCrawlId = async ({
   crawl_id,
 }) => {
+  const pgPool = Container.get(pgPoolToken);
   let result = 0;
   try {
     const { rows } = await pgPool.query(
@@ -34,6 +34,7 @@ export const getPortfolioProjectsByCrawlId = async ({
   limit = 10,
   offset = 0,
 }) => {
+  const pgPool = Container.get(pgPoolToken);
   let result = [];
   try {
     const { rows } = await pgPool.query(

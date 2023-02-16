@@ -79,11 +79,16 @@ export const savePortfolioProjects = async ({ crawl_id, offset, limit }) => {
   return `${crawl_id}: ${offset} - count=${portfolios.length}`;
 };
 
-const prepareCronJobs = async () => {
+const prepareCronJobs = async (forced_crawl_id?) => {
   const defaultLimit = 500;
   const crawlIds = await getProjectsCrawlId();
 
-  const jobs = crawlIds
+  let ids = crawlIds;
+  if (forced_crawl_id) {
+    ids = crawlIds.filter(({ crawl_id }) => crawl_id == forced_crawl_id);
+  }
+
+  const jobs = ids
     .slice(0, 2)
     .map(({ crawl_id, count }) => {
       const offsets = prepareOffsets(Number(count), defaultLimit);
@@ -98,20 +103,32 @@ const prepareCronJobs = async () => {
   return jobs;
 };
 
-export const initDebankProjectsJobs = async () => {
+export const initDebankProjectsJobs = async (forced_crawl_id?) => {
   const { addJobs } = CronQueue(CRON_TASK.projects, async ({ data }) => {
     return await savePortfolioProjects(data);
   });
-
+  
   if (nodeEnv !== 'production') {
-    const jobs = await prepareCronJobs();    
-    console.log('🚀 ~ init', CRON_TASK.projects, jobs.length, new Date());
-    await addJobs(jobs);
+    // const jobs = await prepareCronJobs();    
+    // console.log('🚀 ~ init', CRON_TASK.projects, jobs.length, new Date());
+    // await addJobs(jobs);
   } else {
-    schedule.scheduleJob('50 */3 * * *', async function () {
+    schedule.scheduleJob('50 * * * *', async function () {
       const jobs = await prepareCronJobs();
       console.log('🚀 ~ init', CRON_TASK.projects, jobs.length, new Date());
       await addJobs(jobs);
     });
+  }
+};
+
+export const triggerCronJob = async (forced_crawl_id) => {
+  const { addJobs } = CronQueue(CRON_TASK.projects, async ({ data }) => {
+    return await savePortfolioProjects(data);
+  });
+
+  if (forced_crawl_id) {
+    const jobs = await prepareCronJobs(forced_crawl_id);
+    console.log('🚀 ~ force init', CRON_TASK.balances, forced_crawl_id, jobs.length, new Date());
+    return await addJobs(jobs);
   }
 };

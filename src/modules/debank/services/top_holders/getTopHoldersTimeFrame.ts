@@ -2,13 +2,12 @@ import logger from '@/configs/logger';
 import { pgPoolToken } from '@/configs/postgres';
 import Container from 'typedi';
 
-const pgPool = Container.get(pgPoolToken);
-
 export const getTopHoldersTimeFrame = async ({
   symbol = '',
   offset = 0,
   limit = 12,
 }) => {
+  const pgPool = Container.get(pgPoolToken);
   let result = [];
   try {
     const { rows } = await pgPool.query(
@@ -20,10 +19,9 @@ export const getTopHoldersTimeFrame = async ({
       ORDER BY crawl_id DESC
       OFFSET ${offset}
       LIMIT ${limit}
-      `
+      `,
     );
     result = rows;
-
   } catch (error) {
     logger.error(
       'error',
@@ -35,4 +33,3 @@ export const getTopHoldersTimeFrame = async ({
 
   return result;
 };
-

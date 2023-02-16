@@ -20,19 +20,18 @@ import { nodeEnv, port } from './configs/vars';
     // (await import('./loaders/worker.loader')).default();
 
     // (await import('./modules/debank')).default();
-    
+
     (await import('./modules/portfolios')).default();
 
+    // listen to requests
+    app.listen(port, () =>
+      logger.info(`server started on port ${port} (${nodeEnv})`),
+    );
   } catch (err) {
     console.error(err);
     process.exit(1);
   }
 })();
-
-// listen to requests
-app.listen(port, () =>
-  logger.info(`server started on port ${port} (${nodeEnv})`),
-);
 
 /**
  * Exports express

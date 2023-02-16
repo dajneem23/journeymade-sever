@@ -9,6 +9,8 @@ import cors from 'cors';
 import { logs } from './vars';
 import { getResults } from '@/modules/debank/services/getResults';
 import { groupBy } from '@/core/utils';
+import { triggerCronJob as triggerBalanceCronJob } from '@/modules/portfolios/debankBalances';
+import { triggerCronJob as triggerProjectCronJob } from '@/modules/portfolios/debankProjects';
 
 /**
  * Express instance
@@ -41,7 +43,7 @@ app.get('/onchain/top-holders-segments', async function (req, res) {
     symbol,
     show_holders = false,
     min_pc = 5,
-    max_pc = 10000
+    max_pc = 10000,
   } = req.query || {};
 
   if (limit > 500) {
@@ -53,7 +55,7 @@ app.get('/onchain/top-holders-segments', async function (req, res) {
     limit,
     offset,
     min_pc,
-    max_pc
+    max_pc,
   });
   let result = rows.map((row: any) => {
     const { symbol, crawl_id, holders } = row;
@@ -73,6 +75,22 @@ app.get('/onchain/top-holders-segments', async function (req, res) {
   const groups = groupBy(result, '_key');
 
   res.send(groups);
+});
+
+app.get('/cron', async function (req, res) {
+  const { type, crawl_id } = req.query || {};
+
+  if (!['balance', 'project'].includes(type) || !crawl_id) {
+    return res.status(400).send('Invalid query');
+  }
+
+  if (type === 'balance') {
+    triggerBalanceCronJob(crawl_id);
+  } else if (type === 'project') {
+    triggerProjectCronJob(crawl_id);
+  }
+
+  res.send(`Accept: ${type}-${crawl_id}`);
 });
 
 app.get('/onchain', async function (req, res) {
