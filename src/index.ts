@@ -2,6 +2,7 @@ import app from './configs/express';
 import logger from './configs/logger';
 import mongoLoader from './configs/mongoose';
 import pgLoader from './configs/postgres';
+import { initTelegramBot } from './configs/telegram';
 import { nodeEnv, port } from './configs/vars';
 
 (async () => {
@@ -9,6 +10,8 @@ import { nodeEnv, port } from './configs/vars';
     await pgLoader();
 
     await mongoLoader();
+
+    initTelegramBot();
 
     // if (env.MODE == 'production') {
     //   await (await import('./loaders/telegram.loader')).default();
