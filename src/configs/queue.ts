@@ -6,7 +6,9 @@ import { getJobId } from '@/modules/portfolios/utils';
 import { Job, Queue, Worker } from 'bullmq';
 import IORedis from 'ioredis';
 
-const connection = new IORedis();
+const port = +process.env.REDIS_PORT
+const host = process.env.REDIS_HOST
+const connection = new IORedis(port, host);
 
 export const CronQueue = (name, job_handler) => {
   const queue = new Queue(name, {
