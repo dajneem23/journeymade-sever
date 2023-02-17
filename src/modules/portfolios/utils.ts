@@ -34,7 +34,7 @@ export const prepareCrawlIds = () => {
     });
   }
 
-  return ids.slice(0, 6);
+  return ids.slice(0, 2);
 };
 
 export const prepareOffsets = (max, limit) => {
