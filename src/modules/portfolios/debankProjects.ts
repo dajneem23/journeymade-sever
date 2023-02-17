@@ -33,7 +33,7 @@ const getPortfoliosProjects = async ({ crawl_id, limit, offset }) => {
         portfolio_item_list = [],
       } = details || {};
       return portfolio_item_list.forEach((item) =>
-        item.asset_token_list?.forEach((t) => {
+        item.asset_token_list?.forEach((t, idx) => {
           const usdValue = cleanAmount(t.amount) * cleanPrice(t.price)
           if (Math.abs(usdValue) > minUSDValue) {
             results.push(<AddressSymbolPortfolios>{
@@ -46,6 +46,7 @@ const getPortfoliosProjects = async ({ crawl_id, limit, offset }) => {
               chain: t.chain,
               crawl_time: toTimestamp(crawl_time),
               crawl_id: crawlIdAlias(crawl_id),
+              ref_id: `${t.id}-${idx}`,
   
               dao_id: dao_id,
               platform_token_id: platform_token_id,

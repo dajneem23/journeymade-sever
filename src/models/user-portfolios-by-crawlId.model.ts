@@ -42,6 +42,9 @@ const userSymbolPortfoliosSchema = new mongoose.Schema(
     crawl_time: {
       type: Number,
     },
+    ref_id: {
+      type: String,
+    },
     source: {
       type: String,
     },
@@ -65,6 +68,7 @@ userSymbolPortfoliosSchema.index(
     chain: 1,
     crawl_id: 1,
     pool_id: 1,
+    ref_id: 1
   },
   {
     background: true,

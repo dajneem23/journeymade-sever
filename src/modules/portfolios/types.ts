@@ -12,6 +12,7 @@ export type AddressSymbolPortfolios = {
   pool_id?: string;
   pool_adapter_id?: string;
 
+  ref_id?: string;
   crawl_time: number;
   updated_at?: string;
   crawl_id?: number;

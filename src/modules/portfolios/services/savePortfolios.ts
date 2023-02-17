@@ -27,6 +27,7 @@ export const savePortfolios = async (
         chain: p.chain,
         crawl_id: p.crawl_id,
         pool_id: p.pool_id,
+        ref_id: p.ref_id
       },
       p,
     ),
