@@ -1,3 +1,4 @@
+import { stringifyObjectMsg } from '@/core/utils';
 import { CronJobProp } from '@/modules/portfolios/types';
 import { getJobId } from '@/modules/portfolios/utils';
 
@@ -48,10 +49,7 @@ export const CronQueue = (name, job_handler) => {
     const telegramBot = Container.get(telegramBotToken);
     
     const counts = await queue.getJobCounts('wait', 'completed', 'failed');
-    let msg = `${name}: queue drained, no more jobs left`
-    Object.keys(counts).forEach((key) => {
-      msg += `\n${key}: ${counts[key]}`;
-    });
+    const msg = `${name}: queue drained, no more jobs left ${stringifyObjectMsg(counts)}`
     telegramBot.sendMessage(msg);
     console.log(msg);
   });

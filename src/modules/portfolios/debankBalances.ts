@@ -1,6 +1,7 @@
 import { CronQueue } from '@/configs/queue';
 import { telegramBotToken } from '@/configs/telegram';
 import { nodeEnv } from '@/configs/vars';
+import { stringifyObjectMsg } from '@/core/utils';
 import schedule from 'node-schedule';
 import Container from 'typedi';
 import {
@@ -110,10 +111,7 @@ export const initDebankBalancesJobs = async () => {
       await addJobs(jobs);
 
       const counts = await queue.getJobCounts('wait', 'completed', 'failed');
-      let msg = `🚀 ~ init': ${CRON_TASK.balances} - ${jobs.length}`;
-      Object.keys(counts).forEach((key) => {
-        msg += `\n${key}: ${counts[key]}`;
-      });
+      const msg = `🚀 ~ init': ${CRON_TASK.balances} - ${jobs.length} ${stringifyObjectMsg(counts)}`;      
       telegramBot.sendMessage(msg);
       console.log(msg, new Date());
     });
@@ -132,10 +130,7 @@ export const triggerCronJob = async (forced_crawl_id) => {
     await addJobs(jobs);
 
     const counts = await queue.getJobCounts('wait', 'completed', 'failed');
-    let msg = `🚀 ~ force init': ${CRON_TASK.balances} - ${forced_crawl_id}, ${jobs.length}`;
-    Object.keys(counts).forEach((key) => {
-      msg += `\n${key}: ${counts[key]}`;
-    });
+    const msg = `🚀 ~ force init': ${CRON_TASK.balances} - ${forced_crawl_id}, ${jobs.length} ${stringifyObjectMsg(counts)}`;    
     telegramBot.sendMessage(msg);
     console.log(msg, new Date());
   }
