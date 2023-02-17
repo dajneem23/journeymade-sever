@@ -1,6 +1,6 @@
 import { CronQueue } from '@/configs/queue';
 import { telegramBotToken } from '@/configs/telegram';
-import { nodeEnv } from '@/configs/vars';
+import { minUSDValue, nodeEnv } from '@/configs/vars';
 import { stringifyObjectMsg } from '@/core/utils';
 import schedule from 'node-schedule';
 import Container from 'typedi';
@@ -34,24 +34,27 @@ const getPortfoliosProjects = async ({ crawl_id, limit, offset }) => {
       } = details || {};
       return portfolio_item_list.forEach((item) =>
         item.asset_token_list?.forEach((t) => {
-          results.push(<AddressSymbolPortfolios>{
-            wallet_address: user_address,
-            symbol: t.symbol,
-            amount: cleanAmount(t.amount),
-            price: cleanPrice(t.price),
-            usd_value: cleanAmount(t.amount) * cleanPrice(t.price),
-
-            chain: t.chain,
-            crawl_time: toTimestamp(crawl_time),
-            crawl_id: crawlIdAlias(crawl_id),
-
-            dao_id: dao_id,
-            platform_token_id: platform_token_id,
-            pool_id: item.pool?.id,
-            pool_adapter_id: item.pool?.adapter_id,
-
-            source: DATA_SOURCE.debank,
-          });
+          const usdValue = cleanAmount(t.amount) * cleanPrice(t.price)
+          if (usdValue > minUSDValue) {
+            results.push(<AddressSymbolPortfolios>{
+              wallet_address: user_address,
+              symbol: t.symbol,
+              amount: cleanAmount(t.amount),
+              price: cleanPrice(t.price),
+              usd_value: usdValue,
+  
+              chain: t.chain,
+              crawl_time: toTimestamp(crawl_time),
+              crawl_id: crawlIdAlias(crawl_id),
+  
+              dao_id: dao_id,
+              platform_token_id: platform_token_id,
+              pool_id: item.pool?.id,
+              pool_adapter_id: item.pool?.adapter_id,
+  
+              source: DATA_SOURCE.debank,
+            });
+          }
         }),
       );
     });
@@ -71,7 +74,7 @@ export const savePortfolioProjects = async ({ crawl_id, offset, limit }) => {
 
   if (portfolios?.length > 0) {
     try {
-      await savePortfolios(portfolios);
+      await savePortfolios(crawl_id, portfolios);
     } catch (e) {
       throw new Error(e);
     }
@@ -90,7 +93,6 @@ const prepareCronJobs = async (forced_crawl_id?) => {
   }
 
   const jobs = ids
-    .slice(0, 2)
     .map(({ crawl_id, count }) => {
       const offsets = prepareOffsets(Number(count), defaultLimit);
       return offsets.map((offset) => ({
@@ -112,9 +114,9 @@ export const initDebankProjectsJobs = async () => {
   });
 
   if (nodeEnv !== 'production') {
-    // const jobs = await prepareCronJobs();
-    // console.log('🚀 ~ init', CRON_TASK.projects, jobs.length, new Date());
-    // await addJobs(jobs);
+    const jobs = await prepareCronJobs();
+    console.log('🚀 ~ init', CRON_TASK.projects, jobs.length, new Date());
+    await addJobs(jobs);
   } else {
     schedule.scheduleJob('50 * * * *', async function () {
       const jobs = await prepareCronJobs();

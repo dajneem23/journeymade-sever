@@ -1,4 +1,5 @@
-import model from '@/models/user-symbol-portfolios.model';
+// import model from '@/models/user-symbol-portfolios.model';
+import dynamicModel from '@/models/user-portfolios-by-crawlId.model';
 import { AddressSymbolPortfolios } from '../types';
 
 // Update function
@@ -9,12 +10,15 @@ function updateOne(filter, update) {
       update: {
         $set: update,
       },
-      upsert: true,    
+      upsert: true,
     },
   };
 }
 
-export const savePortfolios = async (portfolios: AddressSymbolPortfolios[]) => {
+export const savePortfolios = async (
+  crawl_id,
+  portfolios: AddressSymbolPortfolios[],
+) => {
   const updateOps = portfolios.map((p) =>
     updateOne(
       {
@@ -24,9 +28,14 @@ export const savePortfolios = async (portfolios: AddressSymbolPortfolios[]) => {
         crawl_id: p.crawl_id,
         pool_id: p.pool_id,
       },
-      p
+      p,
     ),
   );
 
-return await model.bulkWrite([...updateOps]);
+  const model = dynamicModel(crawl_id);
+  if (!model) {
+    throw console.error('no collection', crawl_id);
+  }
+
+  return await model.bulkWrite([...updateOps]);
 };

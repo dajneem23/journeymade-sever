@@ -1,5 +1,6 @@
 import logger from '@/configs/logger';
 import { pgPoolToken } from '@/configs/postgres';
+import { minUSDValue } from '@/configs/vars';
 import Container from 'typedi';
 
 export const getLastCrawlID = async () => {
@@ -29,10 +30,12 @@ export const getBalancesCrawlId = async () => {
   try {
     const { rows } = await pgPool.query(
       `
-      SELECT crawl_id, min(crawl_time) as min_crawl_time, max(crawl_time) as max_crawl_time, count(*)
+      SELECT crawl_id, count(*)
       FROM "debank-portfolio-balances"
+      WHERE usd_value > ${minUSDValue}
       GROUP BY crawl_id
       ORDER BY crawl_id desc
+      LIMIT 3
       `,
     );
     result = rows;

@@ -12,6 +12,7 @@ export const getProjectsCrawlId = async () => {
       FROM "debank-portfolio-projects"
       GROUP BY crawl_id
       ORDER BY crawl_id desc
+      LIMIT 3
       `,
     );
     result = rows;

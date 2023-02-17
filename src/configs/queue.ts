@@ -34,7 +34,7 @@ export const CronQueue = (name, job_handler) => {
   const worker = new Worker(
     name,
     job_handler,
-    { connection, concurrency: 15 },
+    { connection, concurrency: 100 },
   );
 
   worker.on('completed', (job: Job) => {

@@ -71,3 +71,6 @@ export const chartTimeFrames = [
   timeFrameOptions['1h'],
   timeFrameOptions['4h'],
 ];
+
+
+export const minUSDValue = 1000;

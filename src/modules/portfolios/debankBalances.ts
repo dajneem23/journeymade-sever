@@ -61,7 +61,7 @@ const savePortfolioBalances = async ({ crawl_id, offset, limit }) => {
 
   if (portfolios?.length > 0) {
     try {
-      await savePortfolios(portfolios);
+      await savePortfolios(crawl_id, portfolios);
     } catch (e) {
       throw new Error(e);
     }
@@ -71,7 +71,7 @@ const savePortfolioBalances = async ({ crawl_id, offset, limit }) => {
 };
 
 const prepareCronJobs = async (forced_crawl_id?) => {
-  const defaultLimit = 1000;
+  const defaultLimit = 500;
   const crawlIds = await getBalancesCrawlId();
 
   let ids = crawlIds;
@@ -80,7 +80,6 @@ const prepareCronJobs = async (forced_crawl_id?) => {
   }
 
   const jobs = ids
-    .slice(0, 2)
     .map(({ crawl_id, count }) => {
       const offsets = prepareOffsets(Number(count), defaultLimit);
       return offsets.map((offset) => ({
@@ -102,16 +101,18 @@ export const initDebankBalancesJobs = async () => {
   });
 
   if (nodeEnv !== 'production') {
-    // const jobs = await prepareCronJobs();
-    // console.log('🚀 ~ init', CRON_TASK.balances, jobs.length, new Date());
-    // await addJobs(jobs);
+    const jobs = await prepareCronJobs();
+    console.log('🚀 ~ init', CRON_TASK.balances, jobs.length, new Date());
+    await addJobs(jobs);
   } else {
     schedule.scheduleJob('50 * * * *', async function () {
       const jobs = await prepareCronJobs();
       await addJobs(jobs);
 
       const counts = await queue.getJobCounts('wait', 'completed', 'failed');
-      const msg = `🚀 ~ init': ${CRON_TASK.balances} - ${jobs.length} ${stringifyObjectMsg(counts)}`;      
+      const msg = `🚀 ~ init': ${CRON_TASK.balances} - ${
+        jobs.length
+      } ${stringifyObjectMsg(counts)}`;
       telegramBot.sendMessage(msg);
       console.log(msg, new Date());
     });
@@ -130,7 +131,9 @@ export const triggerCronJob = async (forced_crawl_id) => {
     await addJobs(jobs);
 
     const counts = await queue.getJobCounts('wait', 'completed', 'failed');
-    const msg = `🚀 ~ force init': ${CRON_TASK.balances} - ${forced_crawl_id}, ${jobs.length} ${stringifyObjectMsg(counts)}`;    
+    const msg = `🚀 ~ force init': ${
+      CRON_TASK.balances
+    } - ${forced_crawl_id}, ${jobs.length} ${stringifyObjectMsg(counts)}`;
     telegramBot.sendMessage(msg);
     console.log(msg, new Date());
   }

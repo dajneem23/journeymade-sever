@@ -1,6 +1,7 @@
 import Container from 'typedi';
 import { pgPoolToken } from '@/configs/postgres';
 import logger from '@/configs/logger';
+import { minUSDValue } from '@/configs/vars';
 
 export const getPortfolioBalances = async ({
   symbol = '',
@@ -44,6 +45,7 @@ export const countPortfolioBalancesByCrawlId = async ({ crawl_id }) => {
       SELECT count(*) as count
       FROM "debank-portfolio-balances"
       WHERE crawl_id = ${crawl_id}
+      AND usd_value > ${minUSDValue}
       `,
     );
     result = rows[0]?.count;
@@ -71,7 +73,8 @@ export const getPortfolioBalancesByCrawlId = async ({
       `
       SELECT user_address, updated_at, is_stable_coin, amount, chain, price, crawl_id, crawl_time, symbol
       FROM "debank-portfolio-balances"
-      WHERE crawl_id = ${crawl_id}
+      WHERE crawl_id = ${crawl_id}      
+      AND usd_value > ${minUSDValue}
       ORDER BY crawl_time DESC
       OFFSET ${offset}
       LIMIT ${limit}
