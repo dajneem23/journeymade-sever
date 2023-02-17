@@ -35,7 +35,7 @@ const getPortfoliosProjects = async ({ crawl_id, limit, offset }) => {
       return portfolio_item_list.forEach((item) =>
         item.asset_token_list?.forEach((t) => {
           const usdValue = cleanAmount(t.amount) * cleanPrice(t.price)
-          if (usdValue > minUSDValue) {
+          if (Math.abs(usdValue) > minUSDValue) {
             results.push(<AddressSymbolPortfolios>{
               wallet_address: user_address,
               symbol: t.symbol,
