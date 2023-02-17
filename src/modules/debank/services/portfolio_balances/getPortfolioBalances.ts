@@ -43,9 +43,8 @@ export const countPortfolioBalancesByCrawlId = async ({ crawl_id }) => {
     const { rows } = await pgPool.query(
       `
       SELECT count(*) as count
-      FROM "debank-portfolio-balances"
-      WHERE crawl_id = ${crawl_id}
-      AND usd_value > ${minUSDValue}
+      FROM "debank-portfolio-balances-${crawl_id}" 
+      WHERE usd_value > ${minUSDValue}
       `,
     );
     result = rows[0]?.count;
@@ -72,10 +71,9 @@ export const getPortfolioBalancesByCrawlId = async ({
     const { rows } = await pgPool.query(
       `
       SELECT user_address, updated_at, is_stable_coin, amount, chain, price, crawl_id, crawl_time, symbol
-      FROM "debank-portfolio-balances"
-      WHERE crawl_id = ${crawl_id}      
-      AND usd_value > ${minUSDValue}
-      ORDER BY crawl_time DESC
+      FROM "debank-portfolio-balances-${crawl_id}"
+      WHERE usd_value > ${minUSDValue}
+      ORDER BY usd_value DESC
       OFFSET ${offset}
       LIMIT ${limit}
       `,

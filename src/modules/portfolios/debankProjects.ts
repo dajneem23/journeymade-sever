@@ -4,16 +4,16 @@ import { minUSDValue, nodeEnv } from '@/configs/vars';
 import { stringifyObjectMsg } from '@/core/utils';
 import schedule from 'node-schedule';
 import Container from 'typedi';
-import { getPortfolioProjectsByCrawlId } from '../debank/services';
-import { getProjectsCrawlId } from '../debank/services/portfolio_projects/getLastCrawlID';
+import { countPortfolioProjectsByCrawlId, getPortfolioProjectsByCrawlId } from '../debank/services';
 import { savePortfolios } from './services/savePortfolios';
 import { AddressSymbolPortfolios, CRON_TASK, DATA_SOURCE } from './types';
 import {
   cleanAmount,
   cleanPrice,
   crawlIdAlias,
+  prepareCrawlIds,
   prepareOffsets,
-  toTimestamp,
+  toTimestamp
 } from './utils';
 
 const getPortfoliosProjects = async ({ crawl_id, limit, offset }) => {
@@ -32,8 +32,8 @@ const getPortfoliosProjects = async ({ crawl_id, limit, offset }) => {
         platform_token_id,
         portfolio_item_list = [],
       } = details || {};
-      return portfolio_item_list.forEach((item) =>
-        item.asset_token_list?.forEach((t, idx) => {
+      return portfolio_item_list.forEach((item, idx) =>
+        item.asset_token_list?.forEach((t, sidx) => {
           const usdValue = cleanAmount(t.amount) * cleanPrice(t.price)
           if (Math.abs(usdValue) > minUSDValue) {
             results.push(<AddressSymbolPortfolios>{
@@ -86,25 +86,27 @@ export const savePortfolioProjects = async ({ crawl_id, offset, limit }) => {
 
 const prepareCronJobs = async (forced_crawl_id?) => {
   const defaultLimit = 500;
-  const crawlIds = await getProjectsCrawlId();
+  const crawlIds = prepareCrawlIds();
 
   let ids = crawlIds;
   if (forced_crawl_id) {
-    ids = crawlIds.filter(({ crawl_id }) => crawl_id == forced_crawl_id);
+    ids = crawlIds.filter(({ crawl_id }) => crawl_id === forced_crawl_id);
   }
 
-  const jobs = ids
-    .map(({ crawl_id, count }) => {
-      const offsets = prepareOffsets(Number(count), defaultLimit);
-      return offsets.map((offset) => ({
-        crawl_id: Number(crawl_id),
-        offset,
-        limit: defaultLimit,
-      }));
-    })
-    .flat();
+  const jobs = await Promise.all(
+    ids
+      .map(async ({ crawl_id }) => {
+        const count = await countPortfolioProjectsByCrawlId({ crawl_id });
+        const offsets = prepareOffsets(count, defaultLimit);
+        return offsets.map((offset) => ({
+          crawl_id: Number(crawl_id),
+          offset,
+          limit: defaultLimit,
+        }));
+      })      
+  );
 
-  return jobs;
+  return jobs.flat();
 };
 
 export const initDebankProjectsJobs = async () => {
@@ -115,9 +117,13 @@ export const initDebankProjectsJobs = async () => {
   });
 
   if (nodeEnv !== 'production') {
-    const jobs = await prepareCronJobs();
-    console.log('🚀 ~ init', CRON_TASK.projects, jobs.length, new Date());
-    await addJobs(jobs);
+    const waitingCount = await queue.getWaitingCount();
+    console.log("🚀 ", CRON_TASK.projects, " ~ waitingCount", waitingCount)
+    if (waitingCount === 0) {
+      const jobs = await prepareCronJobs();
+      console.log('🚀 ~ init', CRON_TASK.projects, jobs.length, new Date());
+      await addJobs(jobs);
+    }
   } else {
     schedule.scheduleJob('50 * * * *', async function () {
       const jobs = await prepareCronJobs();

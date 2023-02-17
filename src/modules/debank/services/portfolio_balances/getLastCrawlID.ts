@@ -22,27 +22,3 @@ export const getLastCrawlID = async () => {
 
   return result;
 };
-
-export const getBalancesCrawlId = async () => {
-  const pgPool = Container.get(pgPoolToken);
-
-  let result;
-  try {
-    const { rows } = await pgPool.query(
-      `
-      SELECT crawl_id, count(*)
-      FROM "debank-portfolio-balances"
-      WHERE usd_value > ${minUSDValue}
-      GROUP BY crawl_id
-      ORDER BY crawl_id desc
-      LIMIT 3
-      `,
-    );
-    result = rows;
-  } catch (error) {
-    logger.error('error', '[getBalancesCrawlId:error]', JSON.stringify(error));
-    throw error;
-  }
-
-  return result;
-};

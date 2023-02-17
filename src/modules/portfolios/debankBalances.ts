@@ -5,7 +5,7 @@ import { stringifyObjectMsg } from '@/core/utils';
 import schedule from 'node-schedule';
 import Container from 'typedi';
 import {
-  getBalancesCrawlId,
+  countPortfolioBalancesByCrawlId,
   getPortfolioBalancesByCrawlId,
 } from '../debank/services';
 import { savePortfolios } from './services/savePortfolios';
@@ -14,6 +14,7 @@ import {
   cleanAmount,
   cleanPrice,
   crawlIdAlias,
+  prepareCrawlIds,
   prepareOffsets,
   toTimestamp,
 } from './utils';
@@ -72,25 +73,27 @@ const savePortfolioBalances = async ({ crawl_id, offset, limit }) => {
 
 const prepareCronJobs = async (forced_crawl_id?) => {
   const defaultLimit = 500;
-  const crawlIds = await getBalancesCrawlId();
+  const crawlIds = prepareCrawlIds();
 
   let ids = crawlIds;
   if (forced_crawl_id) {
     ids = crawlIds.filter(({ crawl_id }) => crawl_id === forced_crawl_id);
   }
 
-  const jobs = ids
-    .map(({ crawl_id, count }) => {
-      const offsets = prepareOffsets(Number(count), defaultLimit);
-      return offsets.map((offset) => ({
-        crawl_id: Number(crawl_id),
-        offset,
-        limit: defaultLimit,
-      }));
-    })
-    .flat();
+  const jobs = await Promise.all(
+    ids
+      .map(async ({ crawl_id }) => {
+        const count = await countPortfolioBalancesByCrawlId({ crawl_id });
+        const offsets = prepareOffsets(count, defaultLimit);
+        return offsets.map((offset) => ({
+          crawl_id: Number(crawl_id),
+          offset,
+          limit: defaultLimit,
+        }));
+      })      
+  );
 
-  return jobs;
+  return jobs.flat();
 };
 
 export const initDebankBalancesJobs = async () => {
@@ -101,9 +104,21 @@ export const initDebankBalancesJobs = async () => {
   });
 
   if (nodeEnv !== 'production') {
-    const jobs = await prepareCronJobs();
-    console.log('🚀 ~ init', CRON_TASK.balances, jobs.length, new Date());
-    await addJobs(jobs);
+    const waitingCount = await queue.getWaitingCount();
+    console.log('🚀 ', CRON_TASK.balances, ' ~ waitingCount', waitingCount);
+
+    if (waitingCount === 0) {
+      const failedCount = await queue.getFailedCount();
+
+      if (failedCount === 0) {
+        const jobs = await prepareCronJobs();
+        console.log('🚀 ~ init', CRON_TASK.balances, jobs.length, new Date());
+        await addJobs(jobs);
+      } else {
+        const failedJobs = await queue.getFailed(0, failedCount);
+        await addJobs(failedJobs.map((j) => j.data));
+      }
+    }
   } else {
     schedule.scheduleJob('50 * * * *', async function () {
       const jobs = await prepareCronJobs();

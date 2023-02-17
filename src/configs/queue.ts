@@ -34,7 +34,7 @@ export const CronQueue = (name, job_handler) => {
   const worker = new Worker(
     name,
     job_handler,
-    { connection, concurrency: 100 },
+    { connection, concurrency: 120 },
   );
 
   worker.on('completed', (job: Job) => {
@@ -42,7 +42,7 @@ export const CronQueue = (name, job_handler) => {
   });
 
   worker.on('failed', (job: Job) => {
-    console.log('job has failed:', name, job.id);
+    console.log('job has failed:', name, job.id, job.finishedOn - job.processedOn);
   });
 
   worker.on('drained', async () => {

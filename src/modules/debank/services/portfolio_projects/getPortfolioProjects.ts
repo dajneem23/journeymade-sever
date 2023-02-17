@@ -1,6 +1,7 @@
 import Container from 'typedi';
 import { pgPoolToken } from '@/configs/postgres';
 import logger from '@/configs/logger';
+import { minUSDValue } from '@/configs/vars';
 
 
 export const countPortfolioProjectsByCrawlId = async ({
@@ -12,8 +13,11 @@ export const countPortfolioProjectsByCrawlId = async ({
     const { rows } = await pgPool.query(
       `
       SELECT count(*) as count
-      FROM "debank-portfolio-projects"
-      WHERE crawl_id = ${crawl_id}
+      FROM "debank-portfolio-projects-${crawl_id}"
+      WHERE (
+        usd_value is null 
+        OR usd_value > ${minUSDValue}
+      )
       `,
     );
     result = rows[0]?.count;
@@ -40,9 +44,12 @@ export const getPortfolioProjectsByCrawlId = async ({
     const { rows } = await pgPool.query(
       `
       SELECT *
-      FROM "debank-portfolio-projects"
-      WHERE crawl_id = ${crawl_id}
-      ORDER BY crawl_time DESC
+      FROM "debank-portfolio-projects-${crawl_id}"
+      WHERE (
+        usd_value is null 
+        OR usd_value > ${minUSDValue}
+      )
+      ORDER BY usd_value DESC
       OFFSET ${offset}
       LIMIT ${limit}
       `,
