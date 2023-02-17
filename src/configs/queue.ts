@@ -44,7 +44,7 @@ export const CronQueue = (name, job_handler) => {
     console.log('job has failed:', name, job.id);
   });
 
-  worker.on('drained', () => {
+  worker.on('drained', async () => {
     const telegramBot = Container.get(telegramBotToken);
     
     const counts = await queue.getJobCounts('wait', 'completed', 'failed');
