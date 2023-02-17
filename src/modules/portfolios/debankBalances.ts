@@ -96,7 +96,7 @@ const prepareCronJobs = async (forced_crawl_id?) => {
 export const initDebankBalancesJobs = async () => {
   const telegramBot = Container.get(telegramBotToken);
 
-  const { addJobs } = CronQueue(CRON_TASK.balances, async ({ data }) => {
+  const { queue, addJobs } = CronQueue(CRON_TASK.balances, async ({ data }) => {
     return await savePortfolioBalances(data);
   });
 
@@ -107,12 +107,15 @@ export const initDebankBalancesJobs = async () => {
   } else {
     schedule.scheduleJob('50 * * * *', async function () {
       const jobs = await prepareCronJobs();
+      await addJobs(jobs);
 
-      const msg = `🚀 ~ init': ${CRON_TASK.balances} - ${jobs.length}`;
+      const counts = await queue.getJobCounts('wait', 'completed', 'failed');
+      let msg = `🚀 ~ init': ${CRON_TASK.balances} - ${jobs.length}`;
+      Object.keys(counts).forEach((key) => {
+        msg += `\n${key}: ${counts[key]}`;
+      });
       telegramBot.sendMessage(msg);
       console.log(msg, new Date());
-
-      await addJobs(jobs);
     });
   }
 };
@@ -120,17 +123,20 @@ export const initDebankBalancesJobs = async () => {
 export const triggerCronJob = async (forced_crawl_id) => {
   const telegramBot = Container.get(telegramBotToken);
 
-  const { addJobs } = CronQueue(CRON_TASK.balances, async ({ data }) => {
+  const { queue, addJobs } = CronQueue(CRON_TASK.balances, async ({ data }) => {
     return await savePortfolioBalances(data);
   });
 
   if (forced_crawl_id) {
     const jobs = await prepareCronJobs(forced_crawl_id);
+    await addJobs(jobs);
 
-    const msg = `🚀 ~ force init': ${CRON_TASK.balances} - ${forced_crawl_id}, ${jobs.length}`;
+    const counts = await queue.getJobCounts('wait', 'completed', 'failed');
+    let msg = `🚀 ~ force init': ${CRON_TASK.balances} - ${forced_crawl_id}, ${jobs.length}`;
+    Object.keys(counts).forEach((key) => {
+      msg += `\n${key}: ${counts[key]}`;
+    });
     telegramBot.sendMessage(msg);
     console.log(msg, new Date());
-
-    return await addJobs(jobs);
   }
 };

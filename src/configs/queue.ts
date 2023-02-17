@@ -47,7 +47,11 @@ export const CronQueue = (name, job_handler) => {
   worker.on('drained', () => {
     const telegramBot = Container.get(telegramBotToken);
     
-    const msg = `${name}: queue drained, no more jobs left`
+    const counts = await queue.getJobCounts('wait', 'completed', 'failed');
+    let msg = `${name}: queue drained, no more jobs left`
+    Object.keys(counts).forEach((key) => {
+      msg += `\n${key}: ${counts[key]}`;
+    });
     telegramBot.sendMessage(msg);
     console.log(msg);
   });
@@ -67,6 +71,7 @@ export const CronQueue = (name, job_handler) => {
   };
 
   return {
+    queue,
     worker,
     addJobs,
   };
