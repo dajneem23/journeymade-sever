@@ -139,14 +139,28 @@ export const triggerCronJobs = async (forced_crawl_id?) => {
         },
       });
 
+      const counts = await queue.getJobCounts(
+        'active',
+        'completed',
+        'failed',
+        'wait',
+      );
+      const resultCount = await countDocuments({
+        crawl_id,
+        filter: {
+          pool_id: null,
+        },
+      });
       cronLog.save([
         <CronLog>{
           job_name: CRON_TASK.projects,
           crawl_id,
           data: {
             raw_count,
+            result_count: resultCount,
           },
           job_count: jobs.length,
+          job_status: counts
         },
       ]);
 
