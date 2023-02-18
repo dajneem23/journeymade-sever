@@ -46,22 +46,7 @@ const schema = new mongoose.Schema(
 
 schema.index(
   {
-    wallet_address: 1,
-    symbol: 1,
-    chain: 1,
     crawl_id: 1,
-    pool_id: 1,
-    ref_id: 1,
-  },
-  {
-    background: true,
-  },
-);
-
-schema.index(
-  {
-    symbol: 1,
-    wallet_address: 1,
   },
   {
     background: true,
