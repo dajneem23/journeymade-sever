@@ -6,10 +6,10 @@ export default async () => {
   console.log('🚀 ~ nodeEnv', nodeEnv);
 
   if (nodeEnv !== 'production') {
-    // balances.triggerCronJobs();
+    balances.triggerCronJobs();
     projects.triggerCronJobs();
   } else {
-    // balances.scheduleCronJobs();
+    balances.scheduleCronJobs();
     projects.scheduleCronJobs();
   }
 };
