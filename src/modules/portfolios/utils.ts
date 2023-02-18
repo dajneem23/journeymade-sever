@@ -70,7 +70,7 @@ export const prepareCronJobs = async ({
   }
 
   const jobs = await Promise.all(
-    ids.slice(0, 2).map(async ({ crawl_id }) => {
+    ids.slice(0, 1).map(async ({ crawl_id }) => {
       const count = await countFn({ crawl_id });
       const offsets = prepareOffsets(count, defaultLimit);
       return {
