@@ -34,7 +34,7 @@ export const prepareCrawlIds = () => {
     });
   }
 
-  return ids.slice(0, 1);
+  return ids.slice(0, 10);
 };
 
 export const prepareOffsets = (max, limit) => {
@@ -56,3 +56,34 @@ export const crawlIdAlias = (id) => {
 export const getJobId = ({ crawl_id, offset, limit }) => {
   return `${crawl_id}:${offset}-${limit}`;
 };
+
+export const prepareCronJobs = async ({
+  countFn,
+  forced_crawl_id = null
+}) => {
+  const defaultLimit = 500;
+  const crawlIds = prepareCrawlIds();
+
+  let ids = crawlIds;
+  if (forced_crawl_id) {
+    ids = crawlIds.filter(({ crawl_id }) => crawl_id === forced_crawl_id);
+  }
+
+  const jobs = await Promise.all(
+    ids.slice(0, 2).map(async ({ crawl_id }) => {
+      const count = await countFn({ crawl_id });
+      const offsets = prepareOffsets(count, defaultLimit);
+      return {
+        crawl_id,
+        raw_count: count,
+        jobs: offsets.map((offset) => ({
+          crawl_id: Number(crawl_id),
+          offset,
+          limit: defaultLimit,
+        })),
+      };
+    }),
+  );
+
+  return jobs;
+}

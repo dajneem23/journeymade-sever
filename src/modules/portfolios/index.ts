@@ -1,11 +1,15 @@
 import { nodeEnv } from '@/configs/vars';
-import { initDebankBalancesJobs } from './debankBalances';
-import { initDebankProjectsJobs } from './debankProjects';
+import balances from './debankBalances';
+import projects from './debankProjects';
 
 export default async () => {
   console.log('🚀 ~ nodeEnv', nodeEnv);
 
-  initDebankBalancesJobs();
-
-  initDebankProjectsJobs();
+  if (nodeEnv !== 'production') {
+    // balances.triggerCronJobs();
+    projects.triggerCronJobs();
+  } else {
+    // balances.scheduleCronJobs();
+    projects.scheduleCronJobs();
+  }
 };

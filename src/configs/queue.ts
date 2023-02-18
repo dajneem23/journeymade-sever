@@ -9,11 +9,11 @@ import IORedis from 'ioredis';
 import Container from 'typedi';
 import { telegramBotToken } from './telegram';
 
-const port = +process.env.REDIS_PORT
-const host = process.env.REDIS_HOST
+const port = +process.env.REDIS_PORT;
+const host = process.env.REDIS_HOST;
 const connection = new IORedis(port, host);
 
-export const CronQueue = (name, job_handler) => {
+export const CronQueue = ({ name, job_handler, drained_callback = null }) => {
   const queue = new Queue(name, {
     connection,
     defaultJobOptions: {
@@ -26,35 +26,39 @@ export const CronQueue = (name, job_handler) => {
         age: 60 * 60 * 6,
       },
       removeOnFail: {
-        age: 60 * 60 * 8,
+        age: 15 * 60, // 15mins
       },
     },
   });
 
-  const worker = new Worker(
-    name,
-    job_handler,
-    { connection, concurrency: 120 },
-  );
+  const worker = new Worker(name, job_handler, {
+    connection,
+    concurrency: 120,
+  });
 
   worker.on('completed', (job: Job) => {
-    console.log('job has completed:', name, job.id, job.finishedOn - job.processedOn);
+    console.log(
+      'job has completed:',
+      name,
+      job.id,
+      job.finishedOn - job.processedOn,
+    );
   });
 
   worker.on('failed', (job: Job) => {
-    console.log('job has failed:', name, job.id, job.finishedOn - job.processedOn);
+    console.log(
+      'job has failed:',
+      name,
+      job.id,
+      job.finishedOn - job.processedOn,
+    );
   });
 
-  worker.on('drained', async () => {
-    const telegramBot = Container.get(telegramBotToken);
-    
-    const counts = await queue.getJobCounts('wait', 'completed', 'failed');
-    const msg = `${name}: queue drained, no more jobs left ${stringifyObjectMsg(counts)}`
-    telegramBot.sendMessage(msg);
-    console.log(msg);
+  worker.on('drained', async () => {    
+    drained_callback && drained_callback();
   });
 
-  const addJobs = async (props: CronJobProp[]) => { 
+  const addJobs = async (props: CronJobProp[]) => {
     const jobs = props.map((prop) => {
       return {
         name,

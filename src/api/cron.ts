@@ -1,6 +1,6 @@
+import balances from '@/modules/portfolios/debankBalances';
+import projects from '@/modules/portfolios/debankProjects';
 import express from 'express';
-import { triggerCronJob as triggerBalanceCronJob } from '@/modules/portfolios/debankBalances';
-import { triggerCronJob as triggerProjectCronJob } from '@/modules/portfolios/debankProjects';
 
 const router = express.Router();
 
@@ -22,9 +22,9 @@ router.get('/trigger', (req, res) => {
   }
 
   if (type === 'balance') {
-    triggerBalanceCronJob(crawl_id);
+    balances.triggerCronJobs(crawl_id);
   } else if (type === 'project') {
-    triggerProjectCronJob(crawl_id);
+    projects.triggerCronJobs(crawl_id);
   }
 
   res.send(`Accept: ${type}-${crawl_id}`);

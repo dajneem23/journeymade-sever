@@ -1,19 +1,24 @@
 import { CronQueue } from '@/configs/queue';
 import { telegramBotToken } from '@/configs/telegram';
-import { minUSDValue, nodeEnv } from '@/configs/vars';
+import { minUSDValue } from '@/configs/vars';
 import { stringifyObjectMsg } from '@/core/utils';
+import cronLog from '@/modules/cron_logs';
 import schedule from 'node-schedule';
 import Container from 'typedi';
-import { countPortfolioProjectsByCrawlId, getPortfolioProjectsByCrawlId } from '../debank/services';
+import { CronLog } from '../cron_logs/types';
+import {
+  countPortfolioProjectsByCrawlId,
+  getPortfolioProjectsByCrawlId,
+} from '../debank/services';
+import { countDocuments } from './services/countDocuments';
 import { savePortfolios } from './services/savePortfolios';
 import { AddressSymbolPortfolios, CRON_TASK, DATA_SOURCE } from './types';
 import {
   cleanAmount,
   cleanPrice,
   crawlIdAlias,
-  prepareCrawlIds,
-  prepareOffsets,
-  toTimestamp
+  prepareCronJobs,
+  toTimestamp,
 } from './utils';
 
 const getPortfoliosProjects = async ({ crawl_id, limit, offset }) => {
@@ -34,7 +39,7 @@ const getPortfoliosProjects = async ({ crawl_id, limit, offset }) => {
       } = details || {};
       return portfolio_item_list.forEach((item, idx) =>
         item.asset_token_list?.forEach((t, sidx) => {
-          const usdValue = cleanAmount(t.amount) * cleanPrice(t.price)
+          const usdValue = cleanAmount(t.amount) * cleanPrice(t.price);
           if (Math.abs(usdValue) > minUSDValue) {
             results.push(<AddressSymbolPortfolios>{
               wallet_address: user_address,
@@ -42,17 +47,17 @@ const getPortfoliosProjects = async ({ crawl_id, limit, offset }) => {
               amount: cleanAmount(t.amount),
               price: cleanPrice(t.price),
               usd_value: usdValue,
-  
+
               chain: t.chain,
               crawl_time: toTimestamp(crawl_time),
               crawl_id: crawlIdAlias(crawl_id),
               ref_id: `${t.id}-${idx}`,
-  
+
               dao_id: dao_id,
               platform_token_id: platform_token_id,
               pool_id: item.pool?.id,
               pool_adapter_id: item.pool?.adapter_id,
-  
+
               source: DATA_SOURCE.debank,
             });
           }
@@ -84,88 +89,83 @@ export const savePortfolioProjects = async ({ crawl_id, offset, limit }) => {
   return `${crawl_id}: ${offset} - count=${portfolios.length}`;
 };
 
-const prepareCronJobs = async (forced_crawl_id?) => {
-  const defaultLimit = 500;
-  const crawlIds = prepareCrawlIds();
-  console.log("🚀 ~ file: debankProjects.ts:90 ~ prepareCronJobs ~ crawlIds", crawlIds)
-
-  let ids = crawlIds;
-  if (forced_crawl_id) {
-    ids = crawlIds.filter(({ crawl_id }) => crawl_id === forced_crawl_id);
-  }
-
-  const jobs = await Promise.all(
-    ids
-      .map(async ({ crawl_id }) => {
-        const count = await countPortfolioProjectsByCrawlId({ crawl_id });
-        const offsets = prepareOffsets(count, defaultLimit);
-        return offsets.map((offset) => ({
-          crawl_id: Number(crawl_id),
-          offset,
-          limit: defaultLimit,
-        }));
-      })      
-  );
-
-  return jobs.flat();
-};
-
-export const initDebankProjectsJobs = async () => {
+export const triggerCronJobs = async (forced_crawl_id?) => {
   const telegramBot = Container.get(telegramBotToken);
 
-  const { queue, addJobs } = CronQueue(CRON_TASK.projects, async ({ data }) => {
-    return await savePortfolioProjects(data);
+  const cronJobs = await prepareCronJobs({
+    countFn: countPortfolioProjectsByCrawlId,
+    forced_crawl_id,
   });
 
-  if (nodeEnv !== 'production') {
-    const waitingCount = await queue.getWaitingCount();
-    console.log("🚀 ", CRON_TASK.projects, " ~ waitingCount", waitingCount)
-    if (waitingCount === 0) {
-      const failedCount = await queue.getFailedCount();
+  await Promise.all(
+    cronJobs.map(async ({ crawl_id, raw_count, jobs }) => {
+      const queueName = `${CRON_TASK.projects}:${crawl_id}`;
+      const { queue, addJobs } = CronQueue({
+        name: queueName,
+        job_handler: async ({ data }) => {
+          return await savePortfolioProjects(data);
+        },
+        drained_callback: async () => {
+          const counts = await queue.getJobCounts(
+            'active',
+            'completed',
+            'failed',
+            'wait',
+          );
+          const resultCount = await countDocuments({
+            crawl_id,
+            filter: {
+              pool_id: null,
+            },
+          });
 
-      if (failedCount === 0) {
-        const jobs = await prepareCronJobs();
-        await addJobs(jobs);
+          cronLog.save([
+            <CronLog>{
+              job_name: CRON_TASK.projects,
+              crawl_id,
+              data: {
+                raw_count,
+                result_count: resultCount,
+              },
+              job_status: counts,
+            },
+          ]);
 
-        const msg = `🚀 ~ init', ${CRON_TASK.projects}, ${jobs.length}, ${new Date()}`;
-        console.log(msg);
-        telegramBot.sendMessage(msg);
-      } else {
-        const failedJobs = await queue.getFailed(0, failedCount);
-        await addJobs(failedJobs.map((j) => j.data));
+          const msg = `${queueName}: queue drained ${stringifyObjectMsg(
+            counts,
+          )}`;
+          telegramBot.sendMessage(msg);
+          console.log(msg);
+        },
+      });
 
-        const msg = `🚀 ~ init ${CRON_TASK.projects}: failedJobs' ${failedCount}`;
-        console.log(msg);
-        telegramBot.sendMessage(msg);
-      }
-    }
-  } else {
-    schedule.scheduleJob('*/30 * * * *', async function () {
-      const jobs = await prepareCronJobs();
+      cronLog.save([
+        <CronLog>{
+          job_name: CRON_TASK.projects,
+          crawl_id,
+          data: {
+            raw_count,
+          },
+          job_count: jobs.length,
+        },
+      ]);
+
       await addJobs(jobs);
 
-      const counts = await queue.getJobCounts('wait', 'completed', 'failed');
-      const msg = `🚀 ~ init': ${CRON_TASK.projects} - ${jobs.length} ${stringifyObjectMsg(counts)}`;      
+      const msg = `🚀 ${queueName} init: \n- jobs: ${jobs.length}`;
+      console.log(msg);
       telegramBot.sendMessage(msg);
-      console.log(msg, new Date());
-    });
-  }
+    }),
+  );
 };
 
-export const triggerCronJob = async (forced_crawl_id) => {
-  const telegramBot = Container.get(telegramBotToken);
-
-  const { queue, addJobs } = CronQueue(CRON_TASK.projects, async ({ data }) => {
-    return await savePortfolioProjects(data);
+const scheduleCronJobs = () => {
+  schedule.scheduleJob('*/20 * * * *', async function () {
+    await triggerCronJobs();
   });
+};
 
-  if (forced_crawl_id) {
-    const jobs = await prepareCronJobs(forced_crawl_id);
-    await addJobs(jobs);
-
-    const counts = await queue.getJobCounts('wait', 'completed', 'failed');
-    const msg = `🚀 ~ force init': ${CRON_TASK.projects} - ${forced_crawl_id}, ${jobs.length} ${stringifyObjectMsg(counts)}`;    
-    telegramBot.sendMessage(msg);
-    console.log(msg, new Date());
-  }
+export default {
+  triggerCronJobs,
+  scheduleCronJobs,
 };

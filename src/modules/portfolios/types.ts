@@ -26,7 +26,7 @@ export enum DATA_SOURCE {
 }
 
 export enum CRON_TASK {
-  balances = 'debank:balance',
+  balances = 'debank:balances',
   projects = 'debank:projects'
 }
 
