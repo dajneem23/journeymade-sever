@@ -87,6 +87,7 @@ export const savePortfolioProjects = async ({ crawl_id, offset, limit }) => {
 const prepareCronJobs = async (forced_crawl_id?) => {
   const defaultLimit = 500;
   const crawlIds = prepareCrawlIds();
+  console.log("🚀 ~ file: debankProjects.ts:90 ~ prepareCronJobs ~ crawlIds", crawlIds)
 
   let ids = crawlIds;
   if (forced_crawl_id) {
@@ -120,12 +121,19 @@ export const initDebankProjectsJobs = async () => {
     const waitingCount = await queue.getWaitingCount();
     console.log("🚀 ", CRON_TASK.projects, " ~ waitingCount", waitingCount)
     if (waitingCount === 0) {
-      const jobs = await prepareCronJobs();
-      console.log('🚀 ~ init', CRON_TASK.projects, jobs.length, new Date());
-      await addJobs(jobs);
+      const failedCount = await queue.getFailedCount();
+
+      if (failedCount === 0) {
+        const jobs = await prepareCronJobs();
+        console.log('🚀 ~ init', CRON_TASK.projects, jobs.length, new Date());
+        await addJobs(jobs);
+      } else {
+        const failedJobs = await queue.getFailed(0, failedCount);
+        await addJobs(failedJobs.map((j) => j.data));
+      }
     }
   } else {
-    schedule.scheduleJob('50 * * * *', async function () {
+    schedule.scheduleJob('*/30 * * * *', async function () {
       const jobs = await prepareCronJobs();
       await addJobs(jobs);
 

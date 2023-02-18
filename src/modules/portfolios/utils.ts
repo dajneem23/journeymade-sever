@@ -28,13 +28,13 @@ export const prepareCrawlIds = () => {
     });
   }
 
-  for (let i = (24 / duration) - 1; i > 0; i--) {
+  for (let i = (24 / duration); i > 0; i--) {
     ids.push({
       crawl_id: `${yesterday}${i < 10 ? '0' + i : i}`,
     });
   }
 
-  return ids.slice(0, 2);
+  return ids.slice(0, 1);
 };
 
 export const prepareOffsets = (max, limit) => {

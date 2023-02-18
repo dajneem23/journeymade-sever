@@ -120,7 +120,7 @@ export const initDebankBalancesJobs = async () => {
       }
     }
   } else {
-    schedule.scheduleJob('50 * * * *', async function () {
+    schedule.scheduleJob('*/30 * * * *', async function () {
       const jobs = await prepareCronJobs();
       await addJobs(jobs);
 
