@@ -9,8 +9,8 @@ export const getResults = async ({
 }) => {
   const filters: any = {
     abs_percentage_change: {
-      '$gte': min_pc,
-      '$lte': max_pc
+      '$gte': +min_pc,
+      '$lte': +max_pc
     }
   };
 
