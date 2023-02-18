@@ -91,6 +91,7 @@ export const savePortfolioProjects = async ({ crawl_id, offset, limit }) => {
 
 export const triggerCronJobs = async (forced_crawl_id?) => {
   const telegramBot = Container.get(telegramBotToken);
+  telegramBot.sendMessage(`TriggerCronJobs ${CRON_TASK.projects}`);
 
   const cronJobs = await prepareCronJobs({
     countFn: countPortfolioProjectsByCrawlId,

@@ -74,6 +74,7 @@ const savePortfolioBalances = async ({ crawl_id, offset, limit }) => {
 
 const triggerCronJobs = async (forced_crawl_id?) => {
   const telegramBot = Container.get(telegramBotToken);
+  telegramBot.sendMessage(`TriggerCronJobs ${CRON_TASK.balances}`);
 
   const cronJobs = await prepareCronJobs({
     countFn: countPortfolioBalancesByCrawlId,
