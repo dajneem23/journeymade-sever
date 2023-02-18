@@ -37,10 +37,10 @@ export const getResults = async ({
       },
       { $match: filters },
       {
-        $skip: offset
+        $skip: +offset
       },
       {
-        $limit: limit
+        $limit: +limit
       },
     ],
     {

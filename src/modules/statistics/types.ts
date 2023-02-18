@@ -55,50 +55,31 @@ export type SegmentIDType =
   | SegmentID.offset_600_750
   | SegmentID.offset_750_1000
 
-export type Portfolio = {
-  user_address: string;
-  symbol: string;
-  chain: string;
-  amount: number;
-  price: number;
-  decimals: number;
-
-  is_wallet: boolean;
-  is_stable_coin: boolean;
-  updated_at: string;
-  crawl_id: number;
-};
-
-export type Segment = {
-  id: SegmentIDType;
-
-  count: number;
-  avg_balance: number;
-
-  updated_at: string;
-  crawl_id: number;
-
-  holders: any[];
-};
-
-export type Segments = Segment[];
-
 export type SegmentResult = {
   segment_id?: SegmentIDType;
   updated_at: string;
   count: number;
   crawl_id: number;
   crawl_time?: string;
+
   holders: any[];
+  hot_wallets: any[];
 
   total_amount: number;
   total_usd_value?: number;
   symbol?: string;
   percentage_change?: number; // + increase, - decrease
   usd_change?: number; // + increase, - decrease
+  abs_percentage_change?: number; 
 };
 
-export type SegmentResults = {
-  id: SegmentIDType;
-  history: SegmentResult[];
-}[];
+export type Holder = {
+  wallet_address: string;
+  symbol: string;
+  amount: number;
+  usd_value: number;
+  usd_change?: number;
+  percentage_change?: number; // + increase, - decrease
+  abs_percentage_change?: number;
+  usd_percentage_change?: number;
+}
