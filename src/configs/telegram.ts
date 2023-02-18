@@ -5,6 +5,7 @@ import { nodeEnv } from './vars';
 const token = '6228049691:AAEW_8Lm2hAXnz-WpGymi6tLOuCTJLwPoNo';
 const chatIds = {
   minhphamquang: 71480983,
+  cronbot: -871473931
 };
 
 export const telegramBotToken = new Token<any>('_telegramBot');
@@ -14,7 +15,7 @@ export const initTelegramBot = () => {
   const bot = new TelegramBot(token, {});
 
   const sendMessage = (text) => {
-    bot.sendMessage(chatIds.minhphamquang, `[${nodeEnv}]\n--\n${text}`);
+    bot.sendMessage(chatIds.cronbot, `[${nodeEnv}]\n--\n${text}`);
   };
 
   Container.set(telegramBotToken, {
@@ -25,3 +26,5 @@ export const initTelegramBot = () => {
     sendMessage,
   };
 };
+
+// https://api.telegram.org/bot6228049691:AAEW_8Lm2hAXnz-WpGymi6tLOuCTJLwPoNo/getUpdates

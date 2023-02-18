@@ -112,11 +112,18 @@ export const initDebankBalancesJobs = async () => {
 
       if (failedCount === 0) {
         const jobs = await prepareCronJobs();
-        console.log('🚀 ~ init', CRON_TASK.balances, jobs.length, new Date());
         await addJobs(jobs);
+
+        const msg = `🚀 ~ init', ${CRON_TASK.balances}, ${jobs.length}, ${new Date()}`;
+        console.log(msg);
+        telegramBot.sendMessage(msg);
       } else {
         const failedJobs = await queue.getFailed(0, failedCount);
         await addJobs(failedJobs.map((j) => j.data));
+
+        const msg = `🚀 ~ init ${CRON_TASK.balances}: failedJobs', ${failedCount}`;
+        console.log(msg);
+        telegramBot.sendMessage(msg);
       }
     }
   } else {
