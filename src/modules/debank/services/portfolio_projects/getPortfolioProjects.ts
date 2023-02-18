@@ -1,7 +1,7 @@
 import Container from 'typedi';
 import { pgPoolToken } from '@/configs/postgres';
 import logger from '@/configs/logger';
-import { minUSDValue } from '@/configs/vars';
+import { maxUSDValue, minUSDValue } from '@/configs/vars';
 
 
 export const countPortfolioProjectsByCrawlId = async ({
@@ -16,7 +16,7 @@ export const countPortfolioProjectsByCrawlId = async ({
       FROM "debank-portfolio-projects-${crawl_id}"
       WHERE (
         usd_value is null 
-        OR usd_value > ${minUSDValue}
+        OR (usd_value > ${minUSDValue} AND usd_value < ${maxUSDValue})
       )
       `,
     );
@@ -47,7 +47,7 @@ export const getPortfolioProjectsByCrawlId = async ({
       FROM "debank-portfolio-projects-${crawl_id}"
       WHERE (
         usd_value is null 
-        OR usd_value > ${minUSDValue}
+        OR (usd_value > ${minUSDValue} AND usd_value < ${maxUSDValue})
       )
       ORDER BY usd_value DESC
       OFFSET ${offset}

@@ -22,9 +22,9 @@ import { nodeEnv, port } from './configs/vars';
     // (await import('./loaders/worker.loader')).default();
     // (await import('./modules/debank')).default();
 
-    (await import('./modules/portfolios')).default();
+    // (await import('./modules/portfolios')).default();
     
-    // (await import('./modules/statistics')).default();
+    (await import('./modules/statistics')).default();
 
     // listen to requests
     app.listen(port, () =>

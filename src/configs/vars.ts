@@ -74,3 +74,4 @@ export const chartTimeFrames = [
 
 
 export const minUSDValue = 1000;
+export const maxUSDValue = 1000000000000;
