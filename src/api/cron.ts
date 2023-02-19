@@ -1,8 +1,20 @@
 import balances from '@/modules/portfolios/debankBalances';
 import projects from '@/modules/portfolios/debankProjects';
+import cronLog from '@/modules/cron_logs';
 import express from 'express';
 
 const router = express.Router();
+
+const row = html => `<tr>\n${html}</tr>\n`,
+      heading = object => row(Object.keys(object).reduce((html, heading) => (html + `<th>${heading}</th>`), '')),
+      datarow = object => row(Object.values(object).reduce((html, value) => (html + `<td>${value}</td>`), ''));
+                               
+function htmlTable(dataList) {
+  return `<table>
+            ${heading(dataList[0])}
+            ${dataList.reduce((html, object) => (html + datarow(object)), '')}
+          </table>`
+}
 
 // middleware that is specific to this router
 router.use((req, res, next) => {
@@ -10,20 +22,34 @@ router.use((req, res, next) => {
   next();
 });
 // define the home page route
-router.get('/', (req, res) => {
-  res.send('cron apis');
+router.get('/', async (req, res) => {
+
+  const rawLogs = await cronLog.get();
+
+  const table = htmlTable(rawLogs.map(row => {
+    return {
+      id: row.crawl_id,
+      name: row.job_name,
+      count: row.job_count,
+      completed: row.job_status.completed,
+      failed: row.job_status.failed,
+      link: `<a target="_blank" href="http://api.1fox.pro/cron/trigger?type=${row.job_name}&crawl_id=${row.crawl_id}" >trigger</a>`
+    }
+  }))
+
+  res.send(table);
 });
 // define the about route
 router.get('/trigger', (req, res) => {
-  const { type, crawl_id } = req.query || {};
+  const { type = '', crawl_id } = req.query || {};
 
-  if (!['balance', 'project'].includes(type) || !crawl_id) {
+  if (!type || !crawl_id) {
     return res.status(400).send('Invalid query');
   }
 
-  if (type === 'balance') {
+  if (type.includes('balances')) {
     balances.triggerCronJobs(crawl_id);
-  } else if (type === 'project') {
+  } else if (type.includes('projects')) {
     projects.triggerCronJobs(crawl_id);
   }
 
