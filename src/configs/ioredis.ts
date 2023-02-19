@@ -1,8 +1,7 @@
 import IORedis from 'ioredis';
-import { Pool } from 'pg';
 import Container, { Token } from 'typedi';
 
-export const ioRedisToken = new Token<Pool>('_ioRedis');
+export const ioRedisToken = new Token<IORedis>('_ioRedis');
 
 const port = +process.env.REDIS_PORT;
 const host = process.env.REDIS_HOST;

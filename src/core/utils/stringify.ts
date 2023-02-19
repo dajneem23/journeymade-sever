@@ -1,7 +1,7 @@
-export const stringifyObjectMsg = (obj) => {
+export const stringifyObjectMsg = (obj, pre_text = ' - ') => {
   let msg = ''
   Object.keys(obj).forEach((key) => {
-    msg += `\n\t - ${key}: ${obj[key]}`;
+    msg += `\n\t${pre_text}${key}: ${typeof obj[key] === 'object' ? stringifyObjectMsg(obj[key], '\t + ') : obj[key]}`;
   });
 
   return msg

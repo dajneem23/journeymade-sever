@@ -19,11 +19,11 @@ export const getTopHolders = async ({
         crawl_id,
         crawl_time::text,
         updated_at::text,
-        (details -> 'amount')::bigint AS amount
+        (details -> 'amount') AS amount
       FROM PUBLIC."debank-top-holders"
       WHERE symbol = '${symbol}'
       AND crawl_id = ${crawl_id}
-      ORDER BY (details -> 'amount')::bigint DESC
+      ORDER BY crawl_time DESC
       OFFSET ${offset}
       LIMIT ${limit}
       `

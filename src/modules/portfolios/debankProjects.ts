@@ -89,9 +89,40 @@ export const savePortfolioProjects = async ({ crawl_id, offset, limit }) => {
   return `${crawl_id}: ${offset} - count=${portfolios.length}`;
 };
 
+const saveLogs = async ({ queue, raw_count, crawl_id }) => {
+  const jobCounts = await queue.getJobCounts(
+    'active',
+    'completed',
+    'failed',
+    'wait',
+  );
+  const resultCount = await countDocuments({
+    crawl_id,
+    filter: {
+      pool_id: { '$ne': null },
+    },
+  });
+
+  cronLog.save([
+    <CronLog>{
+      job_name: CRON_TASK.projects,
+      crawl_id,
+      data: {
+        raw_count,
+        result_count: resultCount,
+      },
+      job_status: jobCounts,
+    },
+  ]);
+
+  return {
+    jobCounts,
+    resultCount,
+  };
+};
+
 export const triggerCronJobs = async (forced_crawl_id?) => {
   const telegramBot = Container.get(telegramBotToken);
-  telegramBot.sendMessage(`TriggerCronJobs ${CRON_TASK.projects}`);
 
   const cronJobs = await prepareCronJobs({
     countFn: countPortfolioProjectsByCrawlId,
@@ -101,73 +132,44 @@ export const triggerCronJobs = async (forced_crawl_id?) => {
   await Promise.all(
     cronJobs.map(async ({ crawl_id, raw_count, jobs }) => {
       const queueName = `${CRON_TASK.projects}:${crawl_id}`;
-      const { queue, addJobs } = CronQueue({
+      const { queue, addJobs } = await CronQueue({
         name: queueName,
         job_handler: async ({ data }) => {
           return await savePortfolioProjects(data);
         },
         drained_callback: async () => {
-          const counts = await queue.getJobCounts(
-            'active',
-            'completed',
-            'failed',
-            'wait',
-          );
-          const resultCount = await countDocuments({
-            crawl_id,
-            filter: {
-              pool_id: null,
-            },
-          });
-
-          cronLog.save([
-            <CronLog>{
-              job_name: CRON_TASK.projects,
+          setTimeout(async () => {
+            const { jobCounts, resultCount } = await saveLogs({
+              queue,
               crawl_id,
-              data: {
-                raw_count,
-                result_count: resultCount,
-              },
-              job_status: counts,
-            },
-          ]);
+              raw_count,
+            });
 
-          const msg = `${queueName}: queue drained ${stringifyObjectMsg(
-            counts,
-          )}`;
-          telegramBot.sendMessage(msg);
-          console.log(msg);
+            const msg = `${queue.name}: queue drained ${stringifyObjectMsg({
+              job_queue_status: jobCounts,
+              pg_raw: raw_count,
+              mongo_updated: resultCount,
+            })}`;
+            telegramBot.sendMessage(msg);
+            console.log(msg);
+          }, 5000);
         },
       });
-
-      const counts = await queue.getJobCounts(
-        'active',
-        'completed',
-        'failed',
-        'wait',
-      );
-      const resultCount = await countDocuments({
-        crawl_id,
-        filter: {
-          pool_id: null,
-        },
-      });
-      cronLog.save([
-        <CronLog>{
-          job_name: CRON_TASK.projects,
-          crawl_id,
-          data: {
-            raw_count,
-            result_count: resultCount,
-          },
-          job_count: jobs.length,
-          job_status: counts
-        },
-      ]);
 
       await addJobs(jobs);
 
-      const msg = `🚀 ${queueName} init: \n- jobs: ${jobs.length}`;
+      const { jobCounts, resultCount } = await saveLogs({
+        queue,
+        crawl_id,
+        raw_count,
+      });
+
+      const msg = `🚀 ${queue.name} init: ${stringifyObjectMsg({
+        num_of_jobs: jobs.length,
+        job_queue_status: jobCounts,
+        pg_raw: raw_count,
+        mongo_updated: resultCount,
+      })}`;
       console.log(msg);
       telegramBot.sendMessage(msg);
     }),
@@ -175,7 +177,7 @@ export const triggerCronJobs = async (forced_crawl_id?) => {
 };
 
 const scheduleCronJobs = () => {
-  schedule.scheduleJob('*/20 * * * *', async function () {
+  schedule.scheduleJob('*/30 * * * *', async function () {
     await triggerCronJobs();
   });
 };

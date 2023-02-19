@@ -134,6 +134,7 @@ export const getTopHoldersBySymbol = async ({
         console.log(
           '🚀 ~ file: topHolders.ts:131 ~ SegmentOptions.map ~ e',
           id,
+          symbol,
           offset,
           limit,
           e,

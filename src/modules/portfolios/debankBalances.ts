@@ -7,7 +7,7 @@ import Container from 'typedi';
 import { CronLog } from '../cron_logs/types';
 import {
   countPortfolioBalancesByCrawlId,
-  getPortfolioBalancesByCrawlId,
+  getPortfolioBalancesByCrawlId
 } from '../debank/services';
 import { countDocuments } from './services/countDocuments';
 import { savePortfolios } from './services/savePortfolios';
@@ -17,7 +17,7 @@ import {
   cleanPrice,
   crawlIdAlias,
   prepareCronJobs,
-  toTimestamp,
+  toTimestamp
 } from './utils';
 
 const getPortfolioBalances = async ({ crawl_id, limit, offset }) => {
@@ -72,9 +72,40 @@ const savePortfolioBalances = async ({ crawl_id, offset, limit }) => {
   return `${crawl_id}: ${offset} - count=${portfolios.length}`;
 };
 
+const saveLogs = async ({ queue, raw_count, crawl_id }) => {
+  const jobCounts = await queue.getJobCounts(
+    'active',
+    'completed',
+    'failed',
+    'wait',
+  );
+  const resultCount = await countDocuments({
+    crawl_id,
+    filter: {
+      pool_id: null,
+    },
+  });
+
+  cronLog.save([
+    <CronLog>{
+      job_name: CRON_TASK.balances,
+      crawl_id,
+      data: {
+        raw_count,
+        result_count: resultCount,
+      },
+      job_status: jobCounts,
+    },
+  ]);
+
+  return {
+    jobCounts,
+    resultCount,
+  };
+};
+
 const triggerCronJobs = async (forced_crawl_id?) => {
   const telegramBot = Container.get(telegramBotToken);
-  telegramBot.sendMessage(`TriggerCronJobs ${CRON_TASK.balances}`);
 
   const cronJobs = await prepareCronJobs({
     countFn: countPortfolioBalancesByCrawlId,
@@ -84,73 +115,44 @@ const triggerCronJobs = async (forced_crawl_id?) => {
   await Promise.all(
     cronJobs.map(async ({ crawl_id, raw_count, jobs }) => {
       const queueName = `${CRON_TASK.balances}:${crawl_id}`;
-      const { queue, addJobs } = CronQueue({
+      const { queue, addJobs } = await CronQueue({
         name: queueName,
         job_handler: async ({ data }) => {
           return await savePortfolioBalances(data);
         },
         drained_callback: async () => {
-          const counts = await queue.getJobCounts(
-            'active',
-            'completed',
-            'failed',
-            'wait',
-          );
-          const resultCount = await countDocuments({
-            crawl_id,
-            filter: {
-              pool_id: null,
-            },
-          });
-
-          cronLog.save([
-            <CronLog>{
-              job_name: CRON_TASK.balances,
+          setTimeout(async () => {
+            const { jobCounts, resultCount } = await saveLogs({
+              queue,
               crawl_id,
-              data: {
-                raw_count,
-                result_count: resultCount,
-              },
-              job_status: counts,
-            },
-          ]);
+              raw_count,
+            });
 
-          const msg = `${queueName}: queue drained ${stringifyObjectMsg(
-            counts,
-          )}`;
-          telegramBot.sendMessage(msg);
-          console.log(msg);
+            const msg = `${queue.name}: queue drained ${stringifyObjectMsg({
+              job_queue_status: jobCounts,
+              pg_raw: raw_count,
+              mongo_updated: resultCount,
+            })}`;
+            telegramBot.sendMessage(msg);
+            console.log(msg);
+          }, 5000);
         },
       });
-
-      const counts = await queue.getJobCounts(
-        'active',
-        'completed',
-        'failed',
-        'wait',
-      );
-      const resultCount = await countDocuments({
-        crawl_id,
-        filter: {
-          pool_id: null,
-        },
-      });
-      cronLog.save([
-        <CronLog>{
-          job_name: CRON_TASK.balances,
-          crawl_id,
-          data: {
-            raw_count,
-            result_count: resultCount
-          },
-          job_count: jobs.length,
-          job_status: counts
-        },
-      ]);
 
       await addJobs(jobs);
 
-      const msg = `🚀 ${queueName} init: \n- jobs: ${jobs.length}`;
+      const { jobCounts, resultCount } = await saveLogs({
+        queue,
+        crawl_id,
+        raw_count,
+      });
+
+      const msg = `🚀 ${queue.name} init: ${stringifyObjectMsg({
+        num_of_jobs: jobs.length,
+        job_queue_status: jobCounts,
+        pg_raw: raw_count,
+        mongo_updated: resultCount,
+      })}`;
       console.log(msg);
       telegramBot.sendMessage(msg);
     }),
@@ -158,7 +160,7 @@ const triggerCronJobs = async (forced_crawl_id?) => {
 };
 
 const scheduleCronJobs = () => {
-  schedule.scheduleJob('*/20 * * * *', async function () {
+  schedule.scheduleJob('*/30 * * * *', async function () {
     await triggerCronJobs();
   });
 };
