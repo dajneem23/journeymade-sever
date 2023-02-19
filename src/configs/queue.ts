@@ -16,7 +16,7 @@ export const CronQueue = async ({
     connection,
     defaultJobOptions: {
       // The total number of attempts to try the job until it completes
-      attempts: 5,
+      attempts: 10,
       // Backoff setting for automatic retries if the job fails
       backoff: { type: 'fixed', delay: 10 * 1000 },
       removeOnComplete: {

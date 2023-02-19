@@ -7,8 +7,9 @@ import Container from 'typedi';
 import { CronLog } from '../cron_logs/types';
 import {
   countPortfolioBalancesByCrawlId,
-  getPortfolioBalancesByCrawlId
+  getPortfolioBalancesByCrawlId,
 } from '../debank/services';
+import { setIntervalLimited } from '../statistics/utils';
 import { countDocuments } from './services/countDocuments';
 import { savePortfolios } from './services/savePortfolios';
 import { AddressSymbolPortfolios, CRON_TASK, DATA_SOURCE } from './types';
@@ -17,7 +18,7 @@ import {
   cleanPrice,
   crawlIdAlias,
   prepareCronJobs,
-  toTimestamp
+  toTimestamp,
 } from './utils';
 
 const getPortfolioBalances = async ({ crawl_id, limit, offset }) => {
@@ -129,12 +130,23 @@ const triggerCronJobs = async (forced_crawl_id?) => {
             });
 
             const msg = `${queue.name}: queue drained ${stringifyObjectMsg({
+              num_of_jobs: jobs.length,
               job_queue_status: jobCounts,
               pg_raw: raw_count,
               mongo_updated: resultCount,
             })}`;
             telegramBot.sendMessage(msg);
             console.log(msg);
+
+            setIntervalLimited(
+              () => {
+                queue.getFailed().then(async (jobs) => {
+                  return await Promise.all(jobs.map((job) => job.retry()));
+                });
+              },
+              60 * 1000,
+              5,
+            );      
           }, 5000);
         },
       });

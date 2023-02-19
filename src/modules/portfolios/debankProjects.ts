@@ -10,6 +10,7 @@ import {
   countPortfolioProjectsByCrawlId,
   getPortfolioProjectsByCrawlId,
 } from '../debank/services';
+import { setIntervalLimited } from '../statistics/utils';
 import { countDocuments } from './services/countDocuments';
 import { savePortfolios } from './services/savePortfolios';
 import { AddressSymbolPortfolios, CRON_TASK, DATA_SOURCE } from './types';
@@ -99,7 +100,7 @@ const saveLogs = async ({ queue, raw_count, crawl_id }) => {
   const resultCount = await countDocuments({
     crawl_id,
     filter: {
-      pool_id: { '$ne': null },
+      pool_id: { $ne: null },
     },
   });
 
@@ -146,12 +147,23 @@ export const triggerCronJobs = async (forced_crawl_id?) => {
             });
 
             const msg = `${queue.name}: queue drained ${stringifyObjectMsg({
+              num_of_jobs: jobs.length,
               job_queue_status: jobCounts,
               pg_raw: raw_count,
               mongo_updated: resultCount,
             })}`;
             telegramBot.sendMessage(msg);
             console.log(msg);
+
+            setIntervalLimited(
+              () => {
+                queue.getFailed().then(async (jobs) => {
+                  return await Promise.all(jobs.map((job) => job.retry()));
+                });
+              },
+              60 * 1000,
+              5,
+            );
           }, 5000);
         },
       });
