@@ -73,7 +73,7 @@ const savePortfolioBalances = async ({ crawl_id, offset, limit }) => {
   return `${crawl_id}: ${offset} - count=${portfolios.length}`;
 };
 
-const saveLogs = async ({ queue, raw_count, crawl_id }) => {
+const saveLogs = async ({ queue, raw_count, crawl_id, job_count }) => {
   const jobCounts = await queue.getJobCounts(
     'active',
     'completed',
@@ -96,6 +96,7 @@ const saveLogs = async ({ queue, raw_count, crawl_id }) => {
         result_count: resultCount,
       },
       job_status: jobCounts,
+      job_count
     },
   ]);
 
@@ -127,6 +128,7 @@ const triggerCronJobs = async (forced_crawl_id?) => {
               queue,
               crawl_id,
               raw_count,
+              job_count: jobs.length
             });
 
             const msg = `${queue.name}: queue drained ${stringifyObjectMsg({
@@ -149,6 +151,7 @@ const triggerCronJobs = async (forced_crawl_id?) => {
                 queue,
                 crawl_id,
                 raw_count,
+                job_count: jobs.length
               });
             },
             300 * 1000,
@@ -163,6 +166,7 @@ const triggerCronJobs = async (forced_crawl_id?) => {
         queue,
         crawl_id,
         raw_count,
+        job_count: jobs.length
       });
 
       const msg = `🚀 ${queue.name} init: ${stringifyObjectMsg({
