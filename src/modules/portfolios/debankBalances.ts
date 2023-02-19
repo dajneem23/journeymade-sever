@@ -137,17 +137,23 @@ const triggerCronJobs = async (forced_crawl_id?) => {
             })}`;
             telegramBot.sendMessage(msg);
             console.log(msg);
+          }, 60000);
+          
+          setIntervalLimited(
+            () => {
+              queue.getFailed().then(async (jobs) => {
+                return await Promise.all(jobs.map((job) => job.retry()));
+              });
 
-            setIntervalLimited(
-              () => {
-                queue.getFailed().then(async (jobs) => {
-                  return await Promise.all(jobs.map((job) => job.retry()));
-                });
-              },
-              60 * 1000,
-              5,
-            );      
-          }, 5000);
+              saveLogs({
+                queue,
+                crawl_id,
+                raw_count,
+              });
+            },
+            300 * 1000,
+            5,
+          );      
         },
       });
 
