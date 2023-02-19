@@ -1,4 +1,5 @@
 import app from './configs/express';
+import ioRedis from './configs/ioredis';
 import logger from './configs/logger';
 import mongoLoader from './configs/mongoose';
 import pgLoader from './configs/postgres';
@@ -10,6 +11,8 @@ import { nodeEnv, port } from './configs/vars';
     await pgLoader();
 
     await mongoLoader();
+    
+    await ioRedis();
 
     initTelegramBot();
 

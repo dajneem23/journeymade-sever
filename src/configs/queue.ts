@@ -1,19 +1,14 @@
-import { stringifyObjectMsg } from '@/core/utils';
 import { CronJobProp } from '@/modules/portfolios/types';
 import { getJobId } from '@/modules/portfolios/utils';
 
 // worker queues running on the worker server
 // const Queue = require('bee-queue');
+import { ioRedisToken } from '@/configs/ioredis';
 import { Job, Queue, Worker } from 'bullmq';
-import IORedis from 'ioredis';
 import Container from 'typedi';
-import { telegramBotToken } from './telegram';
-
-const port = +process.env.REDIS_PORT;
-const host = process.env.REDIS_HOST;
-const connection = new IORedis(port, host);
 
 export const CronQueue = ({ name, job_handler, drained_callback = null }) => {
+  const connection = Container.get(ioRedisToken);
   const queue = new Queue(name, {
     connection,
     defaultJobOptions: {
@@ -54,7 +49,7 @@ export const CronQueue = ({ name, job_handler, drained_callback = null }) => {
     );
   });
 
-  worker.on('drained', async () => {    
+  worker.on('drained', async () => {
     drained_callback && drained_callback();
   });
 

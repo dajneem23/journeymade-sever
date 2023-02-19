@@ -4,12 +4,12 @@ import projects from './debankProjects';
 
 export default async () => {
   console.log('🚀 ~ nodeEnv', nodeEnv);
+  
+  balances.triggerCronJobs();
+  projects.triggerCronJobs();
 
-  if (nodeEnv !== 'production') {
-    balances.triggerCronJobs();
-    projects.triggerCronJobs();
-  } else {
+  if (nodeEnv === 'production') {
     balances.scheduleCronJobs();
     projects.scheduleCronJobs();
-  }
+  } 
 };
