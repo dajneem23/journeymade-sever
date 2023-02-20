@@ -9,12 +9,13 @@ export const CronQueue = async ({
   name,
   job_handler,
   drained_callback = null,
+  job_options = {}
 }) => {
   const connection = Container.get(ioRedisToken);
 
   const queue = new Queue(name, {
     connection,
-    defaultJobOptions: {
+    defaultJobOptions: Object.assign({
       // The total number of attempts to try the job until it completes
       attempts: 10,
       // Backoff setting for automatic retries if the job fails
@@ -26,7 +27,7 @@ export const CronQueue = async ({
       removeOnFail: {
         age: 15 * 60, // 15mins
       },
-    },
+    }, job_options),
   });
 
   const workers = await queue.getWorkers();

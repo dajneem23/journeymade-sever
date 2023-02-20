@@ -64,6 +64,14 @@ const init = async () => {
         '🚀 ~ file: index.ts:19 ~ drained_callback: ~ drained_callback',
       );
     },
+    job_options: {
+      // The total number of attempts to try the job until it completes
+      attempts: 3,
+      // Backoff setting for automatic retries if the job fails
+      backoff: { type: 'fixed', delay: 10 * 1000 },
+      removeOnComplete: true, 
+      removeOnFail: true
+    }
   });
 
   const jobs = [];
