@@ -1,5 +1,6 @@
 import { groupBy } from '@/core/utils';
 import { getResults } from '@/modules/debank/services/getResults';
+import { getBySymbol } from '@/modules/statistics/services/getBySymbol';
 import express from 'express';
 const router = express.Router();
 
@@ -52,6 +53,29 @@ router.get('/top-holders-segments', async function (req, res) {
   }
 
   const groups = groupBy(result, '_key');
+
+  res.send(groups);
+});
+
+router.get('/top-holders-statistics', async function (req, res) {
+  const { symbol } = req.query || {};
+  if (!symbol) {
+    return res.status(400).send('Invalid query');
+  }  
+
+  const rows = await getBySymbol({
+    symbol,
+  })
+ 
+  const result = rows.map((row: any) => {
+    return {
+      ...row,
+      holders: null
+    };
+  });
+
+
+  const groups = groupBy(result, 'crawl_id');
 
   res.send(groups);
 });
