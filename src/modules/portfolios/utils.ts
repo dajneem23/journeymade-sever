@@ -54,7 +54,9 @@ export const crawlIdAlias = (id) => {
 };
 
 export const getJobId = ({ crawl_id, offset, limit }) => {
-  return `${crawl_id}:${offset}-${limit}`;
+  if (crawl_id) return `${crawl_id}:${offset}-${limit}`;
+
+  return `${offset}-${limit}`;
 };
 
 export const prepareCronJobs = async ({

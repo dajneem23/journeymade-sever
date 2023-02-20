@@ -7,3 +7,5 @@ redis-cli KEYS "bull:debank:*" | xargs redis-cli DEL
 redis-cli KEYS "bull:debank:projects*" | xargs redis-cli DEL
 redis-cli KEYS "bull:debank:balances*" | xargs redis-cli DEL
 
+
+redis-cli KEYS "bull:nansen:*" | xargs redis-cli DEL

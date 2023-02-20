@@ -1,3 +1,4 @@
+import { nodeEnv } from '@/configs/vars';
 import mongoose, { Schema } from 'mongoose';
 
 /**
@@ -53,8 +54,9 @@ const topHoldersSegmentsSchema = new mongoose.Schema(
   },
 );
 
+const name = `top-holders-segments${nodeEnv === 'development' ? '-dev' : ''}`;
 const model  = mongoose.connection
 .useDb('onchain')
-.model('top-holders-segments', topHoldersSegmentsSchema, 'top-holders-segments');
+.model(name, topHoldersSegmentsSchema, name);
 
 export default model;

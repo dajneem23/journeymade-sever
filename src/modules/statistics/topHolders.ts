@@ -3,8 +3,7 @@ import { groupBy, sortArray, sumArrayByField } from '@/core/utils';
 import dayjs from 'dayjs';
 import { getTopHolders } from '../debank/services';
 import {
-  getPortfolios,
-  getPortfoliosByWalletAddress,
+  getPortfoliosByWalletAddress
 } from '../portfolios/services/getPortfolios';
 import { Holder, SegmentIDType, SegmentOptions, SegmentResult } from './types';
 import { percentage } from './utils';
@@ -14,7 +13,7 @@ const getHotWallets = (holders) => {
   if (list.length === 0) return;
 
   return sortArray(list, 'abs_percentage_change', 'desc')
-    .filter((i) => i.abs_percentage_change >= 10)
+    .filter((i) => i.abs_percentage_change >= 5)
     .map((h) => {
       return {
         wallet_address: h.wallet_address,
@@ -75,43 +74,6 @@ const updateHolders = ({ current, prev, symbol }) => {
     holders,
     hot_wallets,
   };
-
-  // const { holders } = item;
-  //     const { holders: prevHolders } = history[index + 1];
-  //     holders.map((holder) => {
-  //       const found = prevHolders.find(
-  //         ({ user_address }) => user_address === holder.user_address,
-  //       );
-  //       if (found) {
-  //         holder.percentage_change = getChangedPercentage(
-  //           holder,
-  //           found,
-  //           'amount',
-  //         );
-
-  //         if (holder.percentage_change !== 0) {
-  //           holder?.portfolios.map((pf) => {
-  //             const foundByChain = found.portfolios?.find(
-  //               ({ chain }) => chain === pf.chain,
-  //             );
-  //             if (foundByChain) {
-  //               pf.percentage_change = getChangedPercentage(
-  //                 pf,
-  //                 foundByChain,
-  //                 'amount',
-  //               );
-  //             } else {
-  //               pf.just_join = true;
-  //             }
-  //           });
-  //         }
-  //       } else {
-  //         holder.is_newbie = true;
-  //       }
-  //     });
-
-  //     item.hot_wallets = getHotWallets(holders);
-  //     item.newbie_wallets = getNewbieWallets(holders);
 };
 
 export const getTopHoldersBySymbol = async ({

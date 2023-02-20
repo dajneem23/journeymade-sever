@@ -16,17 +16,10 @@ import { nodeEnv, port } from './configs/vars';
 
     initTelegramBot();
 
-    // if (env.MODE == 'production') {
-    //   await (await import('./loaders/telegram.loader')).default();
-    // }
-
-    // // Caching (Redis)
-    // await (await import('./loaders/redis.loader')).default();
-    // (await import('./loaders/worker.loader')).default();
-    // (await import('./modules/debank')).default();
+    (await import('./modules/wallet_book')).default();
 
     (await import('./modules/portfolios')).default();
-    
+
     (await import('./modules/statistics')).default();
 
     // listen to requests
