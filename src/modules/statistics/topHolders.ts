@@ -289,8 +289,6 @@ const triggerCronJobs = async () => {
   });
 
   await addJobs(jobs);
-
-  return;
 };
 
 const scheduleCronJobs = () => {
