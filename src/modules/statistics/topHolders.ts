@@ -237,7 +237,7 @@ const getCrawlIds = async () => {
         previous: ids[i + 1],
       });
   }
-  return ranges.slice(0, 3);
+  return ranges;
 };
 
 /**
