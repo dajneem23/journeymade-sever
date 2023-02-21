@@ -298,83 +298,85 @@ const triggerCronJobs = async (forced_crawl_id?) => {
   let crawlIds = crawlIdOptions.slice(0, 1);
   if (forced_crawl_id) {
     crawlIds = crawlIdOptions.filter(
-      ({ current }) => +current === +forced_crawl_id,
+      ({ current }) => current == +forced_crawl_id,
     );
-  } 
+  }
 
-  await Promise.all(crawlIds.map(async (cid) => {
-  const queueName = `top-holders:${cid.current}`;
-  const { queue, addJobs } = await CronQueue({
-      name: queueName,
-      job_handler: async ({ data }) => {
-        return await jobHandler(data);
-      },
-      drained_callback: async () => {
-        setTimeout(async () => {
-          const { jobCounts, resultCount } = await saveLogs({
-            queue,
-            crawl_id: cid.current,
-            raw_count: null,
-            job_count: jobs.length,
-          });
-  
-          const msg = `${queue.name}: queue drained ${stringifyObjectMsg({
-            num_of_jobs: jobs.length,
-            job_queue_status: jobCounts,
-            pg_raw: null,
-            mongo_updated: resultCount,
-          })}`;
-          telegramBot.sendMessage(msg);
-          console.log(msg);
-        }, 60000);
-      },
-      job_options: {
-        // The total number of attempts to try the job until it completes
-        attempts: 3,
-        // Backoff setting for automatic retries if the job fails
-        backoff: { type: 'fixed', delay: 10 * 1000 },
-        removeOnComplete: {
-          age: 60 * 60, // 1h
+  await Promise.all(
+    crawlIds.map(async (cid) => {
+      const queueName = `top-holders:${cid.current}`;
+      const { queue, addJobs } = await CronQueue({
+        name: queueName,
+        job_handler: async ({ data }) => {
+          return await jobHandler(data);
         },
-        removeOnFail: true,
-      },
-    });
+        drained_callback: async () => {
+          setTimeout(async () => {
+            const { jobCounts, resultCount } = await saveLogs({
+              queue,
+              crawl_id: cid.current,
+              raw_count: null,
+              job_count: jobs.length,
+            });
 
-    const jobs = [];
+            const msg = `${queue.name}: queue drained ${stringifyObjectMsg({
+              num_of_jobs: jobs.length,
+              job_queue_status: jobCounts,
+              pg_raw: null,
+              mongo_updated: resultCount,
+            })}`;
+            telegramBot.sendMessage(msg);
+            console.log(msg);
+          }, 60000);
+        },
+        job_options: {
+          // The total number of attempts to try the job until it completes
+          attempts: 3,
+          // Backoff setting for automatic retries if the job fails
+          backoff: { type: 'fixed', delay: 10 * 1000 },
+          removeOnComplete: {
+            age: 60 * 60, // 1h
+          },
+          removeOnFail: true,
+        },
+      });
 
-    symbols.forEach((symbol) => {
-      SegmentOptions.forEach((segment) => {
-        jobs.push({
-          symbol,
-          segment,
-          crawl_ids: cid,
+      const jobs = [];
 
-          // for jobid
-          crawl_id: `${cid.current}:${symbol}`,
-          offset: segment.offset,
-          limit: segment.limit,
+      symbols.forEach((symbol) => {
+        SegmentOptions.forEach((segment) => {
+          jobs.push({
+            symbol,
+            segment,
+            crawl_ids: cid,
+
+            // for jobid
+            crawl_id: `${cid.current}:${symbol}`,
+            offset: segment.offset,
+            limit: segment.limit,
+          });
         });
       });
-    });
 
-    await addJobs(jobs);  
+      await addJobs(jobs);
 
-    const { jobCounts, resultCount } = await saveLogs({
-      queue,
-      crawl_id: cid.current,
-      raw_count: null,
-      job_count: jobs.length,
-    });
-  
-    const msg = `🚀 ${queue.name} init: ${stringifyObjectMsg({
-      num_of_jobs: jobs.length,
-      job_queue_status: jobCounts,
-      pg_raw: null,
-      mongo_updated: resultCount,
-    })}`;
-    console.log(msg);
-    telegramBot.sendMessage(msg);
-  }));
+      const { jobCounts, resultCount } = await saveLogs({
+        queue,
+        crawl_id: cid.current,
+        raw_count: null,
+        job_count: jobs.length,
+      });
+
+      const msg = `🚀 ${queue.name} init: ${stringifyObjectMsg({
+        num_of_jobs: jobs.length,
+        job_queue_status: jobCounts,
+        pg_raw: null,
+        mongo_updated: resultCount,
+      })}`;
+      console.log(msg);
+      telegramBot.sendMessage(msg);
+    }),
+  );
 };
 
 const scheduleCronJobs = () => {

@@ -58,19 +58,21 @@ router.get('/top-holders-segments', async function (req, res) {
 });
 
 router.get('/top-holders-statistics', async function (req, res) {
-  const { symbol } = req.query || {};
-  if (!symbol) {
+  const { symbol, cid } = req.query || {};
+  if (!symbol || !cid) {
     return res.status(400).send('Invalid query');
-  }  
+  }
 
   const rows = await getBySymbol({
     symbol,
+    crawl_id: cid
   })
  
   const result = rows.map((row: any) => {
     return {
       ...row,
-      holders: null
+      holders: null,
+      hot_wallets: cid ? row.hot_wallets : null,
     };
   });
 
