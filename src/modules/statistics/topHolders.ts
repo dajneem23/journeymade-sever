@@ -1,12 +1,23 @@
 import { CronQueue } from '@/configs/queue';
-import { groupBy, sortArray, stringifyObjectMsg, sumArrayByField } from '@/core/utils';
+import {
+  groupBy,
+  sortArray,
+  stringifyObjectMsg,
+  sumArrayByField,
+} from '@/core/utils';
 import schedule from 'node-schedule';
 import { getCoinList, getTopHolders } from '../debank/services';
 import { getPortfoliosByWalletAddress } from '../portfolios/services/getPortfolios';
 import { getAddressBookByAddresses } from '../wallet_book/services/getByAddress';
 import { countDocuments } from './services/countDocuments';
 import { saveTopHoldersStatistics } from './services/saveTopHoldersStatistics';
-import { CRON_TASK, Holder, Output, SegmentOptions, SegmentResult } from './types';
+import {
+  CRON_TASK,
+  Holder,
+  Output,
+  SegmentOptions,
+  SegmentResult,
+} from './types';
 import { percentage } from './utils';
 import cronLog from '@/modules/cron_logs';
 import { CronLog } from '../cron_logs/types';
@@ -264,7 +275,7 @@ const saveLogs = async ({ queue, raw_count, crawl_id, job_count }) => {
         result_count: resultCount,
       },
       job_status: jobCounts,
-      job_count
+      job_count,
     },
   ]);
 
@@ -281,54 +292,57 @@ const saveLogs = async ({ queue, raw_count, crawl_id, job_count }) => {
  */
 const triggerCronJobs = async (forced_crawl_id?) => {
   const telegramBot = Container.get(telegramBotToken);
-  const queueName = 'top-holders';
   const symbols = await getCoinList();
-  
+
   const crawlIdOptions = await getCrawlIds();
   let crawlIds = crawlIdOptions.slice(0, 1);
   if (forced_crawl_id) {
-    crawlIds = crawlIdOptions.filter(({ current }) => current === +forced_crawl_id);
+    crawlIds = crawlIdOptions.filter(
+      ({ current }) => +current === +forced_crawl_id,
+    );
   } 
 
+  await Promise.all(crawlIds.map(async (cid) => {
+  const queueName = `top-holders:${cid.current}`;
   const { queue, addJobs } = await CronQueue({
-    name: queueName,
-    job_handler: async ({ data }) => {
-      return await jobHandler(data);
-    },
-    drained_callback: async () => {
-      setTimeout(async () => {
-        const { jobCounts, resultCount } = await saveLogs({
-          queue,
-          crawl_id: crawlIds.map(({ current }) => current).join(','),
-          raw_count: null,
-          job_count: jobs.length
-        });
-
-        const msg = `${queue.name}: queue drained ${stringifyObjectMsg({
-          num_of_jobs: jobs.length,
-          job_queue_status: jobCounts,
-          pg_raw: null,
-          mongo_updated: resultCount,
-        })}`;
-        telegramBot.sendMessage(msg);
-        console.log(msg);
-      }, 60000);
-    },
-    job_options: {
-      // The total number of attempts to try the job until it completes
-      attempts: 3,
-      // Backoff setting for automatic retries if the job fails
-      backoff: { type: 'fixed', delay: 10 * 1000 },
-      removeOnComplete: {
-        age: 60 * 60, // 1h
+      name: queueName,
+      job_handler: async ({ data }) => {
+        return await jobHandler(data);
       },
-      removeOnFail: true,
-    },
-  });
+      drained_callback: async () => {
+        setTimeout(async () => {
+          const { jobCounts, resultCount } = await saveLogs({
+            queue,
+            crawl_id: cid.current,
+            raw_count: null,
+            job_count: jobs.length,
+          });
+  
+          const msg = `${queue.name}: queue drained ${stringifyObjectMsg({
+            num_of_jobs: jobs.length,
+            job_queue_status: jobCounts,
+            pg_raw: null,
+            mongo_updated: resultCount,
+          })}`;
+          telegramBot.sendMessage(msg);
+          console.log(msg);
+        }, 60000);
+      },
+      job_options: {
+        // The total number of attempts to try the job until it completes
+        attempts: 3,
+        // Backoff setting for automatic retries if the job fails
+        backoff: { type: 'fixed', delay: 10 * 1000 },
+        removeOnComplete: {
+          age: 60 * 60, // 1h
+        },
+        removeOnFail: true,
+      },
+    });
 
-  const jobs = [];
-  symbols.forEach((symbol) => {
-    crawlIds.forEach((cid) => {
+    const jobs = [];
+
+    symbols.forEach((symbol) => {
       SegmentOptions.forEach((segment) => {
         jobs.push({
           symbol,
@@ -342,25 +356,25 @@ const triggerCronJobs = async (forced_crawl_id?) => {
         });
       });
     });
-  });
 
-  await addJobs(jobs);
+    await addJobs(jobs);  
 
-  const { jobCounts, resultCount } = await saveLogs({
-    queue,
-    crawl_id: crawlIds.map(({ current }) => current).join(','),
-    raw_count: null,
-    job_count: jobs.length
-  });
-
-  const msg = `🚀 ${queue.name} init: ${stringifyObjectMsg({
-    num_of_jobs: jobs.length,
-    job_queue_status: jobCounts,
-    pg_raw: null,
-    mongo_updated: resultCount,
-  })}`;
-  console.log(msg);
-  telegramBot.sendMessage(msg);
+    const { jobCounts, resultCount } = await saveLogs({
+      queue,
+      crawl_id: cid.current,
+      raw_count: null,
+      job_count: jobs.length,
+    });
+  
+    const msg = `🚀 ${queue.name} init: ${stringifyObjectMsg({
+      num_of_jobs: jobs.length,
+      job_queue_status: jobCounts,
+      pg_raw: null,
+      mongo_updated: resultCount,
+    })}`;
+    console.log(msg);
+    telegramBot.sendMessage(msg);
+  }));
 };
 
 const scheduleCronJobs = () => {
