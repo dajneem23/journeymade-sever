@@ -59,7 +59,7 @@ router.get('/top-holders-segments', async function (req, res) {
 
 router.get('/top-holders-statistics', async function (req, res) {
   const { symbol, cid } = req.query || {};
-  if (!symbol || !cid) {
+  if (!symbol && !cid) {
     return res.status(400).send('Invalid query');
   }
 
