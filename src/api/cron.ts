@@ -1,5 +1,6 @@
 import balances from '@/modules/portfolios/debankBalances';
 import projects from '@/modules/portfolios/debankProjects';
+import topHolders from '@/modules/statistics/topHolders';
 import cronLog from '@/modules/cron_logs';
 import express from 'express';
 
@@ -51,6 +52,8 @@ router.get('/trigger', (req, res) => {
     balances.triggerCronJobs(crawl_id);
   } else if (type.includes('projects')) {
     projects.triggerCronJobs(crawl_id);
+  } else if (type.includes('top-holders')) {
+    topHolders.triggerCronJobs(crawl_id);
   }
 
   res.send(`Accept: ${type}-${crawl_id}`);

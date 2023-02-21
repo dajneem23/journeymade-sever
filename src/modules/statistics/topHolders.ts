@@ -1,5 +1,5 @@
 import { CronQueue } from '@/configs/queue';
-import { groupBy, sumArrayByField } from '@/core/utils';
+import { groupBy, sortArray, sumArrayByField } from '@/core/utils';
 import cronLog from '@/modules/cron_logs';
 import schedule from 'node-schedule';
 import { getCoinList, getTopHolders } from '../debank/services';
@@ -23,14 +23,14 @@ const getHotWallets = async (holders) => {
     });
 
     if (found) {
-      console.log('found', found)
+      console.log('found', found);
     }
 
-    const res = { address }
+    const res = { address };
     if (found?.tags?.length > 0) res['tags'] = found?.tags?.join(',');
     if (found?.labels?.length > 0) res['labels'] = found?.labels?.join(',');
 
-    return res
+    return res;
   });
 
   return result;
@@ -91,10 +91,12 @@ const updateHolders = async ({ current, prev }) => {
     };
   });
 
-  const hot_wallets = await getHotWallets(holders);
+  const sortedByAmount = sortArray(holders, 'amount', 'desc');
+
+  const hot_wallets = await getHotWallets(sortedByAmount);
 
   return {
-    holders,
+    holders: sortedByAmount,
     hot_wallets,
   };
 };
@@ -235,7 +237,7 @@ const getCrawlIds = async () => {
         previous: ids[i + 1],
       });
   }
-  return ranges.slice(0, 1);
+  return ranges.slice(0, 3);
 };
 
 /**
@@ -243,7 +245,7 @@ const getCrawlIds = async () => {
  * 2. Get segment & group
  * 3. Process data foreach segment/group
  */
-const triggerCronJobs = async () => {
+const triggerCronJobs = async (forced_crawl_id?) => {
   const queueName = 'top-holders';
   const symbols = await getCoinList();
   const crawlIds = await getCrawlIds();
@@ -272,7 +274,12 @@ const triggerCronJobs = async () => {
 
   const jobs = [];
   symbols.forEach((symbol) => {
-    crawlIds.forEach((cid) => {
+    let cids = crawlIds.slice(0, 1)
+    if (forced_crawl_id) {
+      cids = crawlIds.filter(({ current }) => current === forced_crawl_id);
+    } 
+
+    cids.forEach((cid) => {
       SegmentOptions.forEach((segment) => {
         jobs.push({
           symbol,
