@@ -1,13 +1,15 @@
 import { CronQueue } from '@/configs/queue';
 import { groupBy, sortArray, sumArrayByField } from '@/core/utils';
-import cronLog from '@/modules/cron_logs';
 import schedule from 'node-schedule';
 import { getCoinList, getTopHolders } from '../debank/services';
 import { getPortfoliosByWalletAddress } from '../portfolios/services/getPortfolios';
 import { getAddressBookByAddresses } from '../wallet_book/services/getByAddress';
+import { countDocuments } from './services/countDocuments';
 import { saveTopHoldersStatistics } from './services/saveTopHoldersStatistics';
-import { Holder, Output, SegmentOptions, SegmentResult } from './types';
+import { CRON_TASK, Holder, Output, SegmentOptions, SegmentResult } from './types';
 import { percentage } from './utils';
+import cronLog from '@/modules/cron_logs';
+import { CronLog } from '../cron_logs/types';
 
 const getHotWallets = async (holders) => {
   const addresses = holders
@@ -240,6 +242,36 @@ const getCrawlIds = async () => {
   return ranges;
 };
 
+const saveLogs = async ({ queue, raw_count, crawl_id, job_count }) => {
+  const jobCounts = await queue.getJobCounts(
+    'active',
+    'completed',
+    'failed',
+    'wait',
+  );
+  const resultCount = await countDocuments({
+    crawl_id,
+  });
+
+  cronLog.save([
+    <CronLog>{
+      job_name: CRON_TASK.top_holders,
+      crawl_id,
+      data: {
+        raw_count,
+        result_count: resultCount,
+      },
+      job_status: jobCounts,
+      job_count
+    },
+  ]);
+
+  return {
+    jobCounts,
+    resultCount,
+  };
+};
+
 /**
  * 1. Get symbol list
  * 2. Get segment & group
@@ -276,7 +308,7 @@ const triggerCronJobs = async (forced_crawl_id?) => {
   symbols.forEach((symbol) => {
     let cids = crawlIds.slice(0, 1)
     if (forced_crawl_id) {
-      cids = crawlIds.filter(({ current }) => current === forced_crawl_id);
+      cids = crawlIds.filter(({ current }) => current === +forced_crawl_id);
     } 
 
     cids.forEach((cid) => {

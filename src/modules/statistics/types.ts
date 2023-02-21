@@ -144,3 +144,7 @@ export type Output = {
   from_time: number,
   to_time: number,
 } & (SegmentResult | GroupResult)
+
+export enum CRON_TASK {
+  top_holders = 'statistics:top_holders',
+}
