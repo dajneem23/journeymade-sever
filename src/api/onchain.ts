@@ -1,6 +1,7 @@
 import { groupBy } from '@/core/utils';
 import { getResults } from '@/modules/debank/services/getResults';
 import { getBySymbol } from '@/modules/statistics/services/getBySymbol';
+import { getSymbols } from '@/modules/statistics/services/getSymbols';
 import express from 'express';
 const router = express.Router();
 
@@ -65,9 +66,9 @@ router.get('/top-holders-statistics', async function (req, res) {
 
   const rows = await getBySymbol({
     symbol,
-    crawl_id: cid
-  })
- 
+    crawl_id: cid,
+  });
+
   const result = rows.map((row: any) => {
     return {
       ...row,
@@ -76,10 +77,18 @@ router.get('/top-holders-statistics', async function (req, res) {
     };
   });
 
-
   const groups = groupBy(result, 'crawl_id');
 
   res.send(groups);
+});
+
+router.get('/symbols', async function (req, res) {
+  try {
+    const rows = await getSymbols();
+    res.send(rows);
+  } catch (e) {
+    return res.status(500).send(e);
+  }
 });
 
 export default router;
