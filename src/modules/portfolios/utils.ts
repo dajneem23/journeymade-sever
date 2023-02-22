@@ -68,7 +68,8 @@ export const prepareCronJobs = async ({
 
   let ids = crawlIds;
   if (forced_crawl_id) {
-    ids = crawlIds.filter(({ crawl_id }) => crawl_id === forced_crawl_id);
+    // ids = crawlIds.filter(({ crawl_id }) => crawl_id === forced_crawl_id);
+    ids = [{ crawl_id: +forced_crawl_id }];
   }
 
   const jobs = await Promise.all(
