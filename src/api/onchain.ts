@@ -73,7 +73,7 @@ router.get('/top-holders-statistics', async function (req, res) {
     return {
       ...row,
       holders: null,
-      hot_wallets: cid ? row.hot_wallets : null,
+      // hot_wallets: cid ? row.hot_wallets : null,
     };
   });
 

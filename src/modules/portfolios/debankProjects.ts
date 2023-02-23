@@ -10,7 +10,7 @@ import {
   countPortfolioProjectsByCrawlId,
   getPortfolioProjectsByCrawlId,
 } from '../debank/services';
-import { setIntervalLimited } from '../statistics/utils';
+import setLimitedInterval from '../statistics/utils/setLimitedInterval';
 import { countDocuments } from './services/countDocuments';
 import { savePortfolios } from './services/savePortfolios';
 import { AddressSymbolPortfolios, CRON_TASK, DATA_SOURCE } from './types';
@@ -113,7 +113,7 @@ const saveLogs = async ({ queue, raw_count, crawl_id, job_count }) => {
         result_count: resultCount,
       },
       job_status: jobCounts,
-      job_count
+      job_count,
     },
   ]);
 
@@ -145,7 +145,7 @@ export const triggerCronJobs = async (forced_crawl_id?) => {
               queue,
               crawl_id,
               raw_count,
-              job_count: jobs.length
+              job_count: jobs.length,
             });
 
             const msg = `${queue.name}: queue drained ${stringifyObjectMsg({
@@ -155,10 +155,10 @@ export const triggerCronJobs = async (forced_crawl_id?) => {
               mongo_updated: resultCount,
             })}`;
             telegramBot.sendMessage(msg);
-            console.log(msg);            
+            console.log(msg);
           }, 60000);
 
-          setIntervalLimited(
+          setLimitedInterval(
             () => {
               queue.getFailed().then(async (jobs) => {
                 return await Promise.all(jobs.map((job) => job.retry()));
@@ -168,7 +168,7 @@ export const triggerCronJobs = async (forced_crawl_id?) => {
                 queue,
                 crawl_id,
                 raw_count,
-                job_count: jobs.length
+                job_count: jobs.length,
               });
             },
             300 * 1000,
@@ -183,7 +183,7 @@ export const triggerCronJobs = async (forced_crawl_id?) => {
         queue,
         crawl_id,
         raw_count,
-        job_count: jobs.length
+        job_count: jobs.length,
       });
 
       const msg = `🚀 ${queue.name} init: ${stringifyObjectMsg({

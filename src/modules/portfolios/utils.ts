@@ -13,7 +13,7 @@ export const cleanPrice = (price) => {
   return parseFloat(Number(price).toFixed(3));
 };
 
-export const prepareCrawlIds = () => {
+export const prepareCrawlIds = (limit = 10) => {
   const duration = 3; // 3 hours
   const now = dayjs().utc();
 
@@ -34,7 +34,7 @@ export const prepareCrawlIds = () => {
     });
   }
 
-  return ids.slice(0, 10);
+  return ids.slice(0, limit);
 };
 
 export const prepareOffsets = (max, limit) => {

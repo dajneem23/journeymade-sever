@@ -15,52 +15,18 @@ const schema = new mongoose.Schema(
     },
     id: {
       type: String,
-    },
-    from_time: {
-      type: Number,
-    },
-    to_time: {
-      type: Number,
-    },
+    },    
     count: {
       type: Number,
     },
-    min_price: {
-      type: Number,
-    },
-    max_price: {
-      type: Number,
-    },
-    amount: {
-      type: Number,
-    },
-    percentage_change: {
-      type: Number
-    },
-    abs_percentage_change: {
-      type: Number
-    },
-
-    usd_value: {
-      type: Number,
-    },
-    usd_change: {
-      type: Number,
-    },
-    usd_percentage_change: {
-      type: Number,
-    },
-    abs_usd_percentage_change: {
-      type: Number,
-    },
-    holders: {
+    statistics: {
       type: [
         {
           type: Schema.Types.Mixed,
         },
       ],
     },
-    hot_wallets: {
+    holders: {
       type: [
         {
           type: Schema.Types.Mixed,

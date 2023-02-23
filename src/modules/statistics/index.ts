@@ -1,5 +1,5 @@
 import { nodeEnv } from '@/configs/vars';
-import topHolders from './topHolders';
+import topHolders from './top_holders';
 
 export default async () => {
   console.log('🚀 ~ nodeEnv', nodeEnv);

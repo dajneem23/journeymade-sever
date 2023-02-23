@@ -1,7 +1,7 @@
 import model from '@/models/top-holders-statistics.model';
-import { Output } from '../types';
+import { GroupHolders } from '../types';
 
-export const saveTopHoldersStatistics = async (data: Output) => {
+export const saveTopHoldersStatistics = async (data: GroupHolders) => {
   await model.findOneAndUpdate(
     {
       symbol: data.symbol,

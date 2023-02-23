@@ -16,7 +16,7 @@ import { nodeEnv, port } from './configs/vars';
 
     initTelegramBot();
 
-    (await import('./modules/wallet_book')).default();
+    // (await import('./modules/wallet_book')).default();
 
     (await import('./modules/portfolios')).default();
 
