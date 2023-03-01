@@ -8,6 +8,8 @@ import { nodeEnv, port } from './configs/vars';
 
 (async () => {
   try {
+    // (await import('./modules/crawler')).default();
+
     await pgLoader();
 
     await mongoLoader();

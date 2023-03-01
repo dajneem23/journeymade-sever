@@ -1,8 +1,8 @@
 import { getTopHolders } from '@/modules/debank/services';
 import { getPortfoliosByWalletAddress } from '@/modules/portfolios/services/getPortfolios';
-import prepareCrawlIds from '../utils/prepareCrawlIds';
+import prepareCrawlIds from '../../utils/prepareCrawlIds';
 import getStatistics from './getStatistics';
-import { GroupHolders } from '../types';
+import { GroupHolders } from '../../types';
 
 const getUniqueAddressList = async ({
   id,

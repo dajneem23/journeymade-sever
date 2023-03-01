@@ -1,0 +1,31 @@
+import Container from 'typedi';
+import { pgPoolToken } from '@/configs/postgres';
+import logger from '@/configs/logger';
+import { maxUSDValue, minUSDValue } from '@/configs/vars';
+
+export const getDistinctAddressFromBalances = async ({ crawl_id }) => {
+  const pgPool = Container.get(pgPoolToken);
+  let result = [];
+  try {
+    const { rows } = await pgPool.query(
+      `
+      SELECT user_address
+      FROM "debank-portfolio-balances-${crawl_id}"
+      GROUP BY user_address
+      HAVING sum(usd_value) > ${minUSDValue}
+      AND sum(usd_value) < ${maxUSDValue}
+      ORDER BY sum(usd_value) DESC
+      `,
+    );
+    result = rows;
+  } catch (error) {
+    logger.error(
+      'error',
+      '[getDistinctAddressFromBalances:error]',
+      JSON.stringify(error),
+    );
+    throw error;
+  }
+
+  return result;
+};

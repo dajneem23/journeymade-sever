@@ -1,0 +1,30 @@
+import logger from '@/configs/logger';
+import { pgPoolToken } from '@/configs/postgres';
+import Container from 'typedi';
+
+export const getPortfolioBalances = async ({
+  crawl_id,
+  addresses = [],
+}) => {
+  const pgPool = Container.get(pgPoolToken);
+  let result = [];
+  try {
+    const { rows } = await pgPool.query(
+      `
+      SELECT user_address, updated_at, is_stable_coin, amount, chain, price, crawl_id, crawl_time, symbol
+      FROM "debank-portfolio-balances-${crawl_id}"
+      WHERE user_address in (${addresses.map((a) => `'${a}'`).join(',')})
+      `,
+    );
+    result = rows;
+  } catch (error) {
+    logger.error(
+      'error',
+      '[getPortfolioBalances:error]',
+      JSON.stringify(error),
+    );
+    throw error;
+  }
+
+  return result;
+};

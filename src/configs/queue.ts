@@ -1,33 +1,47 @@
-import { CronJobProp } from '@/modules/portfolios/types';
-import { getJobId } from '@/modules/portfolios/utils';
-
 import { ioRedisToken } from '@/configs/ioredis';
 import { Job, Queue, Worker } from 'bullmq';
 import Container from 'typedi';
+
+interface CronJobProp {
+  id?: string;
+  crawl_id: number;
+  offset: number;
+  limit: number;
+}
+
+export const getJobId = ({ id = '', crawl_id, offset, limit }) => {
+  if (id) return id;
+  if (crawl_id) return `${crawl_id}:${offset}-${limit}`;
+
+  return `${offset}-${limit}`;
+};
 
 export const CronQueue = async ({
   name,
   job_handler,
   drained_callback = null,
-  job_options = {}
+  job_options = {},
 }) => {
   const connection = Container.get(ioRedisToken);
 
   const queue = new Queue(name, {
     connection,
-    defaultJobOptions: Object.assign({
-      // The total number of attempts to try the job until it completes
-      attempts: 10,
-      // Backoff setting for automatic retries if the job fails
-      backoff: { type: 'fixed', delay: 10 * 1000 },
-      removeOnComplete: {
-        // 6 hour
-        age: 60 * 60 * 6,
+    defaultJobOptions: Object.assign(
+      {
+        // The total number of attempts to try the job until it completes
+        attempts: 10,
+        // Backoff setting for automatic retries if the job fails
+        backoff: { type: 'fixed', delay: 10 * 1000 },
+        removeOnComplete: {
+          // 6 hour
+          age: 60 * 60 * 6,
+        },
+        removeOnFail: {
+          age: 15 * 60, // 15mins
+        },
       },
-      removeOnFail: {
-        age: 15 * 60, // 15mins
-      },
-    }, job_options),
+      job_options,
+    ),
   });
 
   const workers = await queue.getWorkers();
@@ -35,7 +49,7 @@ export const CronQueue = async ({
   if (!found) {
     const worker = new Worker(name, job_handler, {
       connection,
-      concurrency: 120,
+      concurrency: 30,
     });
 
     worker.on('completed', (job: Job) => {

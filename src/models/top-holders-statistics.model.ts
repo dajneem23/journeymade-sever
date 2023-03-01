@@ -7,16 +7,19 @@ import mongoose, { Schema } from 'mongoose';
  */
 const schema = new mongoose.Schema(
   {
-    symbol: {
-      type: String,
-    },
-    crawl_id: {
-      type: Number,
-    },
     id: {
       type: String,
     },    
-    count: {
+    symbol: {
+      type: String,
+    },
+    cid: {
+      type: Number,
+    },  
+    creator: {
+      type: String,
+    },
+    address_count: {
       type: Number,
     },
     statistics: {
@@ -26,7 +29,7 @@ const schema = new mongoose.Schema(
         },
       ],
     },
-    holders: {
+    wallets: {
       type: [
         {
           type: Schema.Types.Mixed,
@@ -45,8 +48,6 @@ const schema = new mongoose.Schema(
 
 schema.index(
   {
-    symbol: 1,
-    crawl_id: -1,
     id: 1
   },
   {
@@ -57,7 +58,7 @@ schema.index(
 schema.index(
   {
     symbol: 1,
-    crawl_id: -1,
+    cid: -1,
   },
   {
     background: true,
@@ -66,7 +67,7 @@ schema.index(
 
 schema.index(
   {
-    crawl_id: -1,
+    cid: -1,
   },
   {
     background: true,

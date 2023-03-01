@@ -1,6 +1,6 @@
 import { sumArrayByField } from '@/core/utils';
-import { avgValue } from '../utils/avgValue';
-import calculatePercentage from '../utils/calculatePercentage';
+import { avgValue } from '../../utils/avgValue';
+import calculatePercentage from '../../utils/calculatePercentage';
 
 export default function ({ portfolios, crawl_ids, filter: { address = '' } }) {
   const period0Raw = address

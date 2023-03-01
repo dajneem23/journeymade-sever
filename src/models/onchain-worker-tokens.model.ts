@@ -5,23 +5,16 @@ import mongoose, { Schema } from 'mongoose';
  * @private
  */
 const schema = new mongoose.Schema(
-  {
-    _cid: {
-      type: String,
-      index: true,
-    },
-    usd_value: {
-      type: Number,
-      index: true,
-    },
+  {  
   },
   {
     versionKey: false,
+    strict: false
   },
 );
 
 const db = 'onchain';
-const name = 'tokens';
+const name = 'worker-tokens';
 const model = mongoose.connection.useDb(db).model(name, schema, name);
 
 export default model;

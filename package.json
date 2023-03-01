@@ -19,7 +19,7 @@
     "tsutils": "~3.21"
   },
   "scripts": {
-    "dev": "nodemon",
+    "dev": "NODE_OPTIONS=--max-old-space-size=8192 nodemon",
     "start": "ts-node --compiler ttypescript -r tsconfig-paths/register src/index.ts",
     "start:pm2": "pm2 start ecosystem.config.js --env development",
     "start:prod": "tsc -p tsconfig.json && node build/src/index.js",
@@ -67,6 +67,8 @@
     "passport": "^0.6.0",
     "path": "^0.12.7",
     "pg": "^8.9.0",
+    "proxy-chain": "^2.2.1",
+    "puppeteer": "^19.7.2",
     "redis": "^4.6.4",
     "tiny-worker": "^2.3.0",
     "ts-node": "^10.9.1",

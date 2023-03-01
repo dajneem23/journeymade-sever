@@ -1,0 +1,144 @@
+// import model from '@/models/user-symbol-portfolios.model';
+import dynamicModel from '@/models/user-portfolios-by-crawlId.model';
+import portfoliosModel from '@/models/portfolios.model';
+import { AddressSymbolPortfolios } from '../types';
+import { IPortfolios } from '../types/portfolios.type';
+
+// Update function
+function updateOne(filter, update) {
+  return {
+    updateOne: {
+      filter,
+      update: {
+        $set: update,
+      },
+      upsert: true,
+    },
+  };
+}
+
+export const savePortfolios = async (
+  crawl_id,
+  portfolios: AddressSymbolPortfolios[],
+) => {
+  const updateOps = portfolios.map((p) =>
+    updateOne(
+      {
+        wallet_address: p.wallet_address,
+        symbol: p.symbol,
+        chain: p.chain,
+        crawl_id: p.crawl_id,
+        pool_id: p.pool_id,
+        ref_id: p.ref_id,
+      },
+      p,
+    ),
+  );
+
+  const model = dynamicModel(crawl_id);
+  if (!model) {
+    throw console.error('no collection', crawl_id);
+  }
+
+  return await model.bulkWrite([...updateOps]);
+};
+
+export const savePortfolios2 = async (
+  crawl_date,
+  portfolios: IPortfolios[],
+) => {
+  // const model = portfoliosModel(crawl_date);
+  // if (!model) {
+  //   throw console.error('no collection', crawl_date);
+  // }
+  // const upsertOps = portfolios
+  //   .map((p) => {
+  //     return {
+  //       updateOne: {
+  //         filter: {
+  //           address: p.address,
+  //         },
+  //         update: {
+  //           $setOnInsert: {
+  //             history: [],
+  //           },
+  //         },
+  //         upsert: true,
+  //       },
+  //     };
+  //   })
+  //   .flat();
+  // const pushOps = portfolios
+  //   .map((p) => {
+  //     return p.history.map((h) => {
+  //       const filter = {
+  //         address: p.address,
+  //         history: {
+  //           $not: {
+  //             $elemMatch: {
+  //               ref_id: h.ref_id,
+  //             },
+  //           },
+  //         },
+  //       };
+  //       return {
+  //         updateOne: {
+  //           filter,
+  //           update: {
+  //             $push: {
+  //               history: h,
+  //             },
+  //           },
+  //         },
+  //       };
+  //     });
+  //   })
+  //   .flat();
+  // const updateOps = portfolios.map((p) => {
+  //   const setObj = {},
+  //     arrayFilters = [];
+  //   p.history.forEach((h, index) => {
+  //     setObj[`history.$[u${index}]`] = {
+  //       ...h,
+  //       source: 'db2',
+  //     };
+  //     arrayFilters.push({
+  //       [`u${index}.ref_id`]: h.ref_id,
+  //     });
+  //   });
+  //   return {
+  //     updateOne: {
+  //       filter: {
+  //         address: p.address,
+  //       },
+  //       update: {
+  //         $set: setObj,
+  //       },
+  //       arrayFilters: arrayFilters,
+  //     },
+  //   };
+  // });
+  // return await model.bulkWrite([...upsertOps, ...pushOps, ...updateOps]);
+};
+
+export const savePortfolios3 = async (
+  crawl_date,
+  portfolios: IPortfolios[],
+) => {
+  const model = portfoliosModel(crawl_date);
+  if (!model) {
+    throw console.error('no collection', crawl_date);
+  }
+
+  const updateOps = portfolios.map((p) =>
+    updateOne(
+      {
+        address: p.address,
+        ref_id: p.ref_id,
+      },
+      p,
+    ),
+  );
+
+  return await model.bulkWrite([...updateOps]);
+};

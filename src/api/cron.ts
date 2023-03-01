@@ -1,6 +1,6 @@
-import balances from '@/modules/portfolios/debankBalances';
-import projects from '@/modules/portfolios/debankProjects';
-import topHolders from '@/modules/statistics/top_holders/index';
+// import balances from '@/modules/portfolios/debankBalances';
+// import projects from '@/modules/portfolios/debankProjects';
+import topHolders from '@/modules/statistics/__temp/top_holders/index';
 import cronLog from '@/modules/cron_logs';
 import express from 'express';
 
@@ -41,24 +41,24 @@ router.get('/', async (req, res) => {
   res.send(table);
 });
 // define the about route
-router.get('/trigger', (req, res) => {
-  const { type = '', crawl_id } = req.query || {};
+// router.get('/trigger', (req, res) => {
+//   const { type = '', crawl_id } = req.query || {};
 
-  if (!type || !crawl_id) {
-    return res.status(400).send('Invalid query');
-  }
+//   if (!type || !crawl_id) {
+//     return res.status(400).send('Invalid query');
+//   }
 
-  if (type.includes('balances')) {
-    balances.triggerCronJobs(crawl_id);
-  } else if (type.includes('projects')) {
-    projects.triggerCronJobs(crawl_id);
-  } else if (type.includes('holders')) {
-    topHolders.triggerCronJobs(crawl_id);
-  } else {
-    return res.status(400).send('Invalid type');
-  }
+//   if (type.includes('balances')) {
+//     balances.triggerCronJobs(crawl_id);
+//   } else if (type.includes('projects')) {
+//     projects.triggerCronJobs(crawl_id);
+//   } else if (type.includes('holders')) {
+//     topHolders.triggerCronJobs(crawl_id);
+//   } else {
+//     return res.status(400).send('Invalid type');
+//   }
 
-  res.send(`Accept: ${type}-${crawl_id}`);
-});
+//   res.send(`Accept: ${type}-${crawl_id}`);
+// });
 
 export default router;

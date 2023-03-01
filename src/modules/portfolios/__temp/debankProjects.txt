@@ -2,6 +2,7 @@ import { CronQueue } from '@/configs/queue';
 import { telegramBotToken } from '@/configs/telegram';
 import { minUSDValue } from '@/configs/vars';
 import { stringifyObjectMsg } from '@/core/utils';
+import dayjs from '@/core/utils/dayjs';
 import cronLog from '@/modules/cron_logs';
 import schedule from 'node-schedule';
 import Container from 'typedi';
@@ -12,15 +13,19 @@ import {
 } from '../debank/services';
 import setLimitedInterval from '../statistics/utils/setLimitedInterval';
 import { countDocuments } from './services/countDocuments';
-import { savePortfolios } from './services/savePortfolios';
+import { savePortfolios, savePortfolios2 } from './services/savePortfolios';
 import { AddressSymbolPortfolios, CRON_TASK, DATA_SOURCE } from './types';
+import { IPortfolios } from './types/portfolios.type';
+import { RawProjectsType } from './types/rawProjects.type';
+import { getRefIds } from './utils';
+import { generateCronJobs } from './utils/jobHelpers';
 import {
   cleanAmount,
   cleanPrice,
   crawlIdAlias,
   prepareCronJobs,
   toTimestamp,
-} from './utils';
+} from './utils2';
 
 const getPortfoliosProjects = async ({ crawl_id, limit, offset }) => {
   try {

@@ -1,12 +1,12 @@
 import { nodeEnv } from '@/configs/vars';
-import topHolders from './top_holders';
+import { scheduleCronJobs, triggerCronJobs } from './top_holders';
 
 export default async () => {
   console.log('🚀 ~ nodeEnv', nodeEnv);
 
-  topHolders.triggerCronJobs();
+  triggerCronJobs(2023022005);
 
   if (nodeEnv === 'production') {
-    topHolders.scheduleCronJobs();
+    scheduleCronJobs();
   }
 };

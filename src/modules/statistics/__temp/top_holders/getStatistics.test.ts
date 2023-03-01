@@ -1,4 +1,4 @@
-import prepareCrawlIds from '../utils/prepareCrawlIds';
+import prepareCrawlIds from '../../utils/prepareCrawlIds';
 import getStatistics from './getStatistics';
 
 const portfolios = {

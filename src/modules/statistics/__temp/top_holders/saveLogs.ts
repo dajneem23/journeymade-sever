@@ -1,7 +1,7 @@
 import cronLog from '@/modules/cron_logs';
 import { CronLog } from '@/modules/cron_logs/types';
-import { countDocuments } from '../services/countDocuments';
-import { CRON_TASK } from '../types';
+import { countDocuments } from '../../services/countDocuments';
+import { CRON_TASK } from '../../types';
 
 const saveLogs = async ({ queue, raw_count, crawl_id, job_count }) => {
   const jobCounts = await queue.getJobCounts(

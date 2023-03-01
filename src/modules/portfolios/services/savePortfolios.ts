@@ -1,6 +1,5 @@
-// import model from '@/models/user-symbol-portfolios.model';
-import dynamicModel from '@/models/user-portfolios-by-crawlId.model';
-import { AddressSymbolPortfolios } from '../types';
+import portfoliosModel from '@/models/portfolios.model';
+import { IPortfolios } from '../types/portfolios.type';
 
 // Update function
 function updateOne(filter, update) {
@@ -15,28 +14,21 @@ function updateOne(filter, update) {
   };
 }
 
-export const savePortfolios = async (
-  crawl_id,
-  portfolios: AddressSymbolPortfolios[],
-) => {
+export const savePortfolios = async (crawl_date, portfolios: IPortfolios[]) => {
+  const model = portfoliosModel(crawl_date);
+  if (!model) {
+    throw console.error('no collection', crawl_date);
+  }
+
   const updateOps = portfolios.map((p) =>
     updateOne(
       {
-        wallet_address: p.wallet_address,
-        symbol: p.symbol,
-        chain: p.chain,
-        crawl_id: p.crawl_id,
-        pool_id: p.pool_id,
-        ref_id: p.ref_id
+        address: p.address,
+        ref_id: p.ref_id,
       },
       p,
     ),
   );
-
-  const model = dynamicModel(crawl_id);
-  if (!model) {
-    throw console.error('no collection', crawl_id);
-  }
 
   return await model.bulkWrite([...updateOps]);
 };
