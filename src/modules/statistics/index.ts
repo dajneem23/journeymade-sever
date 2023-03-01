@@ -4,7 +4,7 @@ import { scheduleCronJobs, triggerCronJobs } from './top_holders';
 export default async () => {
   console.log('🚀 ~ nodeEnv', nodeEnv);
 
-  triggerCronJobs(2023022005);
+  triggerCronJobs();
 
   if (nodeEnv === 'production') {
     scheduleCronJobs();
