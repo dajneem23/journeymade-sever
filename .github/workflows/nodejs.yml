@@ -16,9 +16,9 @@ on:
 #2
 env:
   REGISTRY: 'registry.digitalocean.com/wikiblock'
-  IMAGE_NAME: 'onchain-signal'
+  IMAGE_NAME: 'onchain-api'
   APP_ENV: 'production'
-  APP_NAME: 'onchain-signal'
+  APP_NAME: 'onchain-api'
   API_PREFIX: ''
   APP_VERSION: '0.0.1'
   APP_PORT: 3001,

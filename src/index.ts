@@ -8,21 +8,19 @@ import { nodeEnv, port } from './configs/vars';
 
 (async () => {
   try {
-    // (await import('./modules/crawler')).default();
-
     await pgLoader();
 
     await mongoLoader();
     
     await ioRedis();
 
-    initTelegramBot();
+    // initTelegramBot();
 
     // (await import('./modules/wallet_book')).default();
 
-    (await import('./modules/portfolios')).default();
+    // (await import('./modules/portfolios')).default();
 
-    (await import('./modules/statistics')).default();
+    // (await import('./modules/statistics')).default();
 
     // listen to requests
     app.listen(port, () =>

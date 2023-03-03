@@ -1,7 +1,7 @@
 import { groupBy } from '@/core/utils';
-import { getResults } from '@/modules/debank/services/getResults';
-import { getBySymbol } from '@/modules/statistics/services/getBySymbol';
-import { getSymbols } from '@/modules/statistics/services/getSymbols';
+import { getResults } from '@/modules/_temp/debank/services/getResults';
+import { getBySymbol } from '@/modules/_temp/statistics/services/getBySymbol';
+import { getSymbols } from '@/modules/_temp/statistics/services/getSymbols';
 import express from 'express';
 const router = express.Router();
 

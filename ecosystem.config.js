@@ -1,7 +1,7 @@
 module.exports = {
   apps: [
     {
-      name: 'onchain-signal',
+      name: 'onchain-api',
       script: 'npm',
       automation: false,
       args: 'run start',

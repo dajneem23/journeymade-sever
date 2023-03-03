@@ -1,4 +1,4 @@
-# 1fox-onchain-signals
+# 1fox-onchain-api
  - debank segments
 
 ## remove queue

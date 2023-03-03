@@ -1,7 +1,7 @@
 // import balances from '@/modules/portfolios/debankBalances';
 // import projects from '@/modules/portfolios/debankProjects';
-import topHolders from '@/modules/statistics/__temp/top_holders/index';
-import cronLog from '@/modules/cron_logs';
+import topHolders from '@/modules/_temp/statistics/__temp/top_holders/index';
+import cronLog from '@/modules/_temp/cron_logs';
 import express from 'express';
 
 const router = express.Router();
@@ -40,6 +40,7 @@ router.get('/', async (req, res) => {
 
   res.send(table);
 });
+
 // define the about route
 // router.get('/trigger', (req, res) => {
 //   const { type = '', crawl_id } = req.query || {};
