@@ -1,1 +1,0 @@
-export const CrawlDuration = 3; // 3 hours

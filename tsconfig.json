@@ -7,13 +7,17 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
     "target": "es6",
     "noImplicitAny": false,
     "moduleResolution": "node",
     "sourceMap": true,
     "outDir": "./build",
     "baseUrl": ".",
-    "typeRoots": ["./src/types", "./node_modules/@types"],
+    "pretty": true,
+    "allowJs": true,
+    "noEmit": false,
+    "typeRoots": ["./src/interfaces", "./node_modules/@types", "./src/types"],
     "paths": {
       "@/*": ["./src/*"]
     },
@@ -22,8 +26,8 @@
         "transform": "ts-transformer-keys/transformer"
       }
     ],
-    "lib": ["ES2021.String"]
+    "lib": ["ES2021.String", "es2017", "esnext.asynciterable"]
   },
   "include": ["./src/**/*", "./ormconfig.ts"],
-  "exclude": ["node_modules"],
+  "exclude": ["node_modules"]
 }
