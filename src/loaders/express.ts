@@ -12,6 +12,7 @@ import { globalErrHandler } from '@/api/controllers/base';
 import AppError from '@/core/appError';
 import routes from '@/api';
 import config from '@/config';
+import swagger from './swagger';
 
 export default ({ app }: { app: express.Application }) => {
   // Allow Cross-Origin requests

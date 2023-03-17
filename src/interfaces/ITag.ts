@@ -1,14 +1,16 @@
-export enum EnumTagSource {
-  debank = 'debank',
-  nansen = 'nansen'
+export enum EnumTagType {
+  category = 'category',
+  token = 'token',
+  platform = 'platform',
+  chain = 'chain',
+  protocol = 'protocol',
 }
 
 export interface ITag {
   id: string,
   name: string,
   description: string,
-  source: EnumTagSource,
-  volume: number
+  type: EnumTagType,
 }
 
 export interface ITagOTD {

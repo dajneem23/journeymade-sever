@@ -25,3 +25,6 @@ README.md
 
 node_modules
 logs
+
+dist
+README.md

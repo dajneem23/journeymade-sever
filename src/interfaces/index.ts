@@ -6,3 +6,4 @@ export * from './IGroupFootprint';
 export * from './ITag';
 export * from './IToken';
 export * from './IPrice';
+export * from './IProtocol';

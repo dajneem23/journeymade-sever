@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "module": "commonjs",
-    "types": ["node", "jest"],
+    "types": ["node"],
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "emitDecoratorMetadata": true,
@@ -12,12 +12,13 @@
     "noImplicitAny": false,
     "moduleResolution": "node",
     "sourceMap": true,
-    "outDir": "./build",
+    "outDir": "./dist",
     "baseUrl": ".",
     "pretty": true,
     "allowJs": true,
     "noEmit": false,
     "typeRoots": ["./src/interfaces", "./node_modules/@types", "./src/types"],
+    "rootDir": "./src",
     "paths": {
       "@/*": ["./src/*"]
     },

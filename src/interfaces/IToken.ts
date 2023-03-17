@@ -27,7 +27,8 @@ export enum EnumChainNames {
 export interface IToken {
   symbol: string;
   name: string;
-  contract_ids: Record<EnumChainNames, string>;
+  eth_id?: string;
+  bsc_id?: string;
 }
 
 export interface ITokenOTD {

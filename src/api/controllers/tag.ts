@@ -55,8 +55,7 @@ export default class TagController {
           id: tag.id,
           name: tag.name,
           description: tag.description,
-          source: tag.source,
-          volume: tag.volume && +tag.volume,
+          type: tag.type,
         };
       });
 
