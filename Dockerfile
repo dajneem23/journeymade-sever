@@ -1,4 +1,4 @@
-FROM node:lts-alpine as builder
+FROM node:18-alpine as builder
 
 ENV NODE_ENV=production
 
@@ -11,10 +11,17 @@ RUN echo $ENV_VARS
 WORKDIR /usr/src/app
 
 # Install app dependencies
-COPY . .
+COPY package.json yarn.lock ./
 
 RUN ls
-RUN yarn && yarn build
+RUN yarn install --prod --frozen-lockfile
+
+COPY . .
+
+RUN yarn build
+
+# remove development dependencies
+RUN yarn autoclean --force
 
 ## this is stage two , where the app actually runs
 FROM node:18-alpine as runner
@@ -30,8 +37,9 @@ WORKDIR /usr/src/app
 
 # Install app dependencies
 COPY --from=builder /usr/src/app/package*.json /usr/src/app/yarn.lock /usr/src/app/.env /usr/src/app/dist ./
+COPY --from=builder /usr/src/app/node_modules ./node_modules
 
-RUN yarn install --production
+# RUN yarn install --production
 
 EXPOSE 3001
 
