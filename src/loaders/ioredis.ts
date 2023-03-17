@@ -7,7 +7,7 @@ export const ioRedisToken = new Token<IORedis>('_ioRedis');
 
 const ioRedis = async () => {
   try {
-    const connection = new IORedis({
+    const connection = new IORedis(config.redis.uri, {
       host: config.redis.host,
       port: config.redis.port,
       password: config.redis.password,
@@ -15,6 +15,7 @@ const ioRedis = async () => {
       enableReadyCheck: false,
       lazyConnect: true,
     });
+
     Container.set(ioRedisToken, connection);
 
     logger.info('init IORedis!');

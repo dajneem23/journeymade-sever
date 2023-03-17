@@ -56,6 +56,7 @@ export default {
   },
 
   redis: {
+    uri: process.env.INTERNAL_REDIS_URI || process.env.REDIS_URI,
     port: +process.env.REDIS_PORT,
     host: process.env.REDIS_HOST,
     password: process.env.REDIS_PASSWORD,
