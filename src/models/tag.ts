@@ -1,6 +1,5 @@
 import config from '@/config';
 import { ITag } from '@/interfaces';
-import { getModelName } from '@/utils';
 import mongoose, { Document } from 'mongoose';
 
 /**
@@ -40,7 +39,7 @@ schema.index(
   },
 );
 
-const name = getModelName('tags');
+const name = 'tag'
 export default mongoose.connection
-  .useDb(config.mongoDbName)
+  .useDb(config.mongoDbNames.onchainApp)
   .model<ITag & Document>(name, schema, name);

@@ -9,6 +9,7 @@ import mongoose, { Document } from 'mongoose';
  */
 const schema = new mongoose.Schema(
   {
+    
     symbol: {
       type: String,
       required: true,
@@ -18,10 +19,11 @@ const schema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-    time_at: {
+    timestamp: {
       type: Number,
       required: true,
     },
+    id: String, // coingecko id
     volume: Number,
     updated_at: String,
   },
@@ -30,6 +32,7 @@ const schema = new mongoose.Schema(
       updatedAt: 'updated_at',
       createdAt: false,
     },
+    strict: false,
     versionKey: false,
   },
 );
@@ -37,14 +40,14 @@ const schema = new mongoose.Schema(
 schema.index(
   {
     symbol: 1,
-    time_at: -1,
+    timestamp: -1,
   },
   {
     background: true,
   },
 );
 
-const name = getModelName('prices');
+const name = 'token-price'
 export default mongoose.connection
-  .useDb(config.mongoDbName)
+  .useDb(config.mongoDbNames.onchain)
   .model<IPrice & Document>(name, schema, name);

@@ -7,8 +7,11 @@ import {
   IPrice,
   ITag,
   IToken,
-  ITransaction,
 } from '@/interfaces';
+
+import {
+  ITransaction
+} from '@1foxglobal/onchain-data-model/lib/interfaces'
 
 declare global {
   namespace Models {

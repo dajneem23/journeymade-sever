@@ -54,6 +54,32 @@ export default class TransactionController {
     }
   }
 
+  public async getStats(req: Request, res: Response, next: NextFunction) {
+    const logger: Logger = Container.get('logger');
+    logger.debug('Calling get endpoint with query: %o', req.query);
+
+    const {
+      page,
+      limit,
+    } = req.query;
+
+    try {
+      const serviceInstance = Container.get(TransactionService);
+      const stats = await serviceInstance.getStats({
+        offset: +req['skip'] || 0,
+        limit: +limit,
+      });
+
+      const success = new SuccessResponse(res, {
+        data: stats,
+      });
+
+      success.send();
+    } catch (err) {
+      next(err);
+    }
+  }
+
   public async add(req: Request, res: Response, next: NextFunction) {
     const logger: Logger = Container.get('logger');
     logger.debug('Calling add endpoint with body: %o', req.body);

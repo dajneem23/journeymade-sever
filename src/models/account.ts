@@ -63,5 +63,5 @@ schema.index(
 
 const name = getModelName('accounts');
 export default mongoose.connection
-  .useDb(config.mongoDbName)
+  .useDb(config.mongoDbNames.onchain)
   .model<IAccount & Document>(name, schema, name);

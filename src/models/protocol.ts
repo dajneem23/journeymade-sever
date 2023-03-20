@@ -1,6 +1,5 @@
 import config from '@/config';
 import { IProtocol } from '@/interfaces';
-import { getModelName } from '@/utils';
 import mongoose, { Document, Schema } from 'mongoose';
 
 /**
@@ -94,7 +93,7 @@ schema.index(
   },
 );
 
-const name = getModelName('protocols');
+const name = 'protocol';
 export default mongoose.connection
-  .useDb(config.mongoDbName)
+  .useDb(config.mongoDbNames.onchainApp)
   .model<IProtocol & Document>(name, schema, name);

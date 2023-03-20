@@ -66,7 +66,7 @@ export default class PriceController {
         return <IPrice>{
           symbol: price.symbol,
           price: +price.price,
-          time_at: +price.time_at,
+          timestamp: +price.timestamp,
           volume: price.volume && +price.volume,
         };
       });

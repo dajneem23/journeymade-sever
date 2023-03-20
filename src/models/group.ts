@@ -77,5 +77,5 @@ schema.index(
 
 const name = getModelName('groups');
 export default mongoose.connection
-  .useDb(config.mongoDbName)
+  .useDb(config.mongoDbNames.onchainApp)
   .model<IGroup & Document>(name, schema, name);

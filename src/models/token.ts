@@ -1,6 +1,5 @@
 import config from '@/config';
 import { IToken } from '@/interfaces';
-import { getModelName } from '@/utils';
 import mongoose, { Document } from 'mongoose';
 
 /**
@@ -9,14 +8,15 @@ import mongoose, { Document } from 'mongoose';
  */
 const schema = new mongoose.Schema(
   {
-    symbol: {
-      type: String,
-      required: true,
-      trim: true,
-    },
+    symbol: String,
     name: String,
-    contract_ids: Object, // { ethereum: "0x514910771af9ca656af840dff83e8264ecf986ca" }
-    updated_at: String,
+    address: String,
+    decimals: Number,
+    chainId: Number,
+    logoURI: String,
+    coingeckoId: String,
+    listedIn: [String],
+    enabled: Boolean,
   },
   {
     timestamps: {
@@ -29,23 +29,15 @@ const schema = new mongoose.Schema(
 
 schema.index(
   {
-    symbol: 1,
+    chainId: 1,
+    enabled: 1,
   },
   {
     background: true,
   },
 );
 
-schema.index(
-  {
-    contract_ids: 1,
-  },
-  {
-    background: true,
-  },
-);
-
-const name = getModelName('tokens');
+const name = 'token';
 export default mongoose.connection
-  .useDb(config.mongoDbName)
+  .useDb(config.mongoDbNames.onchain)
   .model<IToken & Document>(name, schema, name);

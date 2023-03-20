@@ -26,11 +26,11 @@ export default class PriceService {
       filters['symbol'] = symbol;
     }
     if (from_time) {
-      filters['time_at'] = { $gte: from_time };
+      filters['timestamp'] = { $gte: from_time };
     }
 
     if (to_time) {
-      filters['time_at'] = { $lte: to_time };
+      filters['timestamp'] = { $lte: to_time };
     }
 
     const [items, itemCount] = await Promise.all([
@@ -56,7 +56,7 @@ export default class PriceService {
         updateOne: {
           filter: {
             symbol: price.symbol,
-            time_at: price.time_at,
+            timestamp: price.timestamp,
           },
           update: {
             $set: price,

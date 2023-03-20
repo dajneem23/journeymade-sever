@@ -1,6 +1,5 @@
 import config from '@/config';
 import { IPortfolio } from '@/interfaces';
-import { getModelName } from '@/utils';
 import mongoose, { Document } from 'mongoose';
 
 /**
@@ -68,7 +67,7 @@ schema.index(
   },
 );
 
-const name = getModelName('portfolios');
+const name = 'portfolio'
 export default mongoose.connection
-  .useDb(config.mongoDbName)
+  .useDb(config.mongoDbNames.onchainApp)
   .model<IPortfolio & Document>(name, schema, name);

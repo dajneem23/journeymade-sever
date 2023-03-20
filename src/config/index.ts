@@ -2,6 +2,7 @@ import dotenv from 'dotenv';
 
 // Set the NODE_ENV to 'development' by default
 process.env.NODE_ENV = process.env.NODE_ENV || 'development';
+const isProduction = process.env.NODE_ENV === 'production';
 
 // config() will read your .env file, parse the contents, assign it to process.env.
 dotenv.config();
@@ -26,11 +27,14 @@ export default {
   port: parseInt(process.env.PORT, 10),
 
   mongoDbURI: process.env.INTERNAL_MONGO_URI || process.env.MONGO_URI,
-  mongoDbName: process.env.MONGO_DB_NAME,
+  mongoDbNames: {
+    onchain: isProduction ? 'onchain' : 'onchain-dev',
+    onchainApp: isProduction ? 'onchain-app' : 'onchain-app-dev',
+  },
 
   api: {
     prefix: '/api',
-    version: 'v1',
+    version: process.env.APP_VERSION || 'v1',
   },
 
   /**

@@ -1,6 +1,5 @@
 import config from '@/config';
 import { IGroupFootprint } from '@/interfaces';
-import { getModelName } from '@/utils';
 import mongoose, { Document } from 'mongoose';
 
 /**
@@ -66,7 +65,7 @@ schema.index(
   },
 );
 
-const name = getModelName('group-footprints');
+const name = 'group-footprint'
 export default mongoose.connection
-  .useDb(config.mongoDbName)
+  .useDb(config.mongoDbNames.onchainApp)
   .model<IGroupFootprint & Document>(name, schema, name);

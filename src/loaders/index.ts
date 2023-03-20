@@ -9,13 +9,13 @@ import dependencyInjectorLoader from './dependencyInjector';
 export default async ({ expressApp }) => {
   await mongooseLoader();
 
-  await pgLoader();
+  // await pgLoader();
 
-  await ioRedis();
+  // await ioRedis();
 
   logger.info('✌️ DB loaded and connected!');
 
-  initTelegramBot();
+  // initTelegramBot();
 
   const injectModels = ['account', 'token', 'price', 'tag', 'transaction', 'group', 'groupFootprint']
   await dependencyInjectorLoader({

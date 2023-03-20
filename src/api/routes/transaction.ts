@@ -26,6 +26,8 @@ export default (app: Router) => {
     controller.getList,
   );
 
+  route.get('/stats', controller.getStats);
+
   route.post(
     '/',
     celebrate({

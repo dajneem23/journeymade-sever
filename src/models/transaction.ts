@@ -1,7 +1,6 @@
 import config from '@/config';
 import { ITransaction } from '@/interfaces';
-import { getModelName } from '@/utils';
-import mongoose, { Document, Schema } from 'mongoose';
+import mongoose, { Document } from 'mongoose';
 
 /**
  * schema
@@ -10,27 +9,15 @@ import mongoose, { Document, Schema } from 'mongoose';
 
 const schema = new mongoose.Schema(
   {
-    id: {
-      // tx_id
+    hash: {
       type: String,
-      trim: true,
-      required: true,
     },
-    chain: {
+    from: {
       type: String,
-      trim: true,
-      required: true,
     },
-
-    tokens: String,
-
-    sends: [Schema.Types.Mixed],
-    receives: [Schema.Types.Mixed],
-
-    time_at: Number,
-    tx: Schema.Types.Mixed,
-
-    updated_at: Number,
+    to: {
+      type: String,
+    }
   },
   {
     timestamps: {
@@ -38,12 +25,13 @@ const schema = new mongoose.Schema(
       createdAt: false,
     },
     versionKey: false,
+    strict: false
   },
 );
 
 schema.index(
   {
-    id: 1,
+    hash: 1
   },
   {
     background: true,
@@ -52,15 +40,34 @@ schema.index(
 
 schema.index(
   {
-    time_at: -1,        
-    tx: 1,
+    chain: 1,
+    blockNumber: -1
   },
   {
     background: true,
   },
 );
 
-const name = getModelName('transactions');
+schema.index(
+  {
+    chain: 1,
+    timestamp: -1
+  },
+  {
+    background: true,
+  },
+);
+
+schema.index(
+  {
+    to: 1
+  },
+  {
+    background: true,
+  },
+);
+
+const name = 'transaction';
 export default mongoose.connection
-  .useDb(config.mongoDbName)
+  .useDb(config.mongoDbNames.onchain)
   .model<ITransaction & Document>(name, schema, name);

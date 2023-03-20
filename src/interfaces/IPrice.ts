@@ -1,8 +1,9 @@
 export interface IPrice {
   symbol: string;
   price: number;
-  time_at: number;
+  timestamp: number;
   volume?: number;
+  id?: String;  // coingecko id
 }
 
 export interface IPriceOTD {
