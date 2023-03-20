@@ -22,7 +22,7 @@ env:
   API_PREFIX: ''
   APP_VERSION: '0.0.1'
   APP_PORT: 3001
-  NODE_AUTH_TOKEN: '${{secrets.NODE_AUTH_TOKEN}}'
+  NODE_AUTH_TOKEN: ${{secrets.NODE_AUTH_TOKEN}}
 
 #3
 jobs:
