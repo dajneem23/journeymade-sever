@@ -26,13 +26,22 @@ export default (app: Router) => {
     controller.getList,
   );
 
-  route.get('/stats', controller.getStats);
+  route.get(
+    '/stats',
+    celebrate({
+      query: Joi.object({
+        page: Joi.number(),
+        limit: Joi.number(),
+      }),
+    }),
+    controller.getStats,
+  );
 
   route.post(
     '/',
     celebrate({
       body: Joi.object({
-        transactions: Joi.array().required()
+        transactions: Joi.array().required(),
       }),
     }),
     controller.add,

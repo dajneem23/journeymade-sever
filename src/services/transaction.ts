@@ -95,8 +95,10 @@ export default class TransactionService {
       timestamps.push([i.add(-1, 'day').unix(), i.unix()]);
     }
 
+    const ranges = timestamps.slice(offset, offset + limit);
+
     const values = await Promise.all(
-      timestamps.map(async (timestamp) => {
+      ranges.map(async (timestamp) => {
         const value = await this.transactionModel.aggregate([
           {
             $match: {
