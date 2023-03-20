@@ -21,7 +21,8 @@ env:
   APP_NAME: 'onchain-api'
   API_PREFIX: ''
   APP_VERSION: '0.0.1'
-  APP_PORT: 3001,
+  APP_PORT: 3001
+  NODE_AUTH_TOKEN: ${{secrets.NODE_AUTH_TOKEN}}
 
 #3
 jobs:
@@ -33,8 +34,6 @@ jobs:
 
       - name: Build container image
         run: docker build --build-arg ENV_VARS='${{ secrets.SECRETS }}' -t $(echo $REGISTRY)/$(echo $IMAGE_NAME):$(echo $GITHUB_SHA | head -c7) .
-        env:
-          NODE_AUTH_TOKEN: ${{secrets.NODE_AUTH_TOKEN}}
 
       - name: Install doctl
         uses: digitalocean/action-doctl@v2
