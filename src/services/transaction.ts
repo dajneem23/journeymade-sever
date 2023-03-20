@@ -90,7 +90,7 @@ export default class TransactionService {
 
   public async getStats({ offset, limit }) {
     const timestamps = [];
-    const now = dayjs().endOf('hour');
+    const now = dayjs().endOf('day');
     for (let i = now; i > now.clone().add(-70, 'day'); i = i.add(-1, 'day')) {
       timestamps.push([i.add(-1, 'day').unix(), i.unix()]);
     }
