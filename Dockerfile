@@ -11,7 +11,7 @@ RUN echo $ENV_VARS
 WORKDIR /usr/src/app
 
 # Install app dependencies
-COPY package.json yarn.lock ./
+COPY package.json yarn.lock .npmrc ./
 
 RUN ls
 RUN yarn install --prod --frozen-lockfile
