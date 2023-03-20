@@ -2,9 +2,12 @@ FROM node:18-alpine as builder
 
 ENV NODE_ENV=production
 
-ARG ENV_VARS
-ENV ENV_VARS=$ENV_VARS
-RUN echo $ENV_VARS
+# ARG ENV_VARS
+# ENV ENV_VARS=$ENV_VARS
+# RUN echo $ENV_VARS
+
+ARG NODE_AUTH_TOKEN
+ENV NODE_AUTH_TOKEN=$NODE_AUTH_TOKEN
 
 # Create app directory
 
@@ -23,15 +26,17 @@ RUN yarn build
 # remove development dependencies
 RUN yarn autoclean --force
 
+RUN rm -f .npmrc
+
 ## this is stage two , where the app actually runs
 FROM node:18-alpine as runner
 
 # Create app directory
 
 ENV NODE_ENV=production
-ARG ENV_VARS
-ENV ENV_VARS=$ENV_VARS
-RUN echo $ENV_VARS
+# ARG ENV_VARS
+# ENV ENV_VARS=$ENV_VARS
+# RUN echo $ENV_VARS
 
 WORKDIR /usr/src/app
 

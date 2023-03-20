@@ -22,25 +22,18 @@ env:
   API_PREFIX: ''
   APP_VERSION: '0.0.1'
   APP_PORT: 3001
+  NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
 
 #3
 jobs:
   build_and_push:
     runs-on: ubuntu-latest
     steps:
-      - name: Setup NodeJS
-        uses: actions/setup-node@v2.2.0
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: npm
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
-
       - name: Checkout the repo
         uses: actions/checkout@v2
 
       - name: Build container image
-        run: docker build --build-arg ENV_VARS='${{ secrets.SECRETS }}' -t $(echo $REGISTRY)/$(echo $IMAGE_NAME):latest .
+        run: docker build --build-arg NODE_AUTH_TOKEN='${{ secrets.NODE_AUTH_TOKEN }}' -t $(echo $REGISTRY)/$(echo $IMAGE_NAME):latest .
 
       - name: Install doctl
         uses: digitalocean/action-doctl@v2
