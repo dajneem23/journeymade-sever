@@ -7,6 +7,7 @@ import {
   IPrice,
   ITag,
   IToken,
+  ITransactionEvent
 } from '@/interfaces';
 
 import {
@@ -23,6 +24,7 @@ declare global {
     export type TagModel = Model<ITag & Document>;
     export type TokenModel = Model<IToken & Document>;
     export type TransactionModel = Model<ITransaction & Document>;
+    export type TransactionEventModel = Model<ITransactionEvent & Document>;
   }
 }
 

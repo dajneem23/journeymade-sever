@@ -5,6 +5,7 @@ import paginate from 'express-paginate';
 import { Container, Service } from 'typedi';
 
 import TransactionService from '@/services/transaction';
+import TransactionEventService from '@/services/transactionEvent';
 import { Logger } from 'winston';
 import { ITransaction } from '../../interfaces';
 
@@ -64,7 +65,7 @@ export default class TransactionController {
     } = req.query;
 
     try {
-      const serviceInstance = Container.get(TransactionService);
+      const serviceInstance = Container.get(TransactionEventService);
       const stats = await serviceInstance.getStats({
         offset: +req['skip'] || 0,
         limit: +limit,

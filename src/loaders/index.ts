@@ -17,7 +17,7 @@ export default async ({ expressApp }) => {
 
   // initTelegramBot();
 
-  const injectModels = ['account', 'token', 'price', 'tag', 'transaction', 'group', 'groupFootprint']
+  const injectModels = ['account', 'token', 'price', 'tag', 'transaction', 'group', 'groupFootprint', 'transactionEvent']
   await dependencyInjectorLoader({
     models: injectModels.map(m => ({
       name: `${m}Model`,
