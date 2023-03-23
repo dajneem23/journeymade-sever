@@ -36,7 +36,7 @@ jobs:
         run: docker build --build-arg NODE_AUTH_TOKEN='${{ secrets.NODE_AUTH_TOKEN }}' -t $(echo $REGISTRY)/$(echo $IMAGE_NAME):latest .
 
       - name: Install doctl
-        uses: digitalocean/action-doctl@v2
+        uses: digitalocean/action-doctl@v3
         with:
           token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
 
