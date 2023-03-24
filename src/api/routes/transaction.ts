@@ -24,18 +24,7 @@ export default (app: Router) => {
       }),
     }),
     controller.getList,
-  );
-
-  route.get(
-    '/stats',
-    celebrate({
-      query: Joi.object({
-        page: Joi.number(),
-        limit: Joi.number(),
-      }),
-    }),
-    controller.getStats,
-  );
+  );  
 
   route.post(
     '/',
@@ -55,5 +44,25 @@ export default (app: Router) => {
       }),
     }),
     controller.delete,
+  );
+
+
+  /**
+   * Tx event
+   */
+  route.get(
+    '/event/stats',
+    celebrate({
+      query: Joi.object({
+        page: Joi.number(),
+        limit: Joi.number(),
+      }),
+    }),
+    controller.getStats,
+  );
+
+  route.get(
+    '/event/blocks',
+    controller.getEventBlocks,
   );
 };

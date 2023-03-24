@@ -28,40 +28,42 @@ export default class TransactionEventService {
 
     const values = await Promise.all(
       ranges.map(async (timestamp) => {
-        const value = await this.transactionEventModel.aggregate([
-          {
-            $match: {
-              chain: { $in: ['ETH', 'BNB'] },
-              timestamp: {
-                $gt: timestamp[0],
-                $lt: timestamp[1],
+        const value = await this.transactionEventModel
+          .aggregate([
+            {
+              $match: {
+                chain: { $in: ['ETH', 'BNB'] },
+                timestamp: {
+                  $gt: timestamp[0],
+                  $lt: timestamp[1],
+                },
               },
             },
-          },
-          {
-            $project: {
-              symbol: 1,
-              price: 1,
-              usd_value: 1,
-              is_price_gt_0: {
-                $cond: { if: { $gt: ['$price', 0] }, then: 1, else: 0 },
+            {
+              $project: {
+                symbol: 1,
+                price: 1,
+                usd_value: 1,
+                is_price_gt_0: {
+                  $cond: { if: { $gt: ['$price', 0] }, then: 1, else: 0 },
+                },
               },
             },
-          },
-          {
-            $group: {
-              _id: '$symbol',
-              count: { $sum: 1 },
-              has_price_count: { $sum: '$is_price_gt_0' },
-              usd_value: { $sum: '$usd_value' },
+            {
+              $group: {
+                _id: '$symbol',
+                count: { $sum: 1 },
+                has_price_count: { $sum: '$is_price_gt_0' },
+                usd_value: { $sum: '$usd_value' },
+              },
             },
-          },
-          {
-            $sort: {
-              count: -1,
+            {
+              $sort: {
+                count: -1,
+              },
             },
-          },
-        ]).exec();
+          ])
+          .exec();
 
         const count = value.reduce((sum, value) => {
           return sum + value.count;
@@ -75,19 +77,54 @@ export default class TransactionEventService {
 
         return {
           timestamps: [timestamp[0], timestamp[1]],
-          times: [ 
-            dayjs(timestamp[0]*1000).format(),
-            dayjs(timestamp[1]*1000).format()
+          times: [
+            dayjs(timestamp[0] * 1000).format(),
+            dayjs(timestamp[1] * 1000).format(),
           ],
           count,
           has_price_count: hasPriceCount,
           sum_usd_value: sumUsdValue,
           by_token: value,
-        }
+        };
       }),
     );
-    
+
     return values;
   }
 
+  public async getLatestBlockNumber() {
+    const chainIds = [1, 56];
+    const latestBlockNumbers = await Promise.all(
+      chainIds.map(async (chain_id) => {
+        const latest = await this.transactionEventModel
+          .findOne({ chain_id })
+          .sort({ blockNumber: -1 })
+          .exec();
+        return {
+          chain_id,
+          block_number: latest?.block_number,
+        };
+      }),
+    );
+
+    return latestBlockNumbers;
+  }
+
+  public async getMinBlockNumber() {
+    const chainIds = [1, 56];
+    const minBlockNumbers = await Promise.all(
+      chainIds.map(async (chain_id) => {
+        const latest = await this.transactionEventModel
+          .findOne({ chain_id })
+          .sort({ blockNumber: 1 })
+          .exec();
+        return {
+          chain_id,
+          block_number: latest?.block_number,
+        };
+      }),
+    );
+
+    return minBlockNumbers;
+  }
 }

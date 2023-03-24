@@ -125,4 +125,28 @@ export default class TransactionController {
       next(err);
     }
   }
+
+  public async getEventBlocks(req: Request, res: Response, next: NextFunction) {
+    const logger: Logger = Container.get('logger');
+    logger.debug('Calling get endpoint with query: %o', req.query);
+
+    try {
+      const serviceInstance = Container.get(TransactionEventService);
+      const latest = await serviceInstance.getLatestBlockNumber();
+      const min = await serviceInstance.getMinBlockNumber();
+
+      
+
+      const success = new SuccessResponse(res, {
+        data: {
+          latest,
+          min,
+        },
+      });
+
+      success.send();
+    } catch (err) {
+      next(err);
+    }
+  }
 }
