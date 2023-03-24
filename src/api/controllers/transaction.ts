@@ -135,8 +135,6 @@ export default class TransactionController {
       const latest = await serviceInstance.getLatestBlockNumber();
       const min = await serviceInstance.getMinBlockNumber();
 
-      
-
       const success = new SuccessResponse(res, {
         data: {
           latest,

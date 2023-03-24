@@ -8,6 +8,7 @@ import token from './routes/token';
 import transaction from './routes/transaction';
 import group from './routes/group';
 import groupFootprint from './routes/groupFootprint';
+import signal from './routes/signal';
 
 export default () => {
   const app = Router();
@@ -19,6 +20,7 @@ export default () => {
   base(app);
   group(app);
   groupFootprint(app);
+  signal(app);
 
   return app;
 };

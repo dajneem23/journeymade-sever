@@ -127,4 +127,41 @@ export default class TransactionEventService {
 
     return minBlockNumbers;
   }
+
+  public async getLast24hHighUsdValueTxEvent({ min_usd_value, account_type, event_type, symbol, offset, limit }: any) {
+    const now = dayjs().unix();
+    const filters = {
+      usd_value: { $gt: +min_usd_value || 10000 },
+      timestamp: { $gt: now - 24 * 60 * 60 },
+    };
+
+    if (account_type) {
+      filters['account_type'] = account_type.toLowerCase()
+    }
+
+    if (event_type) {
+      filters['type'] = event_type.toLowerCase()
+    }
+
+    if (symbol) {
+      filters['symbol'] = symbol.toUpperCase()
+    }
+
+    const [items, itemCount] = await Promise.all([
+      this.transactionEventModel
+        .find(filters)
+        .sort({ timestamp: -1 })
+        .skip(offset)
+        .limit(limit)
+        .select({ updated_at: 0, _id: 0 })
+        .lean()
+        .exec(),
+      this.transactionEventModel.count(filters),
+    ]);
+
+    return {
+      items,
+      itemCount,
+    };
+  }
 }
