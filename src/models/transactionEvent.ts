@@ -108,5 +108,5 @@ schema.index(
 
 const name = 'tx-event';
 export default mongoose.connection
-  .useDb(config.mongo.dbName)
+  .useDb(config.mongoDbNames.onchain)
   .model<ITransactionEvent & Document>(name, schema, name);
