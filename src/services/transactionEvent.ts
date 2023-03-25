@@ -33,7 +33,7 @@ export default class TransactionEventService {
             {
               $match: {
                 chain: { $in: ['ETH', 'BNB'] },
-                timestamp: {
+                block_at: {
                   $gt: timestamp[0],
                   $lt: timestamp[1],
                 },
