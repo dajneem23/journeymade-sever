@@ -18,9 +18,8 @@ export default (app: Router) => {
     celebrate({
       query: Joi.object({
         min_usd_value: Joi.number(),
-        event_type: Joi.string(),
-        account_type: Joi.string(),
         symbol: Joi.string(),
+        tags: Joi.string(),
         page: Joi.number(),
         limit: Joi.number(),
       }),

@@ -33,21 +33,26 @@ enum EAccountType {
 export interface ITransactionEvent {
   tx_hash: string;
   log_index: number; // <logIndex>
-  type: ETransactionEventType;
 
   block_number?: number;
-  timestamp?: number;
+  block_at?: number;
 
   token: string;  // token address
   symbol?: string; // token symbol
 
-  account: string;  // 
-  account_type?: EAccountType;
-  ref_account?: string;  // 
+  from_account: string;  // from account
+  from_account_type?: EAccountType;
+  from_account_tags?: string[];  //
+
+  to_account: string;  // to account
+  to_account_type?: EAccountType;
+  to_account_tags?: string[];  //
 
   amount: number;
   usd_value?: number;
   price?: number;
+  decimals?: number;
+  price_at?: number;
 
   chain: string;
   chain_id?: number;
