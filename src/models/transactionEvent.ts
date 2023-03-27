@@ -76,36 +76,6 @@ schema.index(
   },
 );
 
-schema.index(
-  {
-    symbol: 1,
-    timestamp: -1
-  },
-  {
-    background: true,
-  },
-);
-
-schema.index(
-  {
-    chain_id: 1,
-    timestamp: -1
-  },
-  {
-    background: true,
-  },
-);
-
-schema.index(
-  {
-    usd_value: -1,
-    timestamp: -1
-  },
-  {
-    background: true,
-  },
-);
-
 const name = 'tx-event';
 export default mongoose.connection
   .useDb(config.mongoDbNames.onchain)

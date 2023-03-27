@@ -32,7 +32,6 @@ export default class TransactionEventService {
           .aggregate([
             {
               $match: {
-                chain: { $in: ['ETH', 'BNB'] },
                 block_at: {
                   $gt: timestamp[0],
                   $lt: timestamp[1],
