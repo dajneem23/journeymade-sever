@@ -19,7 +19,9 @@ export default class TokenService {
     offset,
     limit,
   }: ITokenOTD): Promise<{ items: IToken[]; itemCount: number }> {
-    const filters = {};
+    const filters = {
+      enabled: true
+    };
     if (symbols && symbols.length > 0) {
       filters['symbol'] = { $in: symbols };
     }

@@ -26,25 +26,25 @@ export default (app: Router) => {
     controller.getList,
   );  
 
-  route.post(
-    '/',
-    celebrate({
-      body: Joi.object({
-        transactions: Joi.array().required(),
-      }),
-    }),
-    controller.add,
-  );
+  // route.post(
+  //   '/',
+  //   celebrate({
+  //     body: Joi.object({
+  //       transactions: Joi.array().required(),
+  //     }),
+  //   }),
+  //   controller.add,
+  // );
 
-  route.delete(
-    '/',
-    celebrate({
-      body: Joi.object({
-        id: Joi.string().required(),
-      }),
-    }),
-    controller.delete,
-  );
+  // route.delete(
+  //   '/',
+  //   celebrate({
+  //     body: Joi.object({
+  //       id: Joi.string().required(),
+  //     }),
+  //   }),
+  //   controller.delete,
+  // );
 
 
   /**
@@ -54,6 +54,7 @@ export default (app: Router) => {
     '/event/stats',
     celebrate({
       query: Joi.object({
+        period: Joi.string().min(2).max(3),
         page: Joi.number(),
         limit: Joi.number().min(1).max(5),
       }),

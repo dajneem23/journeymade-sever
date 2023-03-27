@@ -22,27 +22,39 @@ export default (app: Router) => {
     controller.getList,
   );
 
-  route.post(
-    '/',
+  route.get(
+    '/:name/volume',
     celebrate({
-      body: Joi.object({
-        tokens: Joi.array().required().items({
-          symbol: Joi.string().required(),
-          name: Joi.string().required(),
-          contract_ids: Joi.object().required(),
-        })
+      query: Joi.object({
+        period: Joi.string().min(2).max(3),
+        limit: Joi.number(),
+        page: Joi.number(),
       }),
     }),
-    controller.add,
+    controller.getVolume,
   );
 
-  route.delete(
-    '/',
-    celebrate({
-      body: Joi.object({
-        symbol: Joi.string().required(),
-      }),
-    }),
-    controller.delete,
-  );
+  // route.post(
+  //   '/',
+  //   celebrate({
+  //     body: Joi.object({
+  //       tokens: Joi.array().required().items({
+  //         symbol: Joi.string().required(),
+  //         name: Joi.string().required(),
+  //         contract_ids: Joi.object().required(),
+  //       })
+  //     }),
+  //   }),
+  //   controller.add,
+  // );
+
+  // route.delete(
+  //   '/',
+  //   celebrate({
+  //     body: Joi.object({
+  //       symbol: Joi.string().required(),
+  //     }),
+  //   }),
+  //   controller.delete,
+  // );
 };

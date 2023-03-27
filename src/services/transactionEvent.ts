@@ -7,6 +7,7 @@ import {
   EventDispatcherInterface,
 } from '@/decorators/eventDispatcher';
 import dayjs from '@/utils/dayjs';
+import { getTimestampsByPeriod } from '@/utils';
 
 @Service()
 export default class TransactionEventService {
@@ -18,16 +19,10 @@ export default class TransactionEventService {
   ) {}
 
   public async getStats({ offset, limit }) {
-    const timestamps = [];
-    const now = dayjs().endOf('hour');
-    for (let i = now; i > now.clone().add(-70, 'day'); i = i.add(-1, 'hour')) {
-      timestamps.push([i.add(-1, 'hour').unix(), i.unix()]);
-    }
-
-    const ranges = timestamps.slice(offset, offset + limit);
+    const timestamps = getTimestampsByPeriod('1h', offset, limit);
 
     const values = await Promise.all(
-      ranges.map(async (timestamp) => {
+      timestamps.map(async (timestamp) => {
         const value = await this.transactionEventModel
           .aggregate([
             {
@@ -179,6 +174,89 @@ export default class TransactionEventService {
     return {
       items,
       itemCount,
+    };
+  }
+
+  public async getVolume({ symbol, addresses, period, offset, limit }) {
+    const timestamps = getTimestampsByPeriod(period, offset, limit);
+
+    const items = await Promise.all(
+      timestamps.map(async (timestamp) => {
+        const value = await this.transactionEventModel
+          .aggregate([
+            {
+              $match: {
+                symbol: symbol.toUpperCase(),
+                block_at: {
+                  $gt: timestamp[0],
+                  $lt: timestamp[1],
+                },
+                // token: { $in: addresses }
+              },
+            },
+            {
+              $project: {
+                chain_id: 1,
+                symbol: 1,
+                price: 1,
+                usd_value: 1,
+                is_price_gt_0: {
+                  $cond: { if: { $gt: ['$price', 0] }, then: 1, else: 0 },
+                },
+                is_buy: {
+                  $cond: { if: { $eq: ['$from_account_type', 'liquidity_pool'] }, then: 1, else: 0 },
+                },
+                buy_amount: {
+                  $cond: { if: { $eq: ['$from_account_type', 'liquidity_pool'] }, then: '$amount', else: 0 },
+                },
+                buy_volume: {
+                  $cond: { if: { $eq: ['$from_account_type', 'liquidity_pool'] }, then: '$usd_value', else: 0 },
+                },
+                is_sell: {
+                  $cond: { if: { $eq: ['$to_account_type', 'liquidity_pool'] }, then: 1, else: 0 },
+                },
+                sell_amount: {
+                  $cond: { if: { $eq: ['$to_account_type', 'liquidity_pool'] }, then: '$amount', else: 0 },
+                },
+                sell_volume: {
+                  $cond: { if: { $eq: ['$to_account_type', 'liquidity_pool'] }, then: '$usd_value', else: 0 },
+                }
+              },
+            },
+            {
+              $group: {
+                _id: '$chain_id',
+                event_count: { $sum: 1 },
+                buy_count: { $sum: '$is_buy' },
+                buy_amount: { $sum: '$buy_amount' },
+                buy_volume: { $sum: '$buy_volume' },
+
+                sell_count: { $sum: '$is_sell' },
+                sell_amount: { $sum: '$sell_amount' },
+                sell_volume: { $sum: '$sell_volume' },
+
+                usd_value: { $sum: '$usd_value' },
+              },
+            },
+            {
+              $sort: {
+                usd_value: -1,
+              },
+            },
+          ])
+          .exec();
+
+        return {
+          from_time: timestamp[0],
+          to_time: timestamp[1],          
+          value: value,
+        }
+      }),
+    );
+
+    return {
+      items,
+      itemCount: items.length,
     };
   }
 }
