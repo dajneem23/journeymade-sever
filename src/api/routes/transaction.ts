@@ -55,7 +55,7 @@ export default (app: Router) => {
     celebrate({
       query: Joi.object({
         page: Joi.number(),
-        limit: Joi.number(),
+        limit: Joi.number().min(1).max(5),
       }),
     }),
     controller.getStats,

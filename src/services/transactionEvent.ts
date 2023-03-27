@@ -19,9 +19,9 @@ export default class TransactionEventService {
 
   public async getStats({ offset, limit }) {
     const timestamps = [];
-    const now = dayjs().endOf('day');
-    for (let i = now; i > now.clone().add(-70, 'day'); i = i.add(-1, 'day')) {
-      timestamps.push([i.add(-1, 'day').unix(), i.unix()]);
+    const now = dayjs().endOf('hour');
+    for (let i = now; i > now.clone().add(-70, 'day'); i = i.add(-1, 'hour')) {
+      timestamps.push([i.add(-1, 'hour').unix(), i.unix()]);
     }
 
     const ranges = timestamps.slice(offset, offset + limit);
@@ -67,6 +67,11 @@ export default class TransactionEventService {
         const count = value.reduce((sum, value) => {
           return sum + value.count;
         }, 0);
+
+        const countValidTokenPrice = value.reduce((sum, value) => {
+          return sum + (+value.has_price_count > 0 ? value.count : 0);
+        }, 0);
+
         const hasPriceCount = value.reduce((sum, value) => {
           return sum + +value.has_price_count;
         }, 0);
@@ -74,15 +79,23 @@ export default class TransactionEventService {
           return sum + +value.usd_value;
         }, 0);
 
+        const noTokenPriceTokens = value.filter(value => {
+          return +value.count > 0 && +value.has_price_count === 0;
+        })
+
         return {
           timestamps: [timestamp[0], timestamp[1]],
           times: [
             dayjs(timestamp[0] * 1000).format(),
             dayjs(timestamp[1] * 1000).format(),
           ],
-          count,
+          count: countValidTokenPrice,
           has_price_count: hasPriceCount,
           sum_usd_value: sumUsdValue,
+          
+          no_token_price_count: noTokenPriceTokens.reduce((sum, value) => { return sum + value.count }, 0),
+          no_token_price_tokens: noTokenPriceTokens.map(value => value._id),
+
           by_token: value,
         };
       }),
