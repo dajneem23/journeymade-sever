@@ -51,7 +51,7 @@ export default ({ app }: { app: express.Application }) => {
   app.use(hpp());
 
   // Routes
-  app.use(paginate.middleware(50, 200));
+  app.use(paginate.middleware(10, 50));
 
   // Load API routes
   app.use(`${config.api.prefix}/${config.api.version}`, routes());

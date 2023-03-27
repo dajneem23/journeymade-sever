@@ -23,7 +23,7 @@ export default class PriceService {
   }: IPriceOTD): Promise<{ items: IPrice[]; itemCount: number }> {
     const filters = {};
     if (symbol) {
-      filters['symbol'] = symbol;
+      filters['symbol'] = symbol.toUpperCase();
     }
     if (from_time) {
       filters['timestamp'] = { $gte: from_time };
@@ -48,6 +48,46 @@ export default class PriceService {
       items,
       itemCount,
     };
+  }
+
+  public async getAVGPrice({
+    symbol,
+    from_time,
+    to_time,
+  }: IPriceOTD) {
+    const value = await this.priceModel
+      .aggregate([
+        {
+          $match: {
+            symbol: symbol.toUpperCase(),
+            timestamp: {
+              $gt: from_time,
+              $lte: to_time,
+            },
+          },
+        },
+        {
+          $project: {
+            symbol: 1,
+            price: 1,
+            usd_value: 1,
+            price_gt_0: {
+              $cond: { if: { $gt: ['$price', 0] }, then: '$price', else: 0 },
+            },
+          },
+        },
+        {
+          $group: {
+            _id: '$symbol',
+            price: { $avg: '$price_gt_0' },
+            high: { $max: '$price_gt_0' },
+            low: { $min: '$price_gt_0' },
+          },
+        },
+      ])
+      .exec();
+
+    return value;
   }
 
   public async insert(prices: IPrice[]): Promise<any> {

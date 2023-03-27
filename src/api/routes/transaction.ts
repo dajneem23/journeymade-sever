@@ -56,10 +56,10 @@ export default (app: Router) => {
       query: Joi.object({
         period: Joi.string().min(2).max(3),
         page: Joi.number(),
-        limit: Joi.number().min(1).max(5),
+        limit: Joi.number().default(5)
       }),
     }),
-    controller.getStats,
+    controller.getEventStats,
   );
 
   route.get(

@@ -2,12 +2,15 @@ import { SuccessResponse } from '@/core';
 import AppError from '@/core/appError';
 import { IToken, ITokenVolume } from '@/interfaces';
 import TransactionEventService from '@/services/transactionEvent';
+import { getTimestampsByPeriod } from '@/utils';
 import { NextFunction, Request, Response } from 'express';
 import paginate from 'express-paginate';
 import { Container, Service } from 'typedi';
 
 import { Logger } from 'winston';
 import TokenService from '../../services/token';
+import { EPeriod } from '../../interfaces/EPeriod';
+import { sumArrayByField } from '../../utils/sumArrayByField';
 
 @Service()
 export default class TokenController {
@@ -47,52 +50,60 @@ export default class TokenController {
     logger.debug('Calling get endpoint with query: %o', req.query);
 
     const { name } = req.params;
-    const { period = '1h', page = 1, limit = 10 } = req.query;
+    const { period = EPeriod['1h'], page = 1, limit = 10 } = req.query;
+    const offset = +req['skip'] || 0;
 
     try {
-      const serviceInstance = Container.get(TransactionEventService);
-      const { itemCount, items } = await serviceInstance.getVolume({
-        symbol: name,
-        addresses: [],
-        period,
-        offset: +req['skip'] || 0,
+      const service = Container.get(TransactionEventService);
+      const timestamps = getTimestampsByPeriod({
+        period: period as EPeriod,
+        offset: +offset,
         limit: +limit,
       });
 
-      const updated: ITokenVolume[] = items.map((item) => {
-        return {
-          from_time: item.from_time,
-          to_time: item.to_time,
-          chains: item.value.map((c) => {
-            return {
-              id: c._id,
-              sell: {
-                count: c.sell_count,
-                volume: c.sell_volume,
-              },
-              buy: {
-                count: c.buy_count,
-                volume: c.buy_volume,
-              }
-            };
+      const items = await Promise.all(
+        timestamps.map(async (timestamp) => {
+          const item = await service.getVolume({
+            symbol: name,
+            timestamp
           })
-        }
-      });
 
-      const pageCount = Math.ceil(itemCount / +limit);
+          return <ITokenVolume>{
+            from_time: timestamp[0],
+            to_time: timestamp[1],
+            sell: {
+              count: sumArrayByField(item, 'sell_count'),
+              volume: sumArrayByField(item, 'sell_volume'),
+            },
+            buy: {
+              count: sumArrayByField(item, 'buy_count'),
+              volume: sumArrayByField(item, 'buy_volume'),
+            },
+            chains: item.map((c) => {
+              return {
+                id: c._id,
+                sell: {
+                  count: c.sell_count,
+                  volume: c.sell_volume,
+                },
+                buy: {
+                  count: c.buy_count,
+                  volume: c.buy_volume,
+                },
+              };
+            })
+          }
+        })
+      )
+
       const success = new SuccessResponse(res, {
-        data: {
-          items: updated,
-          has_more: paginate.hasNextPages(req)(pageCount),
-          page: +page,
-          total: itemCount,
-        },
+        data: items
       });
 
       success.send();
     } catch (err) {
       next(err);
-    }   
+    }
   }
 
   public async add(req: Request, res: Response, next: NextFunction) {

@@ -8,10 +8,13 @@ import dayjs from '@/utils/dayjs';
 import { Logger } from 'winston';
 import { IPrice } from '../../interfaces/IPrice';
 import PriceService from '../../services/price';
+import { EPeriod } from '@/interfaces';
+import { getTimestampsByPeriod } from '@/utils';
 
 @Service()
 export default class PriceController {
-  constructor() {}
+  constructor() {
+  }
 
   public async getList(req: Request, res: Response, next: NextFunction) {
     const logger: Logger = Container.get('logger');
@@ -23,29 +26,41 @@ export default class PriceController {
       const now = dayjs();
       const { 
         from_time = now.add(-7, 'day').unix(), 
-        to_time = now.unix(),  
+        to_time = now.unix(), 
+        period,
         page = 1,
-        limit = 100,
-      } =
-        req.body;
+        limit = 10,
+      } = req.query;
+      const offset = +req['skip'] || 0;
 
-      const serviceInstance = Container.get(PriceService);
-      const { itemCount, items } = await serviceInstance.getPriceList({
-        symbol,
-        from_time,
-        to_time,
-        offset: +req['skip'] || 0,
+      const timestamps = getTimestampsByPeriod({
+        period: period as EPeriod, 
         limit: +limit,
-      });
+        offset: +offset,
+        from_time: +from_time,
+        to_time: +to_time,
+      });  
 
-      const pageCount = Math.ceil(itemCount / +limit);
+      const service = Container.get(PriceService);
+      const data = await Promise.all(
+        timestamps.map(async (timestamp) => {
+          const value = await service.getAVGPrice({ symbol, from_time: timestamp[0], to_time: timestamp[1] });
+          const { price, high, low } = (value && value[0]) || {};
+        
+          return {
+            from_time: timestamp[0],
+            to_time: timestamp[1],
+            from_time_str: dayjs.unix(timestamp[0]).format('YYYY-MM-DD HH:mm:ss'),
+            to_time_str: dayjs.unix(timestamp[1]).format('YYYY-MM-DD HH:mm:ss'),
+            price: +price,
+            high: +high,
+            low: +low
+          }
+        })
+      )
+      
       const success = new SuccessResponse(res, {
-        data: {
-          items,
-          has_more: paginate.hasNextPages(req)(pageCount),
-          page: +page,
-          total: itemCount,
-        },
+        data,
       });
 
       success.send();

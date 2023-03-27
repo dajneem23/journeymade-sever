@@ -7,7 +7,9 @@ import { Container, Service } from 'typedi';
 import TransactionService from '@/services/transaction';
 import TransactionEventService from '@/services/transactionEvent';
 import { Logger } from 'winston';
-import { ITransaction } from '../../interfaces';
+import { EPeriod, ITransaction } from '../../interfaces';
+import { getTimestampsByPeriod } from '@/utils';
+import dayjs from '@/utils/dayjs';
 
 @Service()
 export default class TransactionController {
@@ -55,21 +57,62 @@ export default class TransactionController {
     }
   }
 
-  public async getStats(req: Request, res: Response, next: NextFunction) {
+  public async getEventStats(req: Request, res: Response, next: NextFunction) {
     const logger: Logger = Container.get('logger');
     logger.debug('Calling get endpoint with query: %o', req.query);
 
     const {
-      page,
-      limit,
+      limit = 12,
     } = req.query;
+    const offset = +req['skip'] || 0;
 
     try {
-      const serviceInstance = Container.get(TransactionEventService);
-      const stats = await serviceInstance.getStats({
-        offset: +req['skip'] || 0,
+      const timestamps = getTimestampsByPeriod({
+        period: EPeriod['1h'],
         limit: +limit,
+        offset,
       });
+
+      const service = Container.get(TransactionEventService);
+
+      const stats = await Promise.all(
+        timestamps.map(async (timestamp) => {
+          const value = await service.groupByTokenSymbol({ timestamp });
+
+          const countValidTokenPrice = value.reduce((sum, value) => {
+            return sum + (+value.has_price_count > 0 ? value.count : 0);
+          }, 0);
+  
+          const hasPriceCount = value.reduce((sum, value) => {
+            return sum + +value.has_price_count;
+          }, 0);
+          const sumUsdValue = value.reduce((sum, value) => {
+            return sum + +value.usd_value;
+          }, 0);
+  
+          const noTokenPriceTokens = value.filter((value) => {
+            return +value.count > 0 && +value.has_price_count === 0;
+          });
+
+          return {
+            timestamps: [timestamp[0], timestamp[1]],
+            times: [
+              dayjs(timestamp[0] * 1000).format(),
+              dayjs(timestamp[1] * 1000).format(),
+            ],
+            count: countValidTokenPrice,
+            has_price_count: hasPriceCount,
+            sum_usd_value: sumUsdValue,
+  
+            no_token_price_count: noTokenPriceTokens.reduce((sum, value) => {
+              return sum + value.count;
+            }, 0),
+            no_token_price_tokens: noTokenPriceTokens.map((value) => value._id),
+  
+            by_token: value,
+          };
+        })
+      )
 
       const success = new SuccessResponse(res, {
         data: stats,
