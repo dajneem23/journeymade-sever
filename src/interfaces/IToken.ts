@@ -24,7 +24,6 @@ export interface ITokenResponse {
 
   chains: string[];
   addresses: string[];
-  listedIn: string[];  
 }
 
 
@@ -48,4 +47,23 @@ export interface ITokenDetailResponse {
   dailyVolume?: number;
   total24hVolume?: number;
   totalAllTime?: number;
+}
+
+export interface ITokenHolderStatsResponse {
+  name: string,
+  count: number,
+  volume: number,
+}
+
+export interface ITokenSignalResponse {
+  title: string;
+  description?: string;
+  from_time: number;
+  to_time: number;
+  period?: string;
+  holders?: ITokenHolderStatsResponse[];
+  lead_zone?: {
+    tags?: string[],
+    address?: string,
+  }
 }

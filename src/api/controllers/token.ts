@@ -1,6 +1,13 @@
 import { SuccessResponse } from '@/core';
 import AppError from '@/core/appError';
-import { IToken, ITokenDetailResponse, ITokenResponse, ITokenVolume } from '@/interfaces';
+import {
+  IToken,
+  ITokenDetailResponse,
+  ITokenHolderStatsResponse,
+  ITokenResponse,
+  ITokenSignalResponse,
+  ITokenVolume,
+} from '@/interfaces';
 import TransactionEventService from '@/services/transactionEvent';
 import { getTimestampsByPeriod, groupBy } from '@/utils';
 import { NextFunction, Request, Response } from 'express';
@@ -17,6 +24,56 @@ import { ErrorResponse } from '../../core/responseTemplate';
 export default class TokenController {
   constructor() {}
 
+  public async getById(req: Request, res: Response, next: NextFunction) {
+    const logger: Logger = Container.get('logger');
+    logger.debug('Calling get endpoint with query: %o', req.query);
+
+    const { id } = req.params;
+
+    try {
+      const service = Container.get(TokenService);
+      const tokens = await service.getByID(id);
+
+      if (!tokens || tokens.length === 0) {
+        const notFound = new ErrorResponse(res, {
+          data: {},
+          status: 'error',
+          message: 'Token not found',
+          code: 404,
+        });
+
+        notFound.send();
+      }
+
+      const result = <ITokenDetailResponse>{
+        id: tokens[0].id,
+        name: tokens[0].name,
+        symbol: tokens[0].symbol,
+        coingeckoId: tokens[0].coingeckoId,
+        logoURI: tokens[0].logoURI,
+
+        chains: tokens.map((t) => {
+          return {
+            id: t.chainId,
+            address: t.address,
+            decimals: t.decimals,
+            listedIn: t.listedIn,
+          };
+        }),
+
+        circulatingSupply: 10,
+        totalSupply: 100,
+      };
+      const success = new SuccessResponse(res, {
+        data: result,
+      });
+
+      success.send();
+    } catch (err) {
+      next(err);
+    }
+  }
+
   public async getList(req: Request, res: Response, next: NextFunction) {
     const logger: Logger = Container.get('logger');
     logger.debug('Calling get endpoint with query: %o', req.query);
@@ -29,7 +86,6 @@ export default class TokenController {
         offset: +req['skip'] || 0,
         limit: 1000,
       });
-
 
       const tokens = groupBy(items, 'id');
       const tokenIds = Object.keys(tokens);
@@ -44,8 +100,8 @@ export default class TokenController {
 
           chains: elms.map((t) => t.chainId),
           addresses: elms.map((t) => t.address),
-        }
-      })
+        };
+      });
 
       const success = new SuccessResponse(res, {
         data: {
@@ -95,8 +151,8 @@ export default class TokenController {
         timestamps.map(async (timestamp) => {
           const item = await service.getVolume({
             address_list: tokens.map((t) => t.address),
-            timestamp
-          })
+            timestamp,
+          });
 
           return <ITokenVolume>{
             from_time: timestamp[0],
@@ -121,13 +177,13 @@ export default class TokenController {
                   volume: c.buy_volume,
                 },
               };
-            })
-          }
-        })
-      )
+            }),
+          };
+        }),
+      );
 
       const success = new SuccessResponse(res, {
-        data: items
+        data: items,
       });
 
       success.send();
@@ -136,48 +192,139 @@ export default class TokenController {
     }
   }
 
-  public async getDetails(req: Request, res: Response, next: NextFunction) {
+  public async getHolderStats(req: Request, res: Response, next: NextFunction) {
     const logger: Logger = Container.get('logger');
     logger.debug('Calling get endpoint with query: %o', req.query);
 
     const { id } = req.params;
+    const { period = EPeriod['1h'], page = 1, limit = 10 } = req.query;
+    const offset = +req['skip'] || 0;
 
-    try {
-    const service = Container.get(TokenService);
-    const tokens = await service.getByID(id);
-
+    const tokenService = Container.get(TokenService);
+    const tokens = await tokenService.getByID(id);
     if (!tokens || tokens.length === 0) {
-      const notFound = new ErrorResponse(res, {
+      const error = new ErrorResponse(res, {
+        message: 'Token not found',
+        code: 404,
         data: {},
         status: 'error',
-        message: 'Token not found',
-        code: 404
       });
-  
-      notFound.send();
+      error.send();
+      return;
     }
-    
-    const result = <ITokenDetailResponse>{
-      id: tokens[0].id,
-      name: tokens[0].name,
-      symbol: tokens[0].symbol,
-      coingeckoId: tokens[0].coingeckoId,
-      logoURI: tokens[0].logoURI,
 
-      chains: tokens.map((t) => {
-        return {
-          id: t.chainId,
-          address: t.address,
-          decimals: t.decimals,
-          listedIn: t.listedIn
-        }
-      }),
+    try {
+      const service = Container.get(TransactionEventService);
+      const timestamps = getTimestampsByPeriod({
+        period: period as EPeriod,
+        offset: +offset,
+        limit: +limit,
+      });
 
-      circulatingSupply: 10,
-      totalSupply: 100,
-    }
+      const items = [
+        <ITokenHolderStatsResponse>{
+          name: 'whale',
+          count: 10,
+          volume: 100,
+        },
+        <ITokenHolderStatsResponse>{
+          name: 'smart_money',
+          count: 3,
+          volume: 20,
+        },
+        <ITokenHolderStatsResponse>{
+          name: 'vc',
+          count: 1,
+          volume: 5,
+        },
+        <ITokenHolderStatsResponse>{
+          name: 'market_maker',
+          count: 2,
+          volume: 8,
+        },
+        <ITokenHolderStatsResponse>{
+          name: 'kol',
+          count: 3,
+          volume: 8,
+        },
+        <ITokenHolderStatsResponse>{
+          name: 'token_fan',
+          count: 2,
+          volume: 8,
+        },
+      ];
+
       const success = new SuccessResponse(res, {
-        data: result
+        data: items,
+      });
+
+      success.send();
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  public async getSignals(req: Request, res: Response, next: NextFunction) {
+    const logger: Logger = Container.get('logger');
+    logger.debug('Calling get endpoint with query: %o', req.query);
+
+    const { id } = req.params;
+    const { period = EPeriod['1h'], page = 1, limit = 10 } = req.query;
+    const offset = +req['skip'] || 0;
+
+    const tokenService = Container.get(TokenService);
+    const tokens = await tokenService.getByID(id);
+    if (!tokens || tokens.length === 0) {
+      const error = new ErrorResponse(res, {
+        message: 'Token not found',
+        code: 404,
+        data: {},
+        status: 'error',
+      });
+      error.send();
+      return;
+    }
+
+    try {
+      const service = Container.get(TransactionEventService);
+      const timestamps = getTimestampsByPeriod({
+        period: period as EPeriod,
+        offset: +offset,
+        limit: +limit,
+      });
+
+      const items = timestamps.map(timestamp => {
+        return <ITokenSignalResponse>{
+          title: 'Alert: 123',
+          description: 'bullist',
+          from_time: timestamp[0],
+          to_time: timestamp[1],
+          holders: [
+            <ITokenHolderStatsResponse>{
+              name: 'whale',
+              count: 10,
+              volume: 100,
+            },
+            <ITokenHolderStatsResponse>{
+              name: 'smart_money',
+              count: 3,
+              volume: 20,
+            },
+            <ITokenHolderStatsResponse>{
+              name: 'vc',
+              count: 1,
+              volume: 5,
+            },
+          ],
+          lead_zone: {
+            tags: ['whale', 'smart_money'],
+            address: '0x123',
+          }
+        }
+      });
+
+      const success = new SuccessResponse(res, {
+        data: items,
       });
 
       success.send();

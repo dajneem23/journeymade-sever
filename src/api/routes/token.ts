@@ -29,7 +29,7 @@ export default (app: Router) => {
         id: Joi.string().required(),
       }),
     }),
-    controller.getDetails,
+    controller.getById,
   );
 
   route.get(
@@ -42,6 +42,16 @@ export default (app: Router) => {
       }),
     }),
     controller.getVolume,
+  );
+
+  route.get(
+    '/:id/holder-stats',
+    controller.getHolderStats,
+  );
+
+  route.get(
+    '/:id/signals',
+    controller.getSignals,
   );
 
   // route.post(
