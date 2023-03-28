@@ -9,6 +9,7 @@ import transaction from './routes/transaction';
 import group from './routes/group';
 import groupFootprint from './routes/groupFootprint';
 import signal from './routes/signal';
+import behavior from './routes/behavior';
 
 export default () => {
   const app = Router();
@@ -21,6 +22,7 @@ export default () => {
   group(app);
   groupFootprint(app);
   signal(app);
+  behavior(app);
 
   return app;
 };

@@ -217,90 +217,111 @@ export default class TransactionEventService {
 
   public async getVolume({ address_list, timestamp }) {
     return await this.transactionEventModel
-    .aggregate([
-      {
-        $match: {
-          token: { $in: address_list },
-          block_at: {
-            $gt: timestamp[0],
-            $lt: timestamp[1],
-          },
-        },
-      },
-      {
-        $project: {
-          chain_id: 1,
-          symbol: 1,
-          price: 1,
-          usd_value: 1,
-          is_price_gt_0: {
-            $cond: { if: { $gt: ['$price', 0] }, then: 1, else: 0 },
-          },
-          is_buy: {
-            $cond: {
-              if: { $eq: ['$from_account_type', 'liquidity_pool'] },
-              then: 1,
-              else: 0,
-            },
-          },
-          buy_amount: {
-            $cond: {
-              if: { $eq: ['$from_account_type', 'liquidity_pool'] },
-              then: '$amount',
-              else: 0,
-            },
-          },
-          buy_volume: {
-            $cond: {
-              if: { $eq: ['$from_account_type', 'liquidity_pool'] },
-              then: '$usd_value',
-              else: 0,
-            },
-          },
-          is_sell: {
-            $cond: {
-              if: { $eq: ['$to_account_type', 'liquidity_pool'] },
-              then: 1,
-              else: 0,
-            },
-          },
-          sell_amount: {
-            $cond: {
-              if: { $eq: ['$to_account_type', 'liquidity_pool'] },
-              then: '$amount',
-              else: 0,
-            },
-          },
-          sell_volume: {
-            $cond: {
-              if: { $eq: ['$to_account_type', 'liquidity_pool'] },
-              then: '$usd_value',
-              else: 0,
+      .aggregate([
+        {
+          $match: {
+            token: { $in: address_list },
+            block_at: {
+              $gt: timestamp[0],
+              $lt: timestamp[1],
             },
           },
         },
-      },
-      {
-        $group: {
-          _id: '$chain_id',
-          event_count: { $sum: 1 },
-          buy_count: { $sum: '$is_buy' },
-          buy_amount: { $sum: '$buy_amount' },
-          buy_volume: { $sum: '$buy_volume' },
+        {
+          $project: {
+            chain_id: 1,
+            symbol: 1,
+            price: 1,
+            usd_value: 1,
+            is_price_gt_0: {
+              $cond: { if: { $gt: ['$price', 0] }, then: 1, else: 0 },
+            },
+            is_buy: {
+              $cond: {
+                if: { $eq: ['$from_account_type', 'liquidity_pool'] },
+                then: 1,
+                else: 0,
+              },
+            },
+            buy_amount: {
+              $cond: {
+                if: { $eq: ['$from_account_type', 'liquidity_pool'] },
+                then: '$amount',
+                else: 0,
+              },
+            },
+            buy_volume: {
+              $cond: {
+                if: { $eq: ['$from_account_type', 'liquidity_pool'] },
+                then: '$usd_value',
+                else: 0,
+              },
+            },
+            is_sell: {
+              $cond: {
+                if: { $eq: ['$to_account_type', 'liquidity_pool'] },
+                then: 1,
+                else: 0,
+              },
+            },
+            sell_amount: {
+              $cond: {
+                if: { $eq: ['$to_account_type', 'liquidity_pool'] },
+                then: '$amount',
+                else: 0,
+              },
+            },
+            sell_volume: {
+              $cond: {
+                if: { $eq: ['$to_account_type', 'liquidity_pool'] },
+                then: '$usd_value',
+                else: 0,
+              },
+            },
+          },
+        },
+        {
+          $group: {
+            _id: '$chain_id',
+            event_count: { $sum: 1 },
+            buy_count: { $sum: '$is_buy' },
+            buy_amount: { $sum: '$buy_amount' },
+            buy_volume: { $sum: '$buy_volume' },
 
-          sell_count: { $sum: '$is_sell' },
-          sell_amount: { $sum: '$sell_amount' },
-          sell_volume: { $sum: '$sell_volume' },
+            sell_count: { $sum: '$is_sell' },
+            sell_amount: { $sum: '$sell_amount' },
+            sell_volume: { $sum: '$sell_volume' },
 
-          usd_value: { $sum: '$usd_value' },
+            usd_value: { $sum: '$usd_value' },
+          },
         },
-      },
-      {
-        $sort: {
-          usd_value: -1,
+        {
+          $sort: {
+            usd_value: -1,
+          },
         },
-      },
-    ])
-    .exec();
+      ])
+      .exec();
+  }
+
+  public async getListByFilters({ addresses, min_usd_value, timestamp }) {
+    return await this.transactionEventModel
+      .find({
+        token: { $in: addresses },
+        block_at: {
+          $gt: timestamp[0],
+          $lt: timestamp[1],
+        },
+        usd_value: {
+          $gt: min_usd_value || 0,
+        },
+      })
+      .select({
+        _id: 0,
+        log_index: 0,
+        tx_hash: 0
+      })
+      .lean()
+      .exec();
   }
 }

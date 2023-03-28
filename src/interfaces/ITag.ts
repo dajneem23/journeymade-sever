@@ -6,6 +6,28 @@ export enum EnumTagType {
   protocol = 'protocol',
 }
 
+export enum EAccountTags {
+  CryptoExchanges = 'CE',
+  SmartContract = 'SC',
+  SmartMoney = 'SM',
+  MarketMaker = 'MM',  
+  TopHolders = 'TH',
+
+  HighActivity = 'HA',
+  HighBalance = 'HB',
+  
+  Bot = 'BOT',
+
+  Investor = 'VC',
+  Capital = 'VC',
+
+  Binance = 'BINANCE',
+  Gate = 'GATE',
+
+  Whale = 'WHALE',
+  Millionaire = 'WHALE',
+}
+
 export interface ITag {
   id: string,
   name: string,
