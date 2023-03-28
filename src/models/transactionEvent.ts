@@ -67,15 +67,6 @@ const schema = new Schema(
   },
 );
 
-schema.index(
-  {
-    tx_hash: 1
-  },
-  {
-    background: true,
-  },
-);
-
 // TODO
 const name = 'tx-event';
 export default mongoose.connection
