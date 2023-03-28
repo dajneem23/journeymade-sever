@@ -23,7 +23,17 @@ export default (app: Router) => {
   );
 
   route.get(
-    '/:name/volume',
+    '/:id',
+    celebrate({
+      params: Joi.object({
+        id: Joi.string().required(),
+      }),
+    }),
+    controller.getDetails,
+  );
+
+  route.get(
+    '/:id/volume',
     celebrate({
       query: Joi.object({
         period: Joi.string().min(2).max(3),

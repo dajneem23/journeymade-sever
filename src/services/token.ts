@@ -42,6 +42,10 @@ export default class TokenService {
     };
   }
 
+  public async getByID(id) {
+    return await this.tokenModel.find({ id }).lean().exec();
+  }
+
   public async insert(tokens: IToken[]): Promise<any> {
     const updateOps = tokens.map((token) => {
       return {

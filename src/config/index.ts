@@ -26,7 +26,9 @@ export default {
 
   port: parseInt(process.env.PORT, 10),
 
-  mongoDbURI: process.env.INTERNAL_MONGO_URI || process.env.MONGO_URI,
+  mongoDbURI: isProduction
+    ? process.env.INTERNAL_MONGO_URI || process.env.MONGO_URI
+    : process.env.MONGO_URI,
   mongoDbNames: {
     onchain: isProduction ? 'onchain' : 'onchain-dev',
     onchainApp: isProduction ? 'onchain-app' : 'onchain-app-dev',
@@ -60,7 +62,7 @@ export default {
   },
 
   redis: {
-    uri: process.env.INTERNAL_REDIS_URI || process.env.REDIS_URI,
+    uri: isProduction ? (process.env.INTERNAL_REDIS_URI || process.env.REDIS_URI) : process.env.REDIS_URI,
     port: +process.env.REDIS_PORT,
     host: process.env.REDIS_HOST,
     password: process.env.REDIS_PASSWORD,
@@ -69,5 +71,5 @@ export default {
   telegram: {
     botToken: process.env.TELEGRAM_BOT_TOKEN,
     chatId: process.env.TELEGRAM_CHAT_ID,
-  }
+  },
 };

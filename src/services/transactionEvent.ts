@@ -215,12 +215,12 @@ export default class TransactionEventService {
     };
   }
 
-  public async getVolume({ symbol, timestamp }) {
+  public async getVolume({ address_list, timestamp }) {
     return await this.transactionEventModel
     .aggregate([
       {
         $match: {
-          symbol: symbol.toUpperCase(),
+          token: { $in: address_list },
           block_at: {
             $gt: timestamp[0],
             $lt: timestamp[1],

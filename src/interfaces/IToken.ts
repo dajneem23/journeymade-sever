@@ -1,37 +1,5 @@
-// export enum EnumChainNames {
-//   'evmos' = 'evmos',
-//   'canto' = 'canto',
-//   'binance-smart-chain' = 'binance-smart-chain',
-//   'osmosis' = 'osmosis',
-
-//   'avalanche' = 'avalanche',
-//   'step-network' = 'step-network',
-//   'defi-kingdoms-blockchain' = 'defi-kingdoms-blockchain',
-//   'milkomeda-cardano' = 'milkomeda-cardano',
-//   'polygon-pos' = 'polygon-pos',
-//   'moonbeam' = 'moonbeam',
-//   'harmony-shard-0' = 'harmony-shard-0',
-//   'moonriver' = 'moonriver',
-
-//   'ethereum' = 'ethereum',
-//   'near-protocol' = 'near-protocol',
-//   'energi' = 'energi',
-//   'fantom' = 'fantom',
-//   'sora' = 'sora',
-//   'arbitrum-one' = 'arbitrum-one',
-//   'optimistic-ethereum' = 'optimistic-ethereum',
-//   'huobi-token' = 'huobi-token',
-//   'xdai' = 'xdai',
-// }
-
-// export interface IToken {
-//   symbol: string;
-//   name: string;
-//   eth_id?: string;
-//   bsc_id?: string;
-// }
-
 export interface IToken {
+  id: String;
   symbol: string;
   name: string;
   address: string;
@@ -45,4 +13,39 @@ export interface ITokenOTD {
   symbols: string[];
   offset: number;
   limit: number;
+}
+
+export interface ITokenResponse {
+  id: string;
+  symbol: string;
+  name: string;
+  coingeckoId: string;
+  logoURI: string;
+
+  chains: string[];
+  addresses: string[];
+  listedIn: string[];  
+}
+
+
+export interface ITokenDetailResponse {
+  id: string;
+  symbol: string;
+  name: string;
+  coingeckoId: string;
+  logoURI: string;
+
+  chains: {
+    id: number;
+    address: string;
+    decimals: number;
+    listedIn?: string[];
+  }[];
+
+  circulatingSupply?: number;
+  totalSupply?: number;
+
+  dailyVolume?: number;
+  total24hVolume?: number;
+  totalAllTime?: number;
 }

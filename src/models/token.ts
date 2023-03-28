@@ -38,6 +38,7 @@ schema.index(
 );
 
 const name = 'token';
+// TODO
 export default mongoose.connection
   .useDb(config.mongoDbNames.onchain)
   .model<IToken & Document>(name, schema, name);

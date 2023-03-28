@@ -50,5 +50,5 @@ schema.index(
 const name = 'token-price'
 // TODO
 export default mongoose.connection
-  .useDb('onchain' || config.mongoDbNames.onchain)
+  .useDb(config.mongoDbNames.onchain)
   .model<IPrice & Document>(name, schema, name);

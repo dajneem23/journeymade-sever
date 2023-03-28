@@ -11,7 +11,7 @@ export default (app: Router) => {
   const controller = Container.get(PriceController);
 
   route.get(
-    '/:symbol',
+    '/:tokenId',
     celebrate({
       query: Joi.object({
         from_time: Joi.number(),

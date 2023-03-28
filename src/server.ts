@@ -12,7 +12,7 @@ async function startServer() {
     .listen(config.port, () => {
       Logger.info(`
       ################################################
-      🛡️  Server listening on port: ${config.port} 🛡️
+      🛡️  Server listening on port: ${config.port} ${config.nodeEnv} 🛡️
       ################################################
     `);
     })

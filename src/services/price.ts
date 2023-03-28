@@ -14,44 +14,8 @@ export default class PriceService {
     @EventDispatcher() private eventDispatcher: EventDispatcherInterface,
   ) {}
 
-  public async getPriceList({
-    symbol,
-    offset,
-    limit,
-    from_time,
-    to_time,
-  }: IPriceOTD): Promise<{ items: IPrice[]; itemCount: number }> {
-    const filters = {};
-    if (symbol) {
-      filters['symbol'] = symbol.toUpperCase();
-    }
-    if (from_time) {
-      filters['timestamp'] = { $gte: from_time };
-    }
-
-    if (to_time) {
-      filters['timestamp'] = { $lte: to_time };
-    }
-
-    const [items, itemCount] = await Promise.all([
-      this.priceModel
-        .find(filters)
-        .skip(offset)
-        .limit(limit)
-        .select({ updated_at: 0, _id: 0 })
-        .lean()
-        .exec(),
-      this.priceModel.count(filters),
-    ]);
-
-    return {
-      items,
-      itemCount,
-    };
-  }
-
   public async getAVGPrice({
-    symbol,
+    token_id,
     from_time,
     to_time,
   }: IPriceOTD) {
@@ -59,7 +23,7 @@ export default class PriceService {
       .aggregate([
         {
           $match: {
-            symbol: symbol.toUpperCase(),
+            token_id: token_id,
             timestamp: {
               $gt: from_time,
               $lte: to_time,

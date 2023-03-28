@@ -7,7 +7,7 @@ export interface IPrice {
 }
 
 export interface IPriceOTD {
-  symbol: string;
+  token_id: string;
   from_time: number;
   to_time: number;
   offset?: number;

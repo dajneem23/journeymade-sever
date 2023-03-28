@@ -1,8 +1,8 @@
 import { SuccessResponse } from '@/core';
 import AppError from '@/core/appError';
-import { IToken, ITokenVolume } from '@/interfaces';
+import { IToken, ITokenDetailResponse, ITokenResponse, ITokenVolume } from '@/interfaces';
 import TransactionEventService from '@/services/transactionEvent';
-import { getTimestampsByPeriod } from '@/utils';
+import { getTimestampsByPeriod, groupBy } from '@/utils';
 import { NextFunction, Request, Response } from 'express';
 import paginate from 'express-paginate';
 import { Container, Service } from 'typedi';
@@ -11,6 +11,7 @@ import { Logger } from 'winston';
 import TokenService from '../../services/token';
 import { EPeriod } from '../../interfaces/EPeriod';
 import { sumArrayByField } from '../../utils/sumArrayByField';
+import { ErrorResponse } from '../../core/responseTemplate';
 
 @Service()
 export default class TokenController {
@@ -29,13 +30,29 @@ export default class TokenController {
         limit: 1000,
       });
 
-      const pageCount = Math.ceil(itemCount / 1000);
+
+      const tokens = groupBy(items, 'id');
+      const tokenIds = Object.keys(tokens);
+      const result = tokenIds.map((id) => {
+        const elms = tokens[id];
+        return <ITokenResponse>{
+          id: elms[0].id,
+          name: elms[0].name,
+          symbol: elms[0].symbol,
+          coingeckoId: elms[0].coingeckoId,
+          logoURI: elms[0].logoURI,
+
+          chains: elms.map((t) => t.chainId),
+          addresses: elms.map((t) => t.address),
+        }
+      })
+
       const success = new SuccessResponse(res, {
         data: {
-          items,
-          has_more: paginate.hasNextPages(req)(pageCount),
-          page: +page,
-          total: itemCount,
+          items: result,
+          has_more: false,
+          page: 1,
+          total: result.length,
         },
       });
 
@@ -49,9 +66,22 @@ export default class TokenController {
     const logger: Logger = Container.get('logger');
     logger.debug('Calling get endpoint with query: %o', req.query);
 
-    const { name } = req.params;
+    const { id } = req.params;
     const { period = EPeriod['1h'], page = 1, limit = 10 } = req.query;
     const offset = +req['skip'] || 0;
+
+    const tokenService = Container.get(TokenService);
+    const tokens = await tokenService.getByID(id);
+    if (!tokens || tokens.length === 0) {
+      const error = new ErrorResponse(res, {
+        message: 'Token not found',
+        code: 404,
+        data: {},
+        status: 'error',
+      });
+      error.send();
+      return;
+    }
 
     try {
       const service = Container.get(TransactionEventService);
@@ -64,7 +94,7 @@ export default class TokenController {
       const items = await Promise.all(
         timestamps.map(async (timestamp) => {
           const item = await service.getVolume({
-            symbol: name,
+            address_list: tokens.map((t) => t.address),
             timestamp
           })
 
@@ -98,6 +128,56 @@ export default class TokenController {
 
       const success = new SuccessResponse(res, {
         data: items
+      });
+
+      success.send();
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  public async getDetails(req: Request, res: Response, next: NextFunction) {
+    const logger: Logger = Container.get('logger');
+    logger.debug('Calling get endpoint with query: %o', req.query);
+
+    const { id } = req.params;
+
+    try {
+    const service = Container.get(TokenService);
+    const tokens = await service.getByID(id);
+
+    if (!tokens || tokens.length === 0) {
+      const notFound = new ErrorResponse(res, {
+        data: {},
+        status: 'error',
+        message: 'Token not found',
+        code: 404
+      });
+  
+      notFound.send();
+    }
+    
+    const result = <ITokenDetailResponse>{
+      id: tokens[0].id,
+      name: tokens[0].name,
+      symbol: tokens[0].symbol,
+      coingeckoId: tokens[0].coingeckoId,
+      logoURI: tokens[0].logoURI,
+
+      chains: tokens.map((t) => {
+        return {
+          id: t.chainId,
+          address: t.address,
+          decimals: t.decimals,
+          listedIn: t.listedIn
+        }
+      }),
+
+      circulatingSupply: 10,
+      totalSupply: 100,
+    }
+      const success = new SuccessResponse(res, {
+        data: result
       });
 
       success.send();

@@ -20,7 +20,7 @@ export default class PriceController {
     const logger: Logger = Container.get('logger');
     logger.debug('Calling get endpoint with params: %o', req.params);
 
-    const { symbol } = req.params;
+    const { tokenId } = req.params;
 
     try {
       const now = dayjs();
@@ -44,7 +44,7 @@ export default class PriceController {
       const service = Container.get(PriceService);
       const data = await Promise.all(
         timestamps.map(async (timestamp) => {
-          const value = await service.getAVGPrice({ symbol, from_time: timestamp[0], to_time: timestamp[1] });
+          const value = await service.getAVGPrice({ token_id: tokenId, from_time: timestamp[0], to_time: timestamp[1] });
           const { price, high, low } = (value && value[0]) || {};
         
           return {
