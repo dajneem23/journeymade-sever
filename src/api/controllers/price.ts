@@ -9,12 +9,12 @@ import { Logger } from 'winston';
 import { IPrice } from '../../interfaces/IPrice';
 import PriceService from '../../services/price';
 import { EPeriod } from '@/interfaces';
-import { getTimestampsByPeriod } from '@/utils';
+import { getTimeFramesByPeriod } from '@/utils';
+import { TimeFramesLimit } from '@/constants';
 
 @Service()
 export default class PriceController {
-  constructor() {
-  }
+  constructor() {}
 
   public async getList(req: Request, res: Response, next: NextFunction) {
     const logger: Logger = Container.get('logger');
@@ -24,41 +24,44 @@ export default class PriceController {
 
     try {
       const now = dayjs();
-      const { 
-        from_time = now.add(-7, 'day').unix(), 
-        to_time = now.unix(), 
+      const {
+        to_time = now.unix(),
         period,
         page = 1,
-        limit = 10,
+        limit = TimeFramesLimit,
       } = req.query;
-      const offset = +req['skip'] || 0;
-
-      const timestamps = getTimestampsByPeriod({
-        period: period as EPeriod, 
+      const timestamps = getTimeFramesByPeriod({
+        period: period as EPeriod,
         limit: +limit,
-        offset: +offset,
-        from_time: +from_time,
         to_time: +to_time,
-      });  
-
+      });
+      
       const service = Container.get(PriceService);
+      console.log("🚀 ~ file: price.ts:66 ~ PriceController ~ timestamps.map ~ timestamps:", timestamps)
       const data = await Promise.all(
-        timestamps.map(async (timestamp) => {
-          const value = await service.getAVGPrice({ token_id: tokenId, from_time: timestamp[0], to_time: timestamp[1] });
+        timestamps.map(async (timestamp, index) => {
+          const value = await service.getAVGPrice({
+            token_id: tokenId,
+            from_time: timestamp[0],
+            to_time: timestamp[1],
+          });
           const { price, high, low } = (value && value[0]) || {};
-        
+
           return {
             from_time: timestamp[0],
             to_time: timestamp[1],
-            from_time_str: dayjs.unix(timestamp[0]).format('YYYY-MM-DD HH:mm:ss'),
+            from_time_str: dayjs
+              .unix(timestamp[0])
+              .format('YYYY-MM-DD HH:mm:ss'),
             to_time_str: dayjs.unix(timestamp[1]).format('YYYY-MM-DD HH:mm:ss'),
             price: +price,
             high: +high,
-            low: +low
-          }
-        })
-      )
-      
+            low: +low,
+            time_index: index
+          };
+        }),
+      );
+
       const success = new SuccessResponse(res, {
         data,
       });

@@ -7,7 +7,7 @@ import {
   EventDispatcherInterface,
 } from '@/decorators/eventDispatcher';
 import dayjs from '@/utils/dayjs';
-import { getTimestampsByPeriod } from '@/utils';
+import { getTimeFramesByPeriod } from '@/utils';
 
 @Service()
 export default class TransactionEventService {
@@ -24,8 +24,8 @@ export default class TransactionEventService {
         {
           $match: {
             block_at: {
-              $gt: timestamp[0],
-              $lt: timestamp[1],
+              $gte: timestamp[0],
+              $lte: timestamp[1],
             },
           },
         },
@@ -64,8 +64,8 @@ export default class TransactionEventService {
             {
               $match: {
                 block_at: {
-                  $gt: timestamp[0],
-                  $lt: timestamp[1],
+                  $gte: timestamp[0],
+                  $lte: timestamp[1],
                 },
               },
             },
@@ -222,8 +222,8 @@ export default class TransactionEventService {
           $match: {
             token: { $in: address_list },
             block_at: {
-              $gt: timestamp[0],
-              $lt: timestamp[1],
+              $gte: timestamp[0],
+              $lte: timestamp[1],
             },
           },
         },
@@ -304,13 +304,13 @@ export default class TransactionEventService {
       .exec();
   }
 
-  public async getListByFilters({ addresses, min_usd_value, timestamp }) {
+  public async getListByFilters({ addresses, min_usd_value, time_frame }) {
     return await this.transactionEventModel
       .find({
         token: { $in: addresses },
         block_at: {
-          $gt: timestamp[0],
-          $lt: timestamp[1],
+          $gte: time_frame[0],
+          $lte: time_frame[1],
         },
         usd_value: {
           $gt: min_usd_value || 0,
@@ -319,7 +319,6 @@ export default class TransactionEventService {
       .select({
         _id: 0,
         log_index: 0,
-        tx_hash: 0
       })
       .lean()
       .exec();

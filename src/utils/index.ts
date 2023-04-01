@@ -5,6 +5,6 @@ export * from './resolvePromisesSeq'
 export * from './stringify'
 export * from './convertStringToArray'
 export * from './getModelName'
-export * from './getTimestampsByPeriod'
+export * from './getTimeFramesByPeriod'
 
 export * from '../core/appError'

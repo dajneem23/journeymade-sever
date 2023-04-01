@@ -8,11 +8,12 @@ import TransactionService from '@/services/transaction';
 import TransactionEventService from '@/services/transactionEvent';
 import { Logger } from 'winston';
 import { EPeriod, ITransaction } from '../../interfaces';
-import { getTimestampsByPeriod } from '@/utils';
+import { getTimeFramesByPeriod } from '@/utils';
 import dayjs from '@/utils/dayjs';
 import TokenService from '@/services/token';
 import { spawn, Thread, Worker } from "threads"
 import { Counter } from '@/workers/behavior-stats';
+import { TimeFramesLimit } from '@/constants';
 
 @Service()
 export default class BehaviorController {
@@ -39,47 +40,42 @@ export default class BehaviorController {
     try {
       const now = dayjs();
       const { 
-        from_time = now.add(-7, 'day').unix(), 
         to_time = now.unix(), 
         period,
-        page = 1,
-        limit = 10,
+        limit = TimeFramesLimit,
       } = req.query;
-      const offset = +req['skip'] || 0;
 
-      const timestamps = getTimestampsByPeriod({
+      const timeFrames = getTimeFramesByPeriod({
         period: period as EPeriod, 
         limit: +limit,
-        offset: +offset,
-        from_time: +from_time,
         to_time: +to_time,
       });  
 
       const txEventService = Container.get(TransactionEventService);
       const worker = await spawn<Counter>(new Worker("../../workers/behavior-stats"));
 
-      const data = await Promise.all(
-        timestamps.map(async (timestamp) => {
+      const data = (await Promise.all(
+        timeFrames.map(async (timeFrame) => {
           const value = await txEventService.getListByFilters({ 
             addresses: tokens.map((token) => token.address),
             min_usd_value: 1000,
-            timestamp
+            time_frame: timeFrame
           });
 
-          const updated = await worker.getStats(value);
-        
-          return {
-            from_time: timestamp[0],
-            to_time: timestamp[1],
-            from_time_str: dayjs.unix(timestamp[0]).format('YYYY-MM-DD HH:mm:ss'),
-            to_time_str: dayjs.unix(timestamp[1]).format('YYYY-MM-DD HH:mm:ss'),
-            activity: updated
-          }
+          return await worker.getDataInTimeFrame(value, timeFrame);
         })
-      )
+      )).flat();
+
+      const volumeFrames = await worker.getVolumeFrames(data);
+      const zoneData = await worker.getVolumeZoneData(timeFrames.map(tf => tf[0]), volumeFrames, data);
 
       const success = new SuccessResponse(res, {
-        data,
+        data: {
+          data: data,
+          time_frames: timeFrames.map(tf => tf[0]),
+          volume_frames: volumeFrames,
+          volume_zones: zoneData,
+        },
       });
 
       success.send();

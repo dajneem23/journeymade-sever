@@ -8,7 +8,7 @@ import TransactionService from '@/services/transaction';
 import TransactionEventService from '@/services/transactionEvent';
 import { Logger } from 'winston';
 import { EPeriod, ITransaction } from '../../interfaces';
-import { getTimestampsByPeriod } from '@/utils';
+import { getTimeFramesByPeriod } from '@/utils';
 import dayjs from '@/utils/dayjs';
 
 @Service()
@@ -67,10 +67,10 @@ export default class TransactionController {
     const offset = +req['skip'] || 0;
 
     try {
-      const timestamps = getTimestampsByPeriod({
+      const timestamps = getTimeFramesByPeriod({
         period: EPeriod['1h'],
         limit: +limit,
-        offset,
+        // offset,
       });
 
       const service = Container.get(TransactionEventService);

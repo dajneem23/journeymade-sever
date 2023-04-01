@@ -9,7 +9,7 @@ import {
   ITokenVolume,
 } from '@/interfaces';
 import TransactionEventService from '@/services/transactionEvent';
-import { getTimestampsByPeriod, groupBy } from '@/utils';
+import { getTimeFramesByPeriod, groupBy } from '@/utils';
 import { NextFunction, Request, Response } from 'express';
 import paginate from 'express-paginate';
 import { Container, Service } from 'typedi';
@@ -141,9 +141,9 @@ export default class TokenController {
 
     try {
       const service = Container.get(TransactionEventService);
-      const timestamps = getTimestampsByPeriod({
+      const timestamps = getTimeFramesByPeriod({
         period: period as EPeriod,
-        offset: +offset,
+        // offset: +offset,
         limit: +limit,
       });
 
@@ -215,9 +215,9 @@ export default class TokenController {
 
     try {
       const service = Container.get(TransactionEventService);
-      const timestamps = getTimestampsByPeriod({
+      const timestamps = getTimeFramesByPeriod({
         period: period as EPeriod,
-        offset: +offset,
+        // offset: +offset,
         limit: +limit,
       });
 
@@ -287,9 +287,9 @@ export default class TokenController {
 
     try {
       const service = Container.get(TransactionEventService);
-      const timestamps = getTimestampsByPeriod({
+      const timestamps = getTimeFramesByPeriod({
         period: period as EPeriod,
-        offset: +offset,
+        // offset: +offset,
         limit: +limit,
       });
 
