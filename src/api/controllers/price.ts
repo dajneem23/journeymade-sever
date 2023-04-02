@@ -30,6 +30,7 @@ export default class PriceController {
         page = 1,
         limit = TimeFramesLimit,
       } = req.query;
+
       const timestamps = getTimeFramesByPeriod({
         period: period as EPeriod,
         limit: +limit,
@@ -37,7 +38,7 @@ export default class PriceController {
       });
       
       const service = Container.get(PriceService);
-      console.log("🚀 ~ file: price.ts:66 ~ PriceController ~ timestamps.map ~ timestamps:", timestamps)
+      // console.log("🚀 ~ file: price.ts:66 ~ PriceController ~ timestamps.map ~ timestamps:", timestamps.length)
       const data = await Promise.all(
         timestamps.map(async (timestamp, index) => {
           const value = await service.getAVGPrice({

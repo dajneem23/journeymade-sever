@@ -11,52 +11,19 @@ export function getTimeFramesByPeriod({
   limit?: number;
   to_time?: number;
 }) {
-  let unit: dayjs.OpUnitType = 'hour',
-    step = 1;
-  switch (period) {
-    case EPeriod['1h']:
-      unit = 'hour';
-      step = 1;
+  const step = +period.substring(0, 1);
+  const _unit = <dayjs.OpUnitType>period.substring(1, 2).toLowerCase();
+  let unit: dayjs.OpUnitType = 'hour';
+
+  switch (_unit) {
+    case 'h':
+      unit = 'hour'
       break;
-    case EPeriod['3h']:
-      unit = 'hour';
-      step = 3;
-      break;
-    case EPeriod['4h']:
-      unit = 'hour';
-      step = 4;
-      break;  
-    case EPeriod['6h']:
-      unit = 'hour';
-      step = 6;
-      break;
-    case EPeriod['12h']:
-      unit = 'hour';
-      step = 12;
-      break;
-    case EPeriod['1d']:
-      unit = 'day';
-      step = 1;
-      break;
-    case EPeriod['7d']:
-      unit = 'day';
-      step = 7;
-      break;
-    case EPeriod['3d']:
-      unit = 'day';
-      step = 3;
-      break;
-    case EPeriod['30d']:
-      unit = 'day';
-      step = 30;
-      break;
-    case EPeriod['90d']:
-      unit = 'day';
-      step = 90;
+    case 'd':  
+      unit = 'day'
       break;
     default:
       unit = 'hour';
-      step = 1;
       break;
   }
 
