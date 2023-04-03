@@ -19,6 +19,8 @@ import TokenService from '../../services/token';
 import { EPeriod } from '../../interfaces/EPeriod';
 import { sumArrayByField } from '../../utils/sumArrayByField';
 import { ErrorResponse } from '../../core/responseTemplate';
+import { TimeFramesLimit } from '@/constants';
+import dayjs from '@/utils/dayjs';
 
 @Service()
 export default class TokenController {
@@ -123,7 +125,10 @@ export default class TokenController {
     logger.debug('Calling get endpoint with query: %o', req.query);
 
     const { id } = req.params;
-    const { period = EPeriod['1h'], page = 1, limit = 10 } = req.query;
+    const now = dayjs();
+    const { 
+      to_time = now.unix(),
+      period = EPeriod['1h'], page = 1, limit = TimeFramesLimit } = req.query;
     const offset = +req['skip'] || 0;
 
     const tokenService = Container.get(TokenService);
@@ -143,8 +148,8 @@ export default class TokenController {
       const service = Container.get(TransactionEventService);
       const timestamps = getTimeFramesByPeriod({
         period: period as EPeriod,
-        // offset: +offset,
         limit: +limit,
+        to_time: +to_time,
       });
 
       const items = await Promise.all(
@@ -157,6 +162,10 @@ export default class TokenController {
           return <ITokenVolume>{
             from_time: timestamp[0],
             to_time: timestamp[1],
+            from_time_str: dayjs
+              .unix(timestamp[0])
+              .format('YYYY-MM-DD HH:mm:ss'),
+            to_time_str: dayjs.unix(timestamp[1]).format('YYYY-MM-DD HH:mm:ss'),
             sell: {
               count: sumArrayByField(item, 'sell_count'),
               volume: sumArrayByField(item, 'sell_volume'),
@@ -197,7 +206,8 @@ export default class TokenController {
     logger.debug('Calling get endpoint with query: %o', req.query);
 
     const { id } = req.params;
-    const { period = EPeriod['1h'], page = 1, limit = 10 } = req.query;
+    const now = dayjs();
+    const { to_time = now.unix(), period = EPeriod['1h'], page = 1, limit = TimeFramesLimit } = req.query;
     const offset = +req['skip'] || 0;
 
     const tokenService = Container.get(TokenService);
@@ -217,8 +227,8 @@ export default class TokenController {
       const service = Container.get(TransactionEventService);
       const timestamps = getTimeFramesByPeriod({
         period: period as EPeriod,
-        // offset: +offset,
         limit: +limit,
+        to_time: +to_time,
       });
 
       const items = [
@@ -269,7 +279,8 @@ export default class TokenController {
     logger.debug('Calling get endpoint with query: %o', req.query);
 
     const { id } = req.params;
-    const { period = EPeriod['1h'], page = 1, limit = 10 } = req.query;
+    const now = dayjs();
+    const { to_time = now.unix(), period = EPeriod['1h'], page = 1, limit = TimeFramesLimit } = req.query;
     const offset = +req['skip'] || 0;
 
     const tokenService = Container.get(TokenService);
@@ -289,8 +300,8 @@ export default class TokenController {
       const service = Container.get(TransactionEventService);
       const timestamps = getTimeFramesByPeriod({
         period: period as EPeriod,
-        // offset: +offset,
         limit: +limit,
+        to_time: +to_time,
       });
 
       const items = timestamps.map(timestamp => {
@@ -299,6 +310,10 @@ export default class TokenController {
           description: 'bullist',
           from_time: timestamp[0],
           to_time: timestamp[1],
+          from_time_str: dayjs
+              .unix(timestamp[0])
+              .format('YYYY-MM-DD HH:mm:ss'),
+          to_time_str: dayjs.unix(timestamp[1]).format('YYYY-MM-DD HH:mm:ss'),
           holders: [
             <ITokenHolderStatsResponse>{
               name: 'whale',

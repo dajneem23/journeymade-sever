@@ -36,6 +36,7 @@ export default (app: Router) => {
     '/:id/volume',
     celebrate({
       query: Joi.object({
+        to_time: Joi.number(),
         period: Joi.string().min(2).max(3),
         limit: Joi.number(),
         page: Joi.number(),
@@ -51,6 +52,14 @@ export default (app: Router) => {
 
   route.get(
     '/:id/signals',
+    celebrate({
+      query: Joi.object({
+        to_time: Joi.number(),
+        period: Joi.string().min(2).max(3),
+        limit: Joi.number(),
+        page: Joi.number(),
+      }),
+    }),
     controller.getSignals,
   );
 
