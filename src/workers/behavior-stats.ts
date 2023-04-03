@@ -23,47 +23,79 @@ interface Output {
 
 const counter = {
   getDataInTimeFrame(value, timeFrame) {
+    const types = ['liquidity_pool', 'smart_contract'];
     const output: Output[] = value
       .map((txLog) => {
         const result = [];
 
-        const isBuy = txLog.from_account_type === 'liquidity_pool';
-        if (isBuy) {
-          const buy: Output = {
-            // token: txLog.token,
-            address: txLog.to_account,
-            tx_hash: txLog.tx_hash,
-            chain_id: txLog.chain_id,
-            action: 'buy',
-            price: txLog.price,
-            amount: txLog.amount,
-            usd_value: txLog.usd_value,
-            symbol: txLog.symbol,
-            tags: txLog.to_account_tags,
-            time: txLog.block_at,
-            time_frame: timeFrame[0],
-          };
-          result.push(buy)
-        }
+        const buy: Output = {
+          // token: txLog.token,
+          address: txLog.to_account,
+          tx_hash: txLog.tx_hash,
+          chain_id: txLog.chain_id,
+          action: 'buy',
+          price: txLog.price,
+          amount: txLog.amount,
+          usd_value: txLog.usd_value,
+          symbol: txLog.symbol,
+          tags: txLog.to_account_tags,
+          time: txLog.block_at,
+          time_frame: timeFrame[0],
+        };
+        result.push(buy)
 
-        const isSell = txLog.to_account_type === 'liquidity_pool';
-        if (isSell) {
-          const sell: Output = {
-            // token: txLog.token,
-            address: txLog.from_account,
-            tx_hash: txLog.tx_hash,
-            chain_id: txLog.chain_id,
-            action: 'sell',
-            price: txLog.price,
-            amount: txLog.amount,
-            usd_value: txLog.usd_value,
-            symbol: txLog.symbol,
-            tags: txLog.from_account_tags,
-            time: txLog.block_at,
-            time_frame: timeFrame[0],
-          };
-          result.push(sell)
-        }
+        // const isBuy = types.includes(txLog.from_account_type);
+        // if (isBuy) {
+        //   const buy: Output = {
+        //     // token: txLog.token,
+        //     address: txLog.to_account,
+        //     tx_hash: txLog.tx_hash,
+        //     chain_id: txLog.chain_id,
+        //     action: 'buy',
+        //     price: txLog.price,
+        //     amount: txLog.amount,
+        //     usd_value: txLog.usd_value,
+        //     symbol: txLog.symbol,
+        //     tags: txLog.to_account_tags,
+        //     time: txLog.block_at,
+        //     time_frame: timeFrame[0],
+        //   };
+        //   result.push(buy)
+        // }
+
+        // const isSell = types.includes(txLog.to_account_type);
+        // if (isSell) {
+        //   const sell: Output = {
+        //     // token: txLog.token,
+        //     address: txLog.from_account,
+        //     tx_hash: txLog.tx_hash,
+        //     chain_id: txLog.chain_id,
+        //     action: 'sell',
+        //     price: txLog.price,
+        //     amount: txLog.amount,
+        //     usd_value: txLog.usd_value,
+        //     symbol: txLog.symbol,
+        //     tags: txLog.from_account_tags,
+        //     time: txLog.block_at,
+        //     time_frame: timeFrame[0],
+        //   };
+        //   result.push(sell)
+        // }
+        const sell: Output = {
+          // token: txLog.token,
+          address: txLog.from_account,
+          tx_hash: txLog.tx_hash,
+          chain_id: txLog.chain_id,
+          action: 'sell',
+          price: txLog.price,
+          amount: txLog.amount,
+          usd_value: txLog.usd_value,
+          symbol: txLog.symbol,
+          tags: txLog.from_account_tags,
+          time: txLog.block_at,
+          time_frame: timeFrame[0],
+        };
+        result.push(sell)
 
         return result
       })
