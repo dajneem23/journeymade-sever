@@ -25,7 +25,7 @@ const ignoredTags = ['CE', 'BINANCE', 'GATE'];
 function inWhitelist(tags: string[]) {
   if (!tags) return true;
 
-  return tags.filter((tag) => !ignoredTags.includes(tag))?.length === 0;
+  return tags.filter((tag) => ignoredTags.includes(tag))?.length === 0;
 }
 
 const counter = {
