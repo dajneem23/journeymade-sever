@@ -6,6 +6,12 @@ import ioRedis from './ioredis';
 import initTelegramBot from './telegram';
 import dependencyInjectorLoader from './dependencyInjector';
 
+const path = require('path');
+const fs = require('fs');
+// const modelFolder = 'models/';
+const modelFolder = path.join(__dirname, '../models');
+console.log("🚀 ~ file: index.ts:13 ~ modelFolder:", modelFolder)
+
 export default async ({ expressApp }) => {
   await mongooseLoader();
 
@@ -17,7 +23,9 @@ export default async ({ expressApp }) => {
 
   // initTelegramBot();
 
-  const injectModels = ['account', 'token', 'price', 'tag', 'transaction', 'group', 'groupFootprint', 'transactionEvent']
+  // TODO
+  // const injectModels = ['account', 'token', 'price', 'tag', 'transaction', 'group', 'groupFootprint', 'transactionEvent', 'debankTopHolders']
+  const injectModels = fs.readdirSync(modelFolder).map(file => file.replace('.ts', ''));
   await dependencyInjectorLoader({
     models: injectModels.map(m => ({
       name: `${m}Model`,

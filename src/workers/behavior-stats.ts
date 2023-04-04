@@ -21,6 +21,11 @@ interface Output {
   time_frame?: number;
 }
 
+/**
+ * 1. Tuong tac vs smart contract cua LP: from/to_type is LP
+ * 2. Transfer sang vi CE
+ */
+
 const ignoredTags = ['CE', 'BINANCE', 'GATE'];
 function inWhitelist(tags: string[]) {
   if (!tags) return true;
@@ -29,11 +34,20 @@ function inWhitelist(tags: string[]) {
 }
 
 const counter = {
+  
   getDataInTimeFrame(value, timeFrame) {
+    const validLogs = value.filter((log) => {
+      const tags = [...(log.to_account_tags || []), ...(log.from_account_tags || [])];
+      return tags.includes('CE');
+    });
+
+    const exchangeTXs = new Set(validLogs.map((log) => log.tx_hash));
+
     const output: Output[] = value
       .map((txLog) => {
-        const result = [];
+        if (!exchangeTXs.has(txLog.tx_hash)) return [];
 
+        const result = [];
         if (inWhitelist(txLog.to_account_tags)) {
           const buy: Output = {
             address: txLog.to_account,
@@ -71,6 +85,7 @@ const counter = {
         return result
       })
       .flat();
+
 
     return output;
   },

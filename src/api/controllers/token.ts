@@ -21,6 +21,7 @@ import { sumArrayByField } from '../../utils/sumArrayByField';
 import { ErrorResponse } from '../../core/responseTemplate';
 import { TimeFramesLimit } from '@/constants';
 import dayjs from '@/utils/dayjs';
+import DebankTopHoldersService from '../../services/debankTopHolders';
 
 @Service()
 export default class TokenController {
@@ -224,12 +225,17 @@ export default class TokenController {
     }
 
     try {
-      const service = Container.get(TransactionEventService);
+      const service = Container.get(DebankTopHoldersService);
       const timestamps = getTimeFramesByPeriod({
         period: period as EPeriod,
         limit: +limit,
         to_time: +to_time,
       });
+
+      // TODO:
+      // const topHolders = await service.getByID(id) || await service.getByID(tokens[0].symbol.toLowerCase());
+      // const topHolderAddressList = topHolders?.holders?.map((t) => t.user_address);
+      // console.log("🚀 ~ file: token.ts:236 ~ TokenController ~ getHolderStats ~ topHolders:", topHolderAddressList);
 
       const items = [
         <ITokenHolderStatsResponse>{

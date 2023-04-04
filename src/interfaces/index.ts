@@ -11,3 +11,5 @@ export * from './ITransactionEvent'
 
 export * from './ITokenVolume'
 export * from './EPeriod'
+
+export * from './IDebankTopHolders'
