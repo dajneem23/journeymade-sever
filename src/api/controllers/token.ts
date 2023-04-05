@@ -23,6 +23,10 @@ import { TimeFramesLimit } from '@/constants';
 import dayjs from '@/utils/dayjs';
 import DebankTopHoldersService from '../../services/debankTopHolders';
 
+import { spawn, Thread, Worker } from "threads"
+import { Counter } from '@/workers/behavior-stats';
+import { Counter as VolumeCounter } from '@/workers/volume';
+
 @Service()
 export default class TokenController {
   constructor() {}
@@ -146,54 +150,38 @@ export default class TokenController {
     }
 
     try {
-      const service = Container.get(TransactionEventService);
-      const timestamps = getTimeFramesByPeriod({
+      const timeFrames = getTimeFramesByPeriod({
         period: period as EPeriod,
         limit: +limit,
         to_time: +to_time,
       });
 
-      const items = await Promise.all(
-        timestamps.map(async (timestamp) => {
-          const item = await service.getVolume({
-            address_list: tokens.map((t) => t.address),
-            timestamp,
+      const txEventService = Container.get(TransactionEventService);
+      const worker = await spawn<Counter>(new Worker("../../workers/behavior-stats"));
+      const volumeWorker = await spawn<VolumeCounter>(new Worker("../../workers/volume"));
+
+      const txLogs = (await Promise.all(
+        timeFrames.map(async (timeFrame) => {
+          const value = await txEventService.getListByFilters({ 
+            addresses: tokens.map((token) => token.address),
+            min_usd_value: 1000,
+            time_frame: timeFrame
           });
 
-          return <ITokenVolume>{
-            from_time: timestamp[0],
-            to_time: timestamp[1],
-            from_time_str: dayjs
-              .unix(timestamp[0])
-              .format('YYYY-MM-DD HH:mm:ss'),
-            to_time_str: dayjs.unix(timestamp[1]).format('YYYY-MM-DD HH:mm:ss'),
-            sell: {
-              count: sumArrayByField(item, 'sell_count'),
-              volume: sumArrayByField(item, 'sell_volume'),
-            },
-            buy: {
-              count: sumArrayByField(item, 'buy_count'),
-              volume: sumArrayByField(item, 'buy_volume'),
-            },
-            chains: item.map((c) => {
-              return {
-                id: c._id,
-                sell: {
-                  count: c.sell_count,
-                  volume: c.sell_volume,
-                },
-                buy: {
-                  count: c.buy_count,
-                  volume: c.buy_volume,
-                },
-              };
-            }),
-          };
-        }),
-      );
+          return await worker.getDataInTimeFrame(value, timeFrame);
+        })
+      )).flat();
+
+      const volumeFrames = await worker.getVolumeFrames(txLogs);
+      const chartData = await volumeWorker.getChartData(timeFrames.map(tf => tf[0]), volumeFrames, txLogs);
 
       const success = new SuccessResponse(res, {
-        data: items,
+        data: {
+          tx_logs: txLogs,
+          time_frames: timeFrames.map(tf => tf[0]),
+          volume_frames: volumeFrames,
+          chart_data: chartData,
+        },
       });
 
       success.send();
