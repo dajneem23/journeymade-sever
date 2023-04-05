@@ -13,3 +13,4 @@ export * from './ITokenVolume'
 export * from './EPeriod'
 
 export * from './IDebankTopHolders'
+export * from './ICoinMarket'

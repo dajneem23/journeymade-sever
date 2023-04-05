@@ -22,6 +22,7 @@ import { ErrorResponse } from '../../core/responseTemplate';
 import { TimeFramesLimit } from '@/constants';
 import dayjs from '@/utils/dayjs';
 import DebankTopHoldersService from '../../services/debankTopHolders';
+import CoinMarketService from '@/services/coinMarket';
 
 @Service()
 export default class TokenController {
@@ -48,6 +49,9 @@ export default class TokenController {
         notFound.send();
       }
 
+      const coinMarketService = Container.get(CoinMarketService);
+      const market = await coinMarketService.getByID(id);
+
       const result = <ITokenDetailResponse>{
         id: tokens[0].id,
         name: tokens[0].name,
@@ -64,8 +68,7 @@ export default class TokenController {
           };
         }),
 
-        circulatingSupply: 10,
-        totalSupply: 100,
+        market
       };
       const success = new SuccessResponse(res, {
         data: result,
@@ -232,7 +235,7 @@ export default class TokenController {
         to_time: +to_time,
       });
 
-      // TODO:
+      // // TODO:
       // const topHolders = await service.getByID(id) || await service.getByID(tokens[0].symbol.toLowerCase());
       // const topHolderAddressList = topHolders?.holders?.map((t) => t.user_address);
       // console.log("🚀 ~ file: token.ts:236 ~ TokenController ~ getHolderStats ~ topHolders:", topHolderAddressList);

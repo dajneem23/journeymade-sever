@@ -24,8 +24,9 @@ export default async ({ expressApp }) => {
   // initTelegramBot();
 
   // TODO
-  const injectModels = ['account', 'token', 'price', 'tag', 'transaction', 'group', 'groupFootprint', 'transactionEvent', 'debankTopHolders']
-  // const injectModels = fs.readdirSync(modelFolder).map(file => file.replace('.ts', ''));
+  // const injectModels = ['account', 'token', 'price', 'tag', 'transaction', 'group', 'groupFootprint', 'transactionEvent', 'debankTopHolders', 'coinMarket']
+  const injectModels = fs.readdirSync(modelFolder).map(file => file.replace('.ts', ''))
+  || ['account', 'token', 'price', 'tag', 'transaction', 'group', 'groupFootprint', 'transactionEvent', 'debankTopHolders', 'coinMarket'];
   await dependencyInjectorLoader({
     models: injectModels.map(m => ({
       name: `${m}Model`,

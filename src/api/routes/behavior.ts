@@ -23,4 +23,18 @@ export default (app: Router) => {
     }),
     controller.getByTokenId,
   );  
+
+  route.get(
+    '/:tokenId/accumulation-trend-score',
+    celebrate({
+      query: Joi.object({
+        from_time: Joi.number(),
+        to_time: Joi.number(),
+        period: Joi.string().min(2).max(3),
+        page: Joi.number(),
+        limit: Joi.number(),
+      }),
+    }),
+    controller.getAccumulationTrendScore
+  )
 };
