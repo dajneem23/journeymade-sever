@@ -25,7 +25,7 @@ export default (app: Router) => {
   );  
 
   route.get(
-    '/:tokenId/accumulation-trend-score',
+    '/:tokenId/activity-trend-score',
     celebrate({
       query: Joi.object({
         from_time: Joi.number(),
@@ -35,6 +35,6 @@ export default (app: Router) => {
         limit: Joi.number(),
       }),
     }),
-    controller.getAccumulationTrendScore
+    controller.getActivityTrendScore
   )
 };

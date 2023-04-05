@@ -14,7 +14,7 @@ import dayjs from '@/utils/dayjs';
 import TokenService from '@/services/token';
 import { spawn, Thread, Worker } from "threads"
 import { Counter } from '@/workers/behavior-stats';
-import { Counter as ATSCounter } from '@/workers/accumulation-trend-score';
+import { Counter as ATSCounter } from '@/workers/activity-trend-score';
 import { TimeFramesLimit } from '@/constants';
 
 @Service()
@@ -86,7 +86,7 @@ export default class BehaviorController {
     }
   }
 
-  public async getAccumulationTrendScore(req: Request, res: Response, next: NextFunction) {
+  public async getActivityTrendScore(req: Request, res: Response, next: NextFunction) {
     const logger: Logger = Container.get('logger');
     logger.debug('Calling get endpoint with params: %o', req.params);
 
@@ -120,9 +120,9 @@ export default class BehaviorController {
 
       const txEventService = Container.get(TransactionEventService);
       const worker = await spawn<Counter>(new Worker("../../workers/behavior-stats"));
-      const atsWorker = await spawn<ATSCounter>(new Worker("../../workers/accumulation-trend-score"));      
+      const atsWorker = await spawn<ATSCounter>(new Worker("../../workers/activity-trend-score"));      
 
-      const data = (await Promise.all(
+      const txLogs = (await Promise.all(
         timeFrames.map(async (timeFrame) => {
           const value = await txEventService.getListByFilters({ 
             addresses: tokens.map((token) => token.address),
@@ -138,13 +138,15 @@ export default class BehaviorController {
       const thService = Container.get(DebankTopHoldersService);
       const topHolders = await thService.getByID(tokenId) || await thService.getByID(tokens[0].symbol.toLowerCase());
       const topHolderAddressList = topHolders?.holders?.map((t) => t.user_address);
-      console.log("🚀 ~ file: token.ts:236 ~ TokenController ~ getHolderStats ~ topHolders:", topHolderAddressList);
 
-      const scores = await atsWorker.getScore(data, timeFrames.map(tf => tf[0]), topHolderAddressList);
+      const segmentFrames = await atsWorker.getSegmentFrames();
+      const chartData = await atsWorker.getScore(timeFrames.map(tf => tf[0]), segmentFrames, txLogs, topHolderAddressList);
 
       const success = new SuccessResponse(res, {
         data: {
-          scores,
+          time_frames: timeFrames.map(tf => tf[0]),
+          segment_frames: segmentFrames,
+          chart_data: chartData,
         },
       });
 

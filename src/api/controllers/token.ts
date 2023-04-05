@@ -297,22 +297,21 @@ export default class TokenController {
 
     try {
       const service = Container.get(TransactionEventService);
-      const timestamps = getTimeFramesByPeriod({
+      const timeFrames = getTimeFramesByPeriod({
         period: period as EPeriod,
         limit: +limit,
         to_time: +to_time,
       });
 
-      const items = timestamps.map(timestamp => {
+      const chartData = timeFrames.map((timeFrame, index) => {
         return <ITokenSignalResponse>{
           title: 'Alert: 123',
           description: 'bullist',
-          from_time: timestamp[0],
-          to_time: timestamp[1],
-          from_time_str: dayjs
-              .unix(timestamp[0])
-              .format('YYYY-MM-DD HH:mm:ss'),
-          to_time_str: dayjs.unix(timestamp[1]).format('YYYY-MM-DD HH:mm:ss'),
+          time_frame: {
+            from: timeFrame[0],
+            to: timeFrame[1]
+          },
+          time_index: index,
           holders: [
             <ITokenHolderStatsResponse>{
               name: 'whale',
@@ -338,7 +337,10 @@ export default class TokenController {
       });
 
       const success = new SuccessResponse(res, {
-        data: items,
+        data: {
+          time_frames: timeFrames.map(tf => tf[0]),
+          chart_data: chartData
+        }
       });
 
       success.send();

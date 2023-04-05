@@ -10,7 +10,6 @@ const path = require('path');
 const fs = require('fs');
 // const modelFolder = 'models/';
 const modelFolder = path.join(__dirname, '../models');
-console.log("🚀 ~ file: index.ts:13 ~ modelFolder:", modelFolder)
 
 export default async ({ expressApp }) => {
   await mongooseLoader();

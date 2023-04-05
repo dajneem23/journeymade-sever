@@ -58,8 +58,11 @@ export interface ITokenHolderStatsResponse {
 export interface ITokenSignalResponse {
   title: string;
   description?: string;
-  from_time: number;
-  to_time: number;
+  time_frame: {
+    from: number;
+    to: number;
+  },
+  time_index: number;
   period?: string;
   holders?: ITokenHolderStatsResponse[];
   lead_zone?: {
