@@ -174,12 +174,14 @@ export default class TokenController {
 
       const volumeFrames = await worker.getVolumeFrames(txLogs);
       const chartData = await volumeWorker.getChartData(timeFrames.map(tf => tf[0]), volumeFrames, txLogs);
+      const priceRanges = await volumeWorker.getPriceRanges(txLogs);
 
       const success = new SuccessResponse(res, {
         data: {
           tx_logs: txLogs,
           time_frames: timeFrames.map(tf => tf[0]),
           volume_frames: volumeFrames,
+          price_ranges: priceRanges,
           chart_data: chartData,
         },
       });
