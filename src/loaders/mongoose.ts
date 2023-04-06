@@ -1,6 +1,9 @@
 import mongoose from 'mongoose';
 import logger from './logger';
 import config from '@/config';
+import recachegoose from 'recachegoose'
+import { ioRedisToken } from './ioredis';
+import Container from 'typedi';
 
 // set mongoose Promise to Bluebird
 mongoose.Promise = Promise;
@@ -30,7 +33,14 @@ mongoose.set('strictQuery', false);
  */
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const mongoLoader = async () => {
-  await new Promise((resolve) => {
+  const ioredis = Container.get(ioRedisToken);
+
+  recachegoose(mongoose, {
+    engine: 'redis',
+    client: ioredis 
+  });
+  
+  await new Promise((resolve) => {    
     mongoose
       .connect(config.mongoDbURI, {
         maxPoolSize: 100,

@@ -5,32 +5,27 @@ import {
   ITokenDetailResponse,
   ITokenHolderStatsResponse,
   ITokenResponse,
-  ITokenSignalResponse,
-  ITokenVolume,
+  ITokenSignalResponse
 } from '@/interfaces';
 import TransactionEventService from '@/services/transactionEvent';
 import { getTimeFramesByPeriod, groupBy } from '@/utils';
 import { NextFunction, Request, Response } from 'express';
-import paginate from 'express-paginate';
 import { Container, Service } from 'typedi';
 
-import { Logger } from 'winston';
-import TokenService from '../../services/token';
-import { EPeriod } from '../../interfaces/EPeriod';
-import { sumArrayByField } from '../../utils/sumArrayByField';
-import { ErrorResponse } from '../../core/responseTemplate';
 import { TimeFramesLimit } from '@/constants';
-import dayjs from '@/utils/dayjs';
-import DebankTopHoldersService from '../../services/debankTopHolders';
 import CoinMarketService from '@/services/coinMarket';
+import dayjs from '@/utils/dayjs';
+import { Logger } from 'winston';
+import { ErrorResponse } from '../../core/responseTemplate';
+import { EPeriod } from '../../interfaces/EPeriod';
+import DebankTopHoldersService from '../../services/debankTopHolders';
+import TokenService from '../../services/token';
 
-import { spawn, Thread, Worker } from "threads"
-import { Counter } from '@/workers/behavior-stats';
-import { Counter as VolumeCounter } from '@/workers/volume';
+import { behaviorCounterToken, volumeCounterToken } from '@/loaders/worker';
 
 @Service()
 export default class TokenController {
-  constructor() {}
+  constructor() {}  
 
   public async getById(req: Request, res: Response, next: NextFunction) {
     const logger: Logger = Container.get('logger');
@@ -124,6 +119,8 @@ export default class TokenController {
       period = EPeriod['1h'], page = 1, limit = TimeFramesLimit } = req.query;
     const offset = +req['skip'] || 0;
 
+    console.time('Hello');
+    console.time('tokenService');
     const tokenService = Container.get(TokenService);
     const token  = await tokenService.getByID(id);
     if (!token) {
@@ -136,35 +133,66 @@ export default class TokenController {
       error.send();
       return;
     }
+    console.timeEnd('tokenService');
     
     try {
+      console.time('getTimeFramesByPeriod');
       const timeFrames = getTimeFramesByPeriod({
         period: period as EPeriod,
         limit: +limit,
         to_time: +to_time,
       });
+      console.timeEnd('getTimeFramesByPeriod');
 
       const txEventService = Container.get(TransactionEventService);
-      const worker = await spawn<Counter>(new Worker("../../workers/behavior-stats"));
-      const volumeWorker = await spawn<VolumeCounter>(new Worker("../../workers/volume"));
+     
+      // console.time('init behavior worker');
+      // const behaviorWorker = await spawn<BehaviorCounterType>(new Worker("../../workers/behavior-stats"));
+      // console.timeEnd('init behavior worker');
+      
+      // console.time('init volume worker');
+      // const volumeWorker = await spawn<VolumeCounter>(new Worker("../../workers/volume"));
+      // console.timeEnd('init volume worker');
 
+      // console.time('init worker');
+      // const [behaviorWorker, volumeWorker] = await Promise.all([
+      //   spawn<BehaviorCounterType>(new Worker("../../workers/behavior/worker")),
+      //   spawn<VolumeCounterType>(new Worker("../../workers/volume/worker"))
+      // ]);
+      // console.timeEnd('init worker');
+
+      const behaviorWorker = Container.get(behaviorCounterToken);
+      const volumeWorker = Container.get(volumeCounterToken);
+
+      console.time('getTxLogs');
       const txLogGroupedByTimeFrame = (await Promise.all(
         timeFrames.map(async (timeFrame) => {
           const value = await txEventService.getListByFilters({ 
+            symbol: token.symbol,
             addresses: token.chains?.map((token) => token.address) || [],
             min_usd_value: 1000,
             time_frame: timeFrame
           });
 
-          return await worker.getDataInTimeFrame(value, timeFrame);
+          return await behaviorWorker.getDataInTimeFrame(value, timeFrame);
         })
       ));
+      console.timeEnd('getTxLogs');
       const txLogs = txLogGroupedByTimeFrame.flat();
-
+      
+      console.time('getVolumeFrames');
       const volumeFrames = await volumeWorker.getVolumeFrames(txLogGroupedByTimeFrame);
-      const chartData = await volumeWorker.getChartData(timeFrames.map(tf => tf[0]), volumeFrames, txLogs);
-      const priceRanges = await volumeWorker.getPriceRanges(txLogs);
+      console.timeEnd('getVolumeFrames');
 
+      console.time('getChartData');
+      const chartData = await volumeWorker.getChartData(timeFrames.map(tf => tf[0]), volumeFrames, txLogs);
+      console.timeEnd('getChartData');
+
+      console.time('getPriceRanges');
+      const priceRanges = await volumeWorker.getPriceRanges(txLogs);
+      console.timeEnd('getPriceRanges');
+
+      console.timeEnd('Hello');
       const success = new SuccessResponse(res, {
         data: {
           tx_logs: txLogs,

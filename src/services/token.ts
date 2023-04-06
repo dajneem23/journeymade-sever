@@ -54,11 +54,16 @@ export default class TokenService {
     const cached = await ioredis.get(`token:${id}`);
     let token;
     if (cached) {
-      token = JSON.parse(cached);
-
-      return <ITokenResponse>{
-        ...token,
+      try {
+        token = JSON.parse(cached);
+        return <ITokenResponse>{
+          ...token,
+        }
+      } catch (e) {
+        this.logger.error(e);
       }
+
+      return;
     }
 
     const tokens = await this.tokenModel.find({ id }).lean().exec();

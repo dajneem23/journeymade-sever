@@ -1,8 +1,6 @@
-import { EAccountTags } from '../interfaces';
-import { VolumeRangeOptions } from '../constants';
-import { expose } from 'threads/worker';
-import { sumArrayByField } from '../utils/sumArrayByField';
-import dayjs from '../utils/dayjs';
+import { VolumeRangeOptions } from '../../constants';
+import { EAccountTags } from '../../interfaces';
+import { sumArrayByField } from '../../utils/sumArrayByField';
 
 const tags = Object.values(EAccountTags);
 
@@ -95,7 +93,7 @@ const counter = {
     return (
       VolumeRangeOptions.find((o) => max <= o[0] && max > o[1]) ||
       VolumeRangeOptions[VolumeRangeOptions.length - 1]
-    ).reverse();
+    ).slice().reverse();
   },
 
   getVolumeZoneData(timeFrames, volumeFrames, data) {
@@ -176,6 +174,5 @@ const counter = {
   },
 };
 
-export type Counter = typeof counter;
-
-expose(counter);
+export type BehaviorCounterType = typeof counter;
+export const behaviorCounter = counter;

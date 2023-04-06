@@ -5,6 +5,7 @@ import logger from './logger';
 import ioRedis from './ioredis';
 import initTelegramBot from './telegram';
 import dependencyInjectorLoader from './dependencyInjector';
+import workerLoader from './worker';
 
 const path = require('path');
 const fs = require('fs');
@@ -12,11 +13,13 @@ const fs = require('fs');
 const modelFolder = path.join(__dirname, '../models');
 
 export default async ({ expressApp }) => {
+  await ioRedis();
+
   await mongooseLoader();
 
-  // await pgLoader();
+  await workerLoader();
 
-  await ioRedis();
+  // await pgLoader();
 
   logger.info('✌️ DB loaded and connected!');
 

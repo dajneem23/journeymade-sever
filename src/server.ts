@@ -3,6 +3,8 @@ import express from 'express';
 import config from './config';
 import Logger from './loaders/logger';
 
+require('events').defaultMaxListeners = 15;
+
 async function startServer() {
   const app = express();
 

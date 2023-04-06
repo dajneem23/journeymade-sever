@@ -7,7 +7,7 @@ import {
   EventDispatcherInterface,
 } from '@/decorators/eventDispatcher';
 import dayjs from '@/utils/dayjs';
-import { getTimeFramesByPeriod } from '@/utils';
+import { getRecachegooseKey, getTimeFramesByPeriod } from '@/utils';
 
 @Service()
 export default class TransactionEventService {
@@ -304,8 +304,22 @@ export default class TransactionEventService {
       .exec();
   }
 
-  public async getListByFilters({ addresses, min_usd_value, time_frame }) {
-    return await this.transactionEventModel
+  public async getListByFilters({ symbol, addresses, min_usd_value, time_frame }) {
+    let cacheDuration = 60 * 10; // 10 mins
+    let cacheKey;
+
+    if (symbol) {
+      cacheKey = `${symbol}:${time_frame[0]}-${time_frame[1]}:${min_usd_value}`;
+
+      const now = dayjs().unix();
+      if (time_frame[1] >= now && time_frame[0] >= now) {
+        cacheDuration = 60;
+      } else if (dayjs().diff(dayjs.unix(time_frame[0]), 'minute') < 30) {
+        cacheDuration = 60 * 3; // 3 mins
+      }
+    }
+
+    const query = () => this.transactionEventModel
       .find({
         block_at: {
           $gte: time_frame[0],
@@ -321,6 +335,9 @@ export default class TransactionEventService {
         log_index: 0,
       })
       .lean()
-      .exec();
+
+    return cacheKey ? await (query() as any)
+      .cache(cacheDuration, getRecachegooseKey({ module: 'tx-event', id: cacheKey}))
+      .exec() : await query().exec();
   }
 }

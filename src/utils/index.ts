@@ -6,5 +6,6 @@ export * from './stringify'
 export * from './convertStringToArray'
 export * from './getModelName'
 export * from './getTimeFramesByPeriod'
+export * from './getRecachegooseKey'
 
 export * from '../core/appError'

@@ -13,9 +13,9 @@ import { getTimeFramesByPeriod } from '@/utils';
 import dayjs from '@/utils/dayjs';
 import TokenService from '@/services/token';
 import { spawn, Thread, Worker } from "threads"
-import { Counter } from '@/workers/behavior-stats';
-import { Counter as ATSCounter } from '@/workers/activity-trend-score';
+import { BehaviorCounterType, ActivityScoreCounterType } from '@/workers';
 import { TimeFramesLimit } from '@/constants';
+import { activityScoreCounterToken, behaviorCounterToken } from '@/loaders/worker';
 
 @Service()
 export default class BehaviorController {
@@ -54,28 +54,30 @@ export default class BehaviorController {
       });  
 
       const txEventService = Container.get(TransactionEventService);
-      const worker = await spawn<Counter>(new Worker("../../workers/behavior-stats"));
+      const behaviorWorker = Container.get(behaviorCounterToken);
+      // const worker = await spawn<BehaviorCounterType>(new Worker("../../workers/behavior-stats"));
 
       // console.time('getData');
       const data = (await Promise.all(
         timeFrames.map(async (timeFrame) => {
           const txEvents = await txEventService.getListByFilters({ 
+            symbol: token.symbol,
             addresses: token.chains?.map((chain) => chain.address) || [],
             min_usd_value: 1000,
             time_frame: timeFrame
           });
 
-          return await worker.getDataInTimeFrame(txEvents, timeFrame);
+          return await behaviorWorker.getDataInTimeFrame(txEvents, timeFrame);
         })
       )).flat();
       // console.timeEnd('getData');
 
       // console.time('volumeFrames');
-      const volumeFrames = await worker.getVolumeFrames(data);
+      const volumeFrames = await behaviorWorker.getVolumeFrames(data);
       // console.timeEnd('volumeFrames');
 
       // console.time('zoneData');
-      const zoneData = await worker.getVolumeZoneData(timeFrames.map(tf => tf[0]), volumeFrames, data);
+      const zoneData = await behaviorWorker.getVolumeZoneData(timeFrames.map(tf => tf[0]), volumeFrames, data);
       // console.timeEnd('zoneData');
 
       const success = new SuccessResponse(res, {
@@ -126,19 +128,20 @@ export default class BehaviorController {
       });  
 
       const txEventService = Container.get(TransactionEventService);
-      const worker = await spawn<Counter>(new Worker("../../workers/behavior-stats"));
-      const atsWorker = await spawn<ATSCounter>(new Worker("../../workers/activity-trend-score"));      
-
+      const behaviorWorker = Container.get(behaviorCounterToken);
+      const activityScoreWorker = Container.get(activityScoreCounterToken);
+      
       console.time('txLogs');
       const txLogs = (await Promise.all(
         timeFrames.map(async (timeFrame) => {
           const value = await txEventService.getListByFilters({ 
+            symbol: token.symbol,
             addresses: token.chains?.map((chain) => chain.address) || [],
             min_usd_value: 1000,
             time_frame: timeFrame
           });
 
-          return await worker.getDataInTimeFrame(value, timeFrame);
+          return await behaviorWorker.getDataInTimeFrame(value, timeFrame);
         })
       )).flat();
       console.timeEnd('txLogs');
@@ -147,15 +150,15 @@ export default class BehaviorController {
       const thService = Container.get(DebankTopHoldersService);
       console.time('topHolders');
       const topHolders = await thService.getByID(token.symbol?.toLowerCase()) || await thService.getByID(tokenId);
-      const topHolderAddressList = topHolders?.holders?.map((t) => t.user_address);
+      const topHolderAddressList = topHolders?.holders;
       console.timeEnd('topHolders');
 
       console.time('segmentFrames');
-      const segmentFrames = await atsWorker.getSegmentFrames();
+      const segmentFrames = await activityScoreWorker.getSegmentFrames();
       console.timeEnd('segmentFrames');
       
       console.time('getScore');
-      const chartData = await atsWorker.getScore(timeFrames.map(tf => tf[0]), segmentFrames, txLogs, topHolderAddressList);
+      const chartData = await activityScoreWorker.getScore(timeFrames.map(tf => tf[0]), segmentFrames, txLogs, topHolderAddressList);
       console.timeEnd('getScore');
 
       const success = new SuccessResponse(res, {
