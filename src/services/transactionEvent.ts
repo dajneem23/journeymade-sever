@@ -307,7 +307,6 @@ export default class TransactionEventService {
   public async getListByFilters({ addresses, min_usd_value, time_frame }) {
     return await this.transactionEventModel
       .find({
-        token: { $in: addresses },
         block_at: {
           $gte: time_frame[0],
           $lte: time_frame[1],
@@ -315,6 +314,7 @@ export default class TransactionEventService {
         usd_value: {
           $gt: min_usd_value || 0,
         },
+        token: { $in: addresses },
       })
       .select({
         _id: 0,

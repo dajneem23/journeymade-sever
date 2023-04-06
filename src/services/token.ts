@@ -1,10 +1,11 @@
 import _ from '@/types/express';
-import { Service, Inject } from 'typedi';
-import { IToken, ITokenOTD } from '../interfaces';
+import Container, { Service, Inject } from 'typedi';
+import { IToken, ITokenOTD, ITokenResponse } from '../interfaces';
 import {
   EventDispatcher,
   EventDispatcherInterface,
 } from '@/decorators/eventDispatcher';
+import { ioRedisToken } from '@/loaders/ioredis';
 
 @Service()
 export default class TokenService {
@@ -42,8 +43,45 @@ export default class TokenService {
     };
   }
 
-  public async getByID(id) {
-    return await this.tokenModel.find({ id }).lean().exec();
+  public async getCachedTokenById(id) {
+    const ioredis = Container.get(ioRedisToken);
+    return await ioredis.get(`token:${id}`);
+  }
+
+  public async getByID(id) {    
+    const ioredis = Container.get(ioRedisToken);
+    
+    const cached = await ioredis.get(`token:${id}`);
+    let token;
+    if (cached) {
+      token = JSON.parse(cached);
+
+      return <ITokenResponse>{
+        ...token,
+      }
+    }
+
+    const tokens = await this.tokenModel.find({ id }).lean().exec();
+    if (!tokens || tokens.length === 0) {      
+      return;
+    }
+    
+    return <ITokenResponse>{
+      id: tokens[0].id,
+      name: tokens[0].name,
+      symbol: tokens[0].symbol,
+      coingeckoId: tokens[0].coingeckoId,
+      logoURI: tokens[0].logoURI,
+
+      chains: tokens.map((t) => {
+        return {
+          id: t.chainId,
+          address: t.address,
+          decimals: t.decimals,
+          listedIn: t.listedIn,
+        };
+      }),
+    }
   }
 
   public async insert(tokens: IToken[]): Promise<any> {

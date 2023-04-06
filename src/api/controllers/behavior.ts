@@ -27,8 +27,8 @@ export default class BehaviorController {
 
     const { tokenId } = req.params;
     const tokenService = Container.get(TokenService);
-    const tokens = await tokenService.getByID(tokenId);
-    if (!tokens || tokens.length === 0) {
+    const token  = await tokenService.getByID(tokenId);
+    if (!token) {
       const error = new ErrorResponse(res, {
         message: 'Token not found',
         code: 404,
@@ -56,27 +56,34 @@ export default class BehaviorController {
       const txEventService = Container.get(TransactionEventService);
       const worker = await spawn<Counter>(new Worker("../../workers/behavior-stats"));
 
+      // console.time('getData');
       const data = (await Promise.all(
         timeFrames.map(async (timeFrame) => {
-          const value = await txEventService.getListByFilters({ 
-            addresses: tokens.map((token) => token.address),
+          const txEvents = await txEventService.getListByFilters({ 
+            addresses: token.chains?.map((chain) => chain.address) || [],
             min_usd_value: 1000,
             time_frame: timeFrame
           });
 
-          return await worker.getDataInTimeFrame(value, timeFrame);
+          return await worker.getDataInTimeFrame(txEvents, timeFrame);
         })
       )).flat();
+      // console.timeEnd('getData');
 
+      // console.time('volumeFrames');
       const volumeFrames = await worker.getVolumeFrames(data);
+      // console.timeEnd('volumeFrames');
+
+      // console.time('zoneData');
       const zoneData = await worker.getVolumeZoneData(timeFrames.map(tf => tf[0]), volumeFrames, data);
+      // console.timeEnd('zoneData');
 
       const success = new SuccessResponse(res, {
         data: {
-          data: data,
+          // tx_logs: data,
           time_frames: timeFrames.map(tf => tf[0]),
           volume_frames: volumeFrames,
-          volume_zones: zoneData,
+          chart_data: zoneData,
         },
       });
 
@@ -92,8 +99,8 @@ export default class BehaviorController {
 
     const { tokenId } = req.params;
     const tokenService = Container.get(TokenService);
-    const tokens = await tokenService.getByID(tokenId);
-    if (!tokens || tokens.length === 0) {
+    const token  = await tokenService.getByID(tokenId);
+    if (!token) {
       const error = new ErrorResponse(res, {
         message: 'Token not found',
         code: 404,
@@ -122,10 +129,11 @@ export default class BehaviorController {
       const worker = await spawn<Counter>(new Worker("../../workers/behavior-stats"));
       const atsWorker = await spawn<ATSCounter>(new Worker("../../workers/activity-trend-score"));      
 
+      console.time('txLogs');
       const txLogs = (await Promise.all(
         timeFrames.map(async (timeFrame) => {
           const value = await txEventService.getListByFilters({ 
-            addresses: tokens.map((token) => token.address),
+            addresses: token.chains?.map((chain) => chain.address) || [],
             min_usd_value: 1000,
             time_frame: timeFrame
           });
@@ -133,14 +141,22 @@ export default class BehaviorController {
           return await worker.getDataInTimeFrame(value, timeFrame);
         })
       )).flat();
+      console.timeEnd('txLogs');
 
       // // TODO:
       const thService = Container.get(DebankTopHoldersService);
-      const topHolders = await thService.getByID(tokenId) || await thService.getByID(tokens[0].symbol.toLowerCase());
+      console.time('topHolders');
+      const topHolders = await thService.getByID(token.symbol?.toLowerCase()) || await thService.getByID(tokenId);
       const topHolderAddressList = topHolders?.holders?.map((t) => t.user_address);
+      console.timeEnd('topHolders');
 
+      console.time('segmentFrames');
       const segmentFrames = await atsWorker.getSegmentFrames();
+      console.timeEnd('segmentFrames');
+      
+      console.time('getScore');
       const chartData = await atsWorker.getScore(timeFrames.map(tf => tf[0]), segmentFrames, txLogs, topHolderAddressList);
+      console.timeEnd('getScore');
 
       const success = new SuccessResponse(res, {
         data: {

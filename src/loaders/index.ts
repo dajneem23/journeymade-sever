@@ -16,7 +16,7 @@ export default async ({ expressApp }) => {
 
   // await pgLoader();
 
-  // await ioRedis();
+  await ioRedis();
 
   logger.info('✌️ DB loaded and connected!');
 

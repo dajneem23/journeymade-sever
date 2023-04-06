@@ -22,10 +22,14 @@ export interface ITokenResponse {
   coingeckoId: string;
   logoURI: string;
 
-  chains: string[];
-  addresses: string[];
+  chains: string[] | {
+    id: number;
+    address: string;
+    decimals: number;
+    listedIn?: string[];
+  }[];
+  addresses?: string[];
 }
-
 
 export interface ITokenDetailResponse {
   id: string;

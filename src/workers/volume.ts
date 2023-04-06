@@ -41,8 +41,20 @@ type TGridZoneData = {
   sell: TAction
 } & TAction 
 
+
 const counter = {
- 
+  getVolumeFrames(groupedTxLogs) {
+    const max = Math.max(...groupedTxLogs.map((txLogs) => {
+      return sumArrayByField(txLogs, 'usd_value');
+    }))
+    console.log("🚀 ~ file: volume.ts:50 ~ max ~ max:", max)
+
+    return (
+      VolumeRangeOptions.find((o) => max <= o[0] && max > o[1]) ||
+      VolumeRangeOptions[VolumeRangeOptions.length - 1]
+    ).reverse();
+  },
+
   getChartData(timeFrames, volumeFrames, txLogs) {
     const dataGrid: TGridZoneData[] = [];
 
@@ -109,13 +121,13 @@ const counter = {
       zone.price = zone.amount > 0 ? zone.usd_value / zone.amount : 0;
       
       zone.buy.count = zone.buy.logs.length;
-      zone.buy.amount = zone.buy.count > 0 ? sumArrayByField(zone.buy.logs, 'amount')/zone.buy.count : 0;
-      zone.buy.usd_value = zone.buy.count > 0 ? sumArrayByField(zone.buy.logs, 'usd_value')/zone.buy.count : 0;
+      zone.buy.amount = zone.buy.count > 0 ? sumArrayByField(zone.buy.logs, 'amount') : 0;
+      zone.buy.usd_value = zone.buy.count > 0 ? sumArrayByField(zone.buy.logs, 'usd_value') : 0;
       zone.buy.price = zone.buy.amount > 0 ? zone.buy.usd_value / zone.buy.amount : 0;
 
       zone.sell.count = zone.sell.logs.length;
-      zone.sell.amount = zone.sell.count > 0 ? sumArrayByField(zone.sell.logs, 'amount')/zone.sell.count : 0;
-      zone.sell.usd_value = zone.sell.count > 0 ? sumArrayByField(zone.sell.logs, 'usd_value')/zone.sell.count : 0;
+      zone.sell.amount = zone.sell.count > 0 ? sumArrayByField(zone.sell.logs, 'amount') : 0;
+      zone.sell.usd_value = zone.sell.count > 0 ? sumArrayByField(zone.sell.logs, 'usd_value') : 0;
       zone.sell.price = zone.sell.amount > 0 ? zone.sell.usd_value / zone.sell.amount : 0;
       
       zone.volume_index += zone.usd_value > 0 ? (zone.usd_value - zone.volume_frame.from) / (zone.volume_frame.to - zone.volume_frame.from) : 0;
@@ -134,7 +146,7 @@ const counter = {
       })
     })
 
-    return dataGrid // .filter(zone => zone.count > 0);
+    return dataGrid.filter(zone => zone.count > 0);
   },
 
   getPriceRanges(txLogs) {

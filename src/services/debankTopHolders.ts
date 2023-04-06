@@ -17,11 +17,9 @@ export default class DebankTopHoldersService {
   public async getByID(id) {
     return await this.debankTopHoldersModel
       .findOne({
-        id: {
-          $regex: new RegExp(id, 'ig'),
-        },
+        id: id,
       })
-      .sort({ $natural: -1 })
+      .sort({ updated_at: -1 })
       .lean()
       .exec();
   }

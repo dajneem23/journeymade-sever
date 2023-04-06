@@ -40,38 +40,23 @@ export default class TokenController {
 
     try {
       const service = Container.get(TokenService);
-      const tokens = await service.getByID(id);
-
-      if (!tokens || tokens.length === 0) {
-        const notFound = new ErrorResponse(res, {
-          data: {},
-          status: 'error',
+      const token  = await service.getByID(id);
+      if (!token) {
+        const error = new ErrorResponse(res, {
           message: 'Token not found',
           code: 404,
+          data: {},
+          status: 'error',
         });
-
-        notFound.send();
+        error.send();
+        return;
       }
 
       const coinMarketService = Container.get(CoinMarketService);
       const market = await coinMarketService.getByID(id);
 
       const result = <ITokenDetailResponse>{
-        id: tokens[0].id,
-        name: tokens[0].name,
-        symbol: tokens[0].symbol,
-        coingeckoId: tokens[0].coingeckoId,
-        logoURI: tokens[0].logoURI,
-
-        chains: tokens.map((t) => {
-          return {
-            id: t.chainId,
-            address: t.address,
-            decimals: t.decimals,
-            listedIn: t.listedIn,
-          };
-        }),
-
+        ...token,
         market
       };
       const success = new SuccessResponse(res, {
@@ -140,8 +125,8 @@ export default class TokenController {
     const offset = +req['skip'] || 0;
 
     const tokenService = Container.get(TokenService);
-    const tokens = await tokenService.getByID(id);
-    if (!tokens || tokens.length === 0) {
+    const token  = await tokenService.getByID(id);
+    if (!token) {
       const error = new ErrorResponse(res, {
         message: 'Token not found',
         code: 404,
@@ -151,7 +136,7 @@ export default class TokenController {
       error.send();
       return;
     }
-
+    
     try {
       const timeFrames = getTimeFramesByPeriod({
         period: period as EPeriod,
@@ -163,19 +148,20 @@ export default class TokenController {
       const worker = await spawn<Counter>(new Worker("../../workers/behavior-stats"));
       const volumeWorker = await spawn<VolumeCounter>(new Worker("../../workers/volume"));
 
-      const txLogs = (await Promise.all(
+      const txLogGroupedByTimeFrame = (await Promise.all(
         timeFrames.map(async (timeFrame) => {
           const value = await txEventService.getListByFilters({ 
-            addresses: tokens.map((token) => token.address),
+            addresses: token.chains?.map((token) => token.address) || [],
             min_usd_value: 1000,
             time_frame: timeFrame
           });
 
           return await worker.getDataInTimeFrame(value, timeFrame);
         })
-      )).flat();
+      ));
+      const txLogs = txLogGroupedByTimeFrame.flat();
 
-      const volumeFrames = await worker.getVolumeFrames(txLogs);
+      const volumeFrames = await volumeWorker.getVolumeFrames(txLogGroupedByTimeFrame);
       const chartData = await volumeWorker.getChartData(timeFrames.map(tf => tf[0]), volumeFrames, txLogs);
       const priceRanges = await volumeWorker.getPriceRanges(txLogs);
 
@@ -205,8 +191,8 @@ export default class TokenController {
     const offset = +req['skip'] || 0;
 
     const tokenService = Container.get(TokenService);
-    const tokens = await tokenService.getByID(id);
-    if (!tokens || tokens.length === 0) {
+    const token  = await tokenService.getByID(id);
+    if (!token) {
       const error = new ErrorResponse(res, {
         message: 'Token not found',
         code: 404,
@@ -283,8 +269,8 @@ export default class TokenController {
     const offset = +req['skip'] || 0;
 
     const tokenService = Container.get(TokenService);
-    const tokens = await tokenService.getByID(id);
-    if (!tokens || tokens.length === 0) {
+     const token  = await tokenService.getByID(id);
+    if (!token) {
       const error = new ErrorResponse(res, {
         message: 'Token not found',
         code: 404,
