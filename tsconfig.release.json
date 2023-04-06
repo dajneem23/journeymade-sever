@@ -19,6 +19,7 @@
     "noEmit": false,
     "typeRoots": ["./src/interfaces", "./node_modules/@types", "./src/types"],
     "rootDir": "./src",
+    "skipLibCheck": true,
     "paths": {
       "@/*": ["./src/*"]
     },
