@@ -14,3 +14,4 @@ export * from './EPeriod'
 
 export * from './IDebankTopHolders'
 export * from './ICoinMarket'
+export * from './IAccountSnapshot'

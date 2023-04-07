@@ -9,7 +9,8 @@ import {
   IToken,
   ITransactionEvent,
   IDebankTopHolders,
-  ICoinMarket
+  ICoinMarket,
+  IAccountSnapshot
 } from '@/interfaces';
 
 import {
@@ -29,6 +30,7 @@ declare global {
     export type TransactionEventModel = Model<ITransactionEvent & Document>;
     export type DebankTopHoldersModel = Model<IDebankTopHolders & Document>;
     export type CoinMarketModel = Model<ICoinMarket & Document>;
+    export type AccountSnapshotModel = Model<IAccountSnapshot & Document>;
   }
 }
 

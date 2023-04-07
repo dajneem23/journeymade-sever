@@ -98,6 +98,7 @@ const counter = {
 
   getVolumeZoneData(timeFrames, volumeFrames, data) {
     const actions = ['buy', 'sell'] ,zones = [];
+    const maxTimeFrame = Math.max(...timeFrames);
     timeFrames.forEach((tf, tfIdx) => {
       volumeFrames.forEach((vf, vfIdx) => {
         
@@ -146,12 +147,13 @@ const counter = {
       zone.count = zone.logs.length;
       zone.amount = zone.count > 0 ? sumArrayByField(zone.logs, 'amount')/zone.count : 0;
       zone.usd_value = zone.count > 0 ? sumArrayByField(zone.logs, 'usd_value')/zone.count : 0;
+      zone.balance_snapshot = zone.count > 0 ? sumArrayByField(zone.logs, 'balance_snapshot')/zone.count : 0;
 
       zone.last_tx_time = zone.count > 0 ? Math.max(...zone.logs.map(log => log.time)) : 0;
 
       zone.vol_index += zone.usd_value > 0 ? (zone.usd_value - zone.from_volume) / (zone.to_volume - zone.from_volume) : 0;
 
-      // zone.time_index += zone.last_tx_time > 0 ? (zone.last_tx_time - zone.from_time) / (zone.to_time - zone.from_time) : 0;
+      zone.time_index += zone.last_tx_time > 0 ? (zone.last_tx_time - zone.from_time) / (zone.to_time - zone.from_time) : 0;
 
       zone.price = zone.count > 0 ? sumArrayByField(zone.logs, 'price')/zone.count : 0;
       zone.sum_usd_value = zone.count > 0 ? sumArrayByField(zone.logs, 'usd_value') : 0;
@@ -170,7 +172,7 @@ const counter = {
       })
     })
 
-    return zones //.filter(zone => zone.count > 0);
+    return zones // .filter(zone => zone.count > 0);
   },
 };
 

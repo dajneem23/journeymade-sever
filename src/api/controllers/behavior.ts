@@ -6,6 +6,7 @@ import { Container, Service } from 'typedi';
 
 import TransactionService from '@/services/transaction';
 import TransactionEventService from '@/services/transactionEvent';
+import AccountSnapshotService from '@/services/accountSnapshot';
 import DebankTopHoldersService from '@/services/debankTopHolders'
 import { Logger } from 'winston';
 import { EPeriod, ITransaction } from '../../interfaces';
@@ -54,11 +55,12 @@ export default class BehaviorController {
       });  
 
       const txEventService = Container.get(TransactionEventService);
+      const accountSnapshotService = Container.get(AccountSnapshotService);
       const behaviorWorker = Container.get(behaviorCounterToken);
       // const worker = await spawn<BehaviorCounterType>(new Worker("../../workers/behavior-stats"));
 
       // console.time('getData');
-      const data = (await Promise.all(
+      const txLogs = (await Promise.all(
         timeFrames.map(async (timeFrame) => {
           const txEvents = await txEventService.getListByFilters({ 
             symbol: token.symbol,
@@ -67,22 +69,40 @@ export default class BehaviorController {
             time_frame: timeFrame
           });
 
-          return await behaviorWorker.getDataInTimeFrame(txEvents, timeFrame);
+          const group = await behaviorWorker.getDataInTimeFrame(txEvents, timeFrame);
+
+          const addressList = group.map((tx) => tx.address);
+          if (addressList.length === 0) return group;
+
+          const addressSnapshots = await accountSnapshotService.getAccountSnapshot({
+            addresses: addressList,
+            time: timeFrame[0],
+            offset: 0,
+            limit: 1000
+          }) || []
+
+          group.forEach((tx) => {
+            const found = addressSnapshots.find((snapshot) => snapshot.address === tx.address)
+            // if (found) console.log('found', found?.stats?.total_net_usd_value)
+            tx.balance_snapshot = found ? found.stats?.total_net_usd_value : null;
+          })
+          
+          return group;
         })
       )).flat();
       // console.timeEnd('getData');
-
+   
       // console.time('volumeFrames');
-      const volumeFrames = await behaviorWorker.getVolumeFrames(data);
+      const volumeFrames = await behaviorWorker.getVolumeFrames(txLogs);
       // console.timeEnd('volumeFrames');
 
       // console.time('zoneData');
-      const zoneData = await behaviorWorker.getVolumeZoneData(timeFrames.map(tf => tf[0]), volumeFrames, data);
+      const zoneData = await behaviorWorker.getVolumeZoneData(timeFrames.map(tf => tf[0]), volumeFrames, txLogs);
       // console.timeEnd('zoneData');
 
       const success = new SuccessResponse(res, {
         data: {
-          // tx_logs: data,
+          // tx_logs: txLogs,
           time_frames: timeFrames.map(tf => tf[0]),
           volume_frames: volumeFrames,
           chart_data: zoneData,
@@ -139,7 +159,7 @@ export default class BehaviorController {
             addresses: token.chains?.map((chain) => chain.address) || [],
             min_usd_value: 1000,
             time_frame: timeFrame
-          });
+          });        
 
           return await behaviorWorker.getDataInTimeFrame(value, timeFrame);
         })
