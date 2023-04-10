@@ -170,11 +170,11 @@ export default class TokenController {
           const value = await txEventService.getListByFilters({ 
             symbol: token.symbol,
             addresses: token.chains?.map((token) => token.address) || [],
-            min_usd_value: 1000,
+            min_usd_value: 0,
             time_frame: timeFrame
           });
 
-          return await behaviorWorker.getDataInTimeFrame(value, timeFrame);
+          return await volumeWorker.getBuySellData(value, timeFrame);
         })
       ));
       console.timeEnd('getTxLogs');

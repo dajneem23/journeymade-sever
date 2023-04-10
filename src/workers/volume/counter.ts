@@ -39,7 +39,64 @@ type TGridZoneData = {
   sell: TAction;
 } & TAction;
 
+const LIQUIDITY_POOL_TYPE = 'liquidity_pool';
+const ignoredTags = ['CE', 'BINANCE', 'GATE'];
+function inWhitelist(tags: string[]) {
+  if (!tags) return true;
+
+  return tags.filter((tag) => ignoredTags.includes(tag))?.length === 0;
+}
+
 const counter = {
+  getBuySellData(txLogs, timeFrame) {
+    const output: Output[] = txLogs
+      .map((txLog) => {
+        const { from_account_type, to_account_type } = txLog;
+        const isBuy = from_account_type === LIQUIDITY_POOL_TYPE;
+        const isSell = to_account_type === LIQUIDITY_POOL_TYPE;
+        
+        const result = [];        
+        if (isBuy) {
+          const buy: Output = {
+            address: txLog.to_account,
+            tx_hash: txLog.tx_hash,
+            chain_id: txLog.chain_id,
+            action: 'buy',
+            price: txLog.price,
+            amount: txLog.amount,
+            usd_value: txLog.usd_value,
+            symbol: txLog.symbol,
+            tags: txLog.to_account_tags,
+            time: txLog.block_at,
+            time_frame: timeFrame[0],
+          };
+          result.push(buy)
+        }
+
+        if (isSell) {
+          const sell: Output = {
+            address: txLog.from_account,
+            tx_hash: txLog.tx_hash,
+            chain_id: txLog.chain_id,
+            action: 'sell',
+            price: txLog.price,
+            amount: txLog.amount,
+            usd_value: txLog.usd_value,
+            symbol: txLog.symbol,
+            tags: txLog.from_account_tags,
+            time: txLog.block_at,
+            time_frame: timeFrame[0],
+          };
+          result.push(sell)
+        }
+
+        return result
+      })
+      .flat();
+
+
+    return output;
+  },
   getVolumeFrames(groupedTxLogs) {
     const max = Math.max(
       ...groupedTxLogs.map((txLogs) => {
