@@ -65,7 +65,7 @@ export default class BehaviorController {
           const txEvents = await txEventService.getListByFilters({ 
             symbol: token.symbol,
             addresses: token.chains?.map((chain) => chain.address) || [],
-            min_usd_value: 1000,
+            min_usd_value: 0,
             time_frame: timeFrame,
             actions: ['swap'],
           });
@@ -224,19 +224,15 @@ export default class BehaviorController {
       const now = dayjs();
       const { 
         to_time = now.unix(), 
-        period,
-        limit = TimeFramesLimit,
       } = req.query;
 
       const timeFrames = getTimeFramesByPeriod({
-        period: period as EPeriod, 
-        limit: +limit,
+        period: EPeriod['1h'], 
+        limit: 24,
         to_time: +to_time,
       });  
 
       const txEventService = Container.get(TransactionEventService);
-      const behaviorWorker = Container.get(behaviorCounterToken);
-      const activityScoreWorker = Container.get(activityScoreCounterToken);
       const volumeWorker = Container.get(volumeCounterToken);
       
       console.time('txLogs');
@@ -247,7 +243,7 @@ export default class BehaviorController {
             addresses: token.chains?.map((chain) => chain.address) || [],
             min_usd_value: 1000,
             time_frame: timeFrame,
-            actions: ['swap'],
+            actions: ['swap', 'add', 'remove'],
           });        
 
           return await volumeWorker.getBuySellData(value, timeFrame);

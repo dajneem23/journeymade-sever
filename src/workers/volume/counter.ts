@@ -17,6 +17,9 @@ interface Output {
   tags: string[];
   time?: number;
   time_frame?: number;  
+  tx_action?: string;
+  maker_account?: string;
+  log_index?: number;
 }
 
 type TAction = {
@@ -69,6 +72,9 @@ const counter = {
             tags: txLog.to_account_tags,
             time: txLog.block_at,
             time_frame: timeFrame[0],
+            tx_action: txLog.tx_action,
+            maker_account: txLog.maker_account,
+            log_index: txLog.log_index,
           };
           result.push(buy)
         }
@@ -86,6 +92,9 @@ const counter = {
             tags: txLog.from_account_tags,
             time: txLog.block_at,
             time_frame: timeFrame[0],
+            tx_action: txLog.tx_action,
+            maker_account: txLog.maker_account,
+            log_index: txLog.log_index,
           };
           result.push(sell)
         }

@@ -11,7 +11,7 @@ export function getTimeFramesByPeriod({
   limit?: number;
   to_time?: number;
 }) {
-  const step = +period.substring(0, 1);
+  const step = +period.substring(0, period.length - 1);
   const _unit = <dayjs.OpUnitType>period.substring(1, 2).toLowerCase();
   let unit: dayjs.OpUnitType = 'hour';
 

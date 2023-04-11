@@ -7,7 +7,7 @@ import {
   EventDispatcherInterface,
 } from '@/decorators/eventDispatcher';
 import dayjs from '@/utils/dayjs';
-import { getRecachegooseKey, getTimeFramesByPeriod } from '@/utils';
+import { getRecachegooseKey, getTimeFramesByPeriod, removeDuplicateObjects } from '@/utils';
 
 @Service()
 export default class TransactionEventService {
@@ -346,12 +346,20 @@ export default class TransactionEventService {
       .find(filter)
       .select({
         _id: 0,
-        log_index: 0,
       })
       .lean()
 
-    return cacheKey ? await (query() as any)
-      .cache(cacheDuration, getRecachegooseKey({ module: 'tx-event', id: cacheKey}))
-      .exec() : await query().exec();
+    const result = cacheKey ? await (query() as any)
+    .cache(cacheDuration, getRecachegooseKey({ module: 'tx-event', id: cacheKey}))
+    .exec() : await query().exec();
+
+    const resultWithUniqueKey = result.map(item => {
+      return {
+        ...item,
+        unique_key: `${item.tx_hash}-${item.log_index}`,
+      }
+    })
+
+    return removeDuplicateObjects(resultWithUniqueKey, 'unique_key');
   }
 }
