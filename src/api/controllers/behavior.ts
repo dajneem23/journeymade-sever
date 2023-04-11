@@ -161,7 +161,7 @@ export default class BehaviorController {
           const value = await txEventService.getListByFilters({ 
             symbol: token.symbol,
             addresses: token.chains?.map((chain) => chain.address) || [],
-            min_usd_value: 1000,
+            min_usd_value: 0,
             time_frame: timeFrame,
             actions: ['swap'],
           });        
@@ -241,7 +241,7 @@ export default class BehaviorController {
           const value = await txEventService.getListByFilters({ 
             symbol: token.symbol,
             addresses: token.chains?.map((chain) => chain.address) || [],
-            min_usd_value: 1000,
+            min_usd_value: 0,
             time_frame: timeFrame,
             actions: ['swap', 'add', 'remove'],
           });        
