@@ -43,7 +43,7 @@ type TGridZoneData = {
 } & TAction;
 
 const LIQUIDITY_POOL_TYPE = 'liquidity_pool';
-const ignoredTags = ['CE', 'BINANCE', 'GATE'];
+const ignoredTags = ['CE', 'BINANCE', 'GATE', 'BOT'];
 function inWhitelist(tags: string[]) {
   if (!tags) return true;
 
@@ -55,8 +55,8 @@ const counter = {
     const output: Output[] = txLogs
       .map((txLog) => {
         const { from_account_type, to_account_type } = txLog;
-        const isBuy = from_account_type === LIQUIDITY_POOL_TYPE;
-        const isSell = to_account_type === LIQUIDITY_POOL_TYPE;
+        const isBuy = from_account_type === LIQUIDITY_POOL_TYPE && inWhitelist(txLog.to_account_tags);
+        const isSell = to_account_type === LIQUIDITY_POOL_TYPE && inWhitelist(txLog.from_account_tags);
         
         const result = [];        
         if (isBuy) {

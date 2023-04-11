@@ -24,7 +24,7 @@ interface Output {
  * 2. Transfer sang vi CE
  */
 
-const ignoredTags = ['CE', 'BINANCE', 'GATE'];
+const ignoredTags = ['CE', 'BINANCE', 'GATE', 'BOT'];
 function inWhitelist(tags: string[]) {
   if (!tags) return true;
 

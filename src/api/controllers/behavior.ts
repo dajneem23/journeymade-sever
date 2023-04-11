@@ -103,7 +103,7 @@ export default class BehaviorController {
 
       const success = new SuccessResponse(res, {
         data: {
-          tx_logs: txLogs,
+          // tx_logs: txLogs,
           time_frames: timeFrames.map(tf => tf[0]),
           volume_frames: volumeFrames,
           chart_data: zoneData,
@@ -187,7 +187,7 @@ export default class BehaviorController {
 
       const success = new SuccessResponse(res, {
         data: {
-          tx_logs: txLogs,
+          // tx_logs: txLogs,
           time_frames: timeFrames.map(tf => tf[0]),
           segment_frames: segmentFrames,
           chart_data: chartData,
