@@ -25,6 +25,20 @@ export default (app: Router) => {
   );  
 
   route.get(
+    '/:tokenId/logs',
+    celebrate({
+      query: Joi.object({
+        from_time: Joi.number(),
+        to_time: Joi.number(),
+        period: Joi.string().min(2).max(3),
+        page: Joi.number(),
+        limit: Joi.number(),
+      }),
+    }),
+    controller.getLogs,
+  );  
+
+  route.get(
     '/:tokenId/activity-trend-score',
     celebrate({
       query: Joi.object({

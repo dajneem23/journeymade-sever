@@ -201,4 +201,69 @@ export default class BehaviorController {
       next(err);
     }
   }
+
+  public async getLogs(req: Request, res: Response, next: NextFunction) {
+    const logger: Logger = Container.get('logger');
+    logger.debug('Calling get endpoint with params: %o', req.params);
+
+    const { tokenId } = req.params;
+    const tokenService = Container.get(TokenService);
+    const token  = await tokenService.getByID(tokenId);
+    if (!token) {
+      const error = new ErrorResponse(res, {
+        message: 'Token not found',
+        code: 404,
+        data: {},
+        status: 'error',
+      });
+      error.send();
+      return;
+    }
+
+    try {
+      const now = dayjs();
+      const { 
+        to_time = now.unix(), 
+        period,
+        limit = TimeFramesLimit,
+      } = req.query;
+
+      const timeFrames = getTimeFramesByPeriod({
+        period: period as EPeriod, 
+        limit: +limit,
+        to_time: +to_time,
+      });  
+
+      const txEventService = Container.get(TransactionEventService);
+      const behaviorWorker = Container.get(behaviorCounterToken);
+      const activityScoreWorker = Container.get(activityScoreCounterToken);
+      const volumeWorker = Container.get(volumeCounterToken);
+      
+      console.time('txLogs');
+      const txLogs = (await Promise.all(
+        timeFrames.map(async (timeFrame) => {
+          const value = await txEventService.getListByFilters({ 
+            symbol: token.symbol,
+            addresses: token.chains?.map((chain) => chain.address) || [],
+            min_usd_value: 1000,
+            time_frame: timeFrame,
+            actions: ['swap'],
+          });        
+
+          return await volumeWorker.getBuySellData(value, timeFrame);
+        })
+      )).flat();
+      console.timeEnd('txLogs');
+
+      const success = new SuccessResponse(res, {
+        data: {
+          tx_logs: txLogs,
+        },
+      });
+
+      success.send();
+    } catch (err) {
+      next(err);
+    }
+  }
 }
