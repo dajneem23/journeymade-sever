@@ -28,9 +28,9 @@ export function getTimeFramesByPeriod({
   }
 
   const timestamps = [];
-  let to = to_time ? dayjs.unix(to_time).endOf(unit) : dayjs().endOf(unit);
+  let to = to_time ? dayjs.unix(to_time).add(1, unit).endOf(unit) : dayjs().add(1, unit).endOf(unit);
 
-  while (timestamps.length < limit) {
+  while (timestamps.length <= limit) {
     timestamps.unshift([to.add(-1 * step, unit).add(1, 'second').unix(), to.unix(), step, unit]);
     to = to.add(-1 * step, unit);
   }
