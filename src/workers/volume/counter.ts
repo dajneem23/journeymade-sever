@@ -16,7 +16,7 @@ interface Output {
   symbol?: string;
   tags: string[];
   time?: number;
-  time_frame?: number;
+  time_frame?: number;  
 }
 
 type TAction = {
@@ -235,7 +235,7 @@ const counter = {
       });
     });
 
-    return dataGrid // .filter(zone => zone.count > 0);
+    return dataGrid.filter(zone => zone.count > 0);
   },
 
   getPriceRanges(txLogs) {

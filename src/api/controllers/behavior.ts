@@ -16,7 +16,7 @@ import TokenService from '@/services/token';
 import { spawn, Thread, Worker } from "threads"
 import { BehaviorCounterType, ActivityScoreCounterType } from '@/workers';
 import { TimeFramesLimit } from '@/constants';
-import { activityScoreCounterToken, behaviorCounterToken } from '@/loaders/worker';
+import { activityScoreCounterToken, behaviorCounterToken, volumeCounterToken } from '@/loaders/worker';
 
 @Service()
 export default class BehaviorController {
@@ -57,7 +57,7 @@ export default class BehaviorController {
       const txEventService = Container.get(TransactionEventService);
       const accountSnapshotService = Container.get(AccountSnapshotService);
       const behaviorWorker = Container.get(behaviorCounterToken);
-      // const worker = await spawn<BehaviorCounterType>(new Worker("../../workers/behavior-stats"));
+      const volumeWorker = Container.get(volumeCounterToken);
 
       // console.time('getData');
       const txLogs = (await Promise.all(
@@ -66,10 +66,13 @@ export default class BehaviorController {
             symbol: token.symbol,
             addresses: token.chains?.map((chain) => chain.address) || [],
             min_usd_value: 1000,
-            time_frame: timeFrame
+            time_frame: timeFrame,
+            actions: ['swap'],
           });
 
-          const group = await behaviorWorker.getDataInTimeFrame(txEvents, timeFrame);
+          const group = await volumeWorker.getBuySellData(txEvents, timeFrame);
+
+          // const group = await behaviorWorker.getDataInTimeFrame(txEvents, timeFrame);
 
           const addressList = group.map((tx) => tx.address);
           if (addressList.length === 0) return group;
@@ -102,7 +105,7 @@ export default class BehaviorController {
 
       const success = new SuccessResponse(res, {
         data: {
-          // tx_logs: txLogs,
+          tx_logs: txLogs,
           time_frames: timeFrames.map(tf => tf[0]),
           volume_frames: volumeFrames,
           chart_data: zoneData,
@@ -150,6 +153,7 @@ export default class BehaviorController {
       const txEventService = Container.get(TransactionEventService);
       const behaviorWorker = Container.get(behaviorCounterToken);
       const activityScoreWorker = Container.get(activityScoreCounterToken);
+      const volumeWorker = Container.get(volumeCounterToken);
       
       console.time('txLogs');
       const txLogs = (await Promise.all(
@@ -158,10 +162,12 @@ export default class BehaviorController {
             symbol: token.symbol,
             addresses: token.chains?.map((chain) => chain.address) || [],
             min_usd_value: 1000,
-            time_frame: timeFrame
+            time_frame: timeFrame,
+            actions: ['swap'],
           });        
 
-          return await behaviorWorker.getDataInTimeFrame(value, timeFrame);
+          return await volumeWorker.getBuySellData(value, timeFrame);
+          // return await behaviorWorker.getDataInTimeFrame(value, timeFrame);
         })
       )).flat();
       console.timeEnd('txLogs');
@@ -183,6 +189,7 @@ export default class BehaviorController {
 
       const success = new SuccessResponse(res, {
         data: {
+          tx_logs: txLogs,
           time_frames: timeFrames.map(tf => tf[0]),
           segment_frames: segmentFrames,
           chart_data: chartData,

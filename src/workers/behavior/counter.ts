@@ -45,7 +45,7 @@ const counter = {
       .map((txLog) => {
         if (!exchangeTXs.has(txLog.tx_hash)) return [];
 
-        const result = [];
+        const result = [];        
         if (inWhitelist(txLog.to_account_tags)) {
           const buy: Output = {
             address: txLog.to_account,
@@ -172,7 +172,7 @@ const counter = {
       })
     })
 
-    return zones // .filter(zone => zone.count > 0);
+    return zones //.filter(zone => zone.count > 0);
   },
 };
 

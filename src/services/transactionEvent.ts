@@ -304,12 +304,21 @@ export default class TransactionEventService {
       .exec();
   }
 
-  public async getListByFilters({ symbol, addresses, min_usd_value, time_frame }) {
+  public async getListByFilters({ symbol, addresses, min_usd_value, time_frame, actions }: {
+    symbol?: string, 
+    addresses, 
+    min_usd_value?: number, 
+    time_frame?, 
+    actions?: string[]
+  }) {
     let cacheDuration = 60 * 10; // 10 mins
-    let cacheKey;
+    let cacheKey;    
 
     if (symbol) {
       cacheKey = `${symbol}:${time_frame[0]}-${time_frame[1]}:${min_usd_value}`;
+      if (actions?.length > 0) {
+        cacheKey += `:${actions.join(',')}`;
+      }
 
       const now = dayjs().unix();
       if (time_frame[1] >= now && time_frame[0] >= now) {
@@ -319,17 +328,22 @@ export default class TransactionEventService {
       }
     }
 
+    const filter = {
+      block_at: {
+        $gte: time_frame[0],
+        $lte: time_frame[1],
+      },
+      usd_value: {
+        $gt: min_usd_value || 0,
+      },
+      token: { $in: addresses },
+    };
+    if (actions?.length > 0) {
+      filter['tx_action'] = { $in: actions };
+    }
+
     const query = () => this.transactionEventModel
-      .find({
-        block_at: {
-          $gte: time_frame[0],
-          $lte: time_frame[1],
-        },
-        usd_value: {
-          $gt: min_usd_value || 0,
-        },
-        token: { $in: addresses },
-      })
+      .find(filter)
       .select({
         _id: 0,
         log_index: 0,

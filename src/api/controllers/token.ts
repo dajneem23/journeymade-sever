@@ -161,7 +161,6 @@ export default class TokenController {
       // ]);
       // console.timeEnd('init worker');
 
-      const behaviorWorker = Container.get(behaviorCounterToken);
       const volumeWorker = Container.get(volumeCounterToken);
 
       console.time('getTxLogs');
@@ -171,7 +170,8 @@ export default class TokenController {
             symbol: token.symbol,
             addresses: token.chains?.map((token) => token.address) || [],
             min_usd_value: 0,
-            time_frame: timeFrame
+            time_frame: timeFrame,
+            actions: ['swap'],
           });
 
           return await volumeWorker.getBuySellData(value, timeFrame);
