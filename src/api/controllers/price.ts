@@ -62,9 +62,19 @@ export default class PriceController {
           };
         }),
       );
+      console.log("🚀 ~ file: price.ts:65 ~ PriceController ~ getList ~ data:", data)
+
+      const values = data.map((item) => [item.price, item.high, item.low]).flat();
+      const min = Math.min(...values);
+      const max = Math.max(...values);
+      console.log("🚀 ~ file: price.ts:70 ~ PriceController ~ getList ~ max:", min, max)
 
       const success = new SuccessResponse(res, {
-        data,
+        data: {
+          min: min - (max - min) * 0.25,
+          max: max + (max - min) * 0.25,
+          items: data,
+        },
       });
 
       success.send();

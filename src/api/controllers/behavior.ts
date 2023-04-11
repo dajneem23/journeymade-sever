@@ -10,7 +10,7 @@ import AccountSnapshotService from '@/services/accountSnapshot';
 import DebankTopHoldersService from '@/services/debankTopHolders'
 import { Logger } from 'winston';
 import { EPeriod, ITransaction } from '../../interfaces';
-import { getTimeFramesByPeriod } from '@/utils';
+import { getTimeFramesByPeriod, sortArray } from '@/utils';
 import dayjs from '@/utils/dayjs';
 import TokenService from '@/services/token';
 import { spawn, Thread, Worker } from "threads"
@@ -71,8 +71,6 @@ export default class BehaviorController {
           });
 
           const group = await volumeWorker.getBuySellData(txEvents, timeFrame);
-
-          // const group = await behaviorWorker.getDataInTimeFrame(txEvents, timeFrame);
 
           const addressList = group.map((tx) => tx.address);
           if (addressList.length === 0) return group;
@@ -253,7 +251,7 @@ export default class BehaviorController {
 
       const success = new SuccessResponse(res, {
         data: {
-          tx_logs: txLogs,
+          tx_logs: sortArray(txLogs, 'time', 'desc'),
         },
       });
 
