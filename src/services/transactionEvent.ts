@@ -311,7 +311,7 @@ export default class TransactionEventService {
     time_frame?, 
     actions?: string[]
   }) {
-    let cacheDuration = 60 * 10; // 10 mins
+    let cacheDuration = 60 * 30; // 30 mins
     let cacheKey;    
 
     if (symbol) {
@@ -324,7 +324,7 @@ export default class TransactionEventService {
       if (time_frame[1] >= now && time_frame[0] >= now) {
         cacheDuration = 60;
       } else if (dayjs().diff(dayjs.unix(time_frame[0]), 'minute') < 30) {
-        cacheDuration = 60 * 3; // 3 mins
+        cacheDuration = 60 * 5; // 5 mins
       }
     }
 

@@ -2,8 +2,6 @@ import { VolumeRangeOptions } from '../../constants';
 import { EAccountTags } from '../../interfaces';
 import { sumArrayByField } from '../../utils/sumArrayByField';
 
-const tags = Object.values(EAccountTags);
-
 interface Output {
   token?: string;
   tx_hash?: string;
@@ -249,19 +247,6 @@ const counter = {
     });
 
     return dataGrid //.filter(zone => zone.count > 0);
-  },
-
-  getPriceRanges(txLogs) {
-    const priceList = txLogs
-      .filter((txLog) => txLog.price > 0)
-      .map((txLog) => txLog.price);
-    const min = Math.min(...priceList);
-    const max = Math.max(...priceList);
-
-    return {
-      min: min - (max - min) * 0.2,
-      max: max + (max - min) * 0.2,
-    };
   },
 };
 

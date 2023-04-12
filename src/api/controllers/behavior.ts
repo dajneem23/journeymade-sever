@@ -34,7 +34,7 @@ export default class BehaviorController {
         message: 'Token not found',
         code: 404,
         data: {},
-        status: 'error',
+        status: 404
       });
       error.send();
       return;
@@ -128,7 +128,7 @@ export default class BehaviorController {
         message: 'Token not found',
         code: 404,
         data: {},
-        status: 'error',
+        status: 404
       });
       error.send();
       return;
@@ -212,7 +212,7 @@ export default class BehaviorController {
         message: 'Token not found',
         code: 404,
         data: {},
-        status: 'error',
+        status: 404
       });
       error.send();
       return;

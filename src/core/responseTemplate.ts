@@ -15,7 +15,11 @@ class ResponseTemplate {
   }
 
   send() {
-    return this.res.status(this.status).json(this.json);
+    try {
+      return this.res.status(this.status).json(this.json);
+    } catch (e) {
+      return this.res.status(500).json({});
+    }
   }
 
   get json() {

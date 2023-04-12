@@ -1,9 +1,13 @@
+import { setMaxListeners, EventEmitter } from 'node:events';
 import 'reflect-metadata';
 import express from 'express';
 import config from './config';
 import Logger from './loaders/logger';
 
 require('events').defaultMaxListeners = 15;
+
+const ee = new EventEmitter();
+setMaxListeners(16, ee);
 
 async function startServer() {
   const app = express();

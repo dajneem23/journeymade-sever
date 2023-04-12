@@ -66,8 +66,14 @@ export default class TokenService {
       return;
     }
 
-    const tokens = await this.tokenModel.find({ id }).lean().exec();
-    if (!tokens || tokens.length === 0) {      
+    let tokens
+    try {
+      tokens = await this.tokenModel.find({ id }).lean().exec();
+      if (!tokens || tokens.length === 0) {      
+        return;
+      }
+    } catch (e) {
+      this.logger.error(e);
       return;
     }
     

@@ -41,7 +41,7 @@ export default class TokenController {
           message: 'Token not found',
           code: 404,
           data: {},
-          status: 'error',
+          status: 404
         });
         error.send();
         return;
@@ -113,6 +113,7 @@ export default class TokenController {
     logger.debug('Calling get endpoint with query: %o', req.query);
 
     const { id } = req.params;
+    console.log("🚀 ~ file: token.ts:116 ~ TokenController ~ getVolume ~ id:", id)
     const now = dayjs();
     const { 
       to_time = now.unix(),
@@ -124,11 +125,12 @@ export default class TokenController {
     const tokenService = Container.get(TokenService);
     const token  = await tokenService.getByID(id);
     if (!token) {
+      console.log("🚀 ~ file: token.ts:128 ~ TokenController ~ getVolume ~ token:", token)
       const error = new ErrorResponse(res, {
         message: 'Token not found',
         code: 404,
         data: {},
-        status: 'error',
+        status: 404,
       });
       error.send();
       return;
@@ -172,15 +174,10 @@ export default class TokenController {
       const chartData = await volumeWorker.getChartData(timeFrames.map(tf => tf[0]), volumeFrames, txLogs);
       console.timeEnd('getChartData');
 
-      // console.time('getPriceRanges');
-      // const priceRanges = await volumeWorker.getPriceRanges(txLogs);
-      // console.timeEnd('getPriceRanges');
-
       console.timeEnd('getVolume');
       const success = new SuccessResponse(res, {
         data: {
           // tx_logs: txLogs,
-          // price_ranges: priceRanges,
           time_frames: timeFrames.map(tf => tf[0]),
           volume_frames: volumeFrames,
           chart_data: chartData,
@@ -209,7 +206,7 @@ export default class TokenController {
         message: 'Token not found',
         code: 404,
         data: {},
-        status: 'error',
+        status: 404
       });
       error.send();
       return;
@@ -287,7 +284,7 @@ export default class TokenController {
         message: 'Token not found',
         code: 404,
         data: {},
-        status: 'error',
+        status: 404
       });
       error.send();
       return;
