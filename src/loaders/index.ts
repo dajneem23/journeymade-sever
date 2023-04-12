@@ -3,7 +3,6 @@ import mongooseLoader from './mongoose';
 import pgLoader from './postgres';
 import logger from './logger';
 import ioRedis from './ioredis';
-import initTelegramBot from './telegram';
 import dependencyInjectorLoader from './dependencyInjector';
 import workerLoader from './worker';
 
@@ -22,8 +21,6 @@ export default async ({ expressApp }) => {
   // await pgLoader();
 
   logger.info('✌️ DB loaded and connected!');
-
-  // initTelegramBot();
 
   // TODO
   const injectModels = ['account', 'token', 'price', 'tag', 'transaction', 'group', 'groupFootprint', 'transactionEvent', 'debankTopHolders', 'coinMarket', 'accountSnapshot']
