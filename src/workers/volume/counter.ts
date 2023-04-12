@@ -242,6 +242,10 @@ const counter = {
           usd_value,
         };
       });
+
+      delete zone.logs;
+      delete zone.buy.logs;
+      delete zone.sell.logs;
     });
 
     return dataGrid //.filter(zone => zone.count > 0);

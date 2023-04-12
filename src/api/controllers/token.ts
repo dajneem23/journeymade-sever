@@ -119,7 +119,7 @@ export default class TokenController {
       period = EPeriod['1h'], page = 1, limit = TimeFramesLimit } = req.query;
     const offset = +req['skip'] || 0;
 
-    console.time('Hello');
+    console.time('getVolume');
     console.time('tokenService');
     const tokenService = Container.get(TokenService);
     const token  = await tokenService.getByID(id);
@@ -145,22 +145,6 @@ export default class TokenController {
       console.timeEnd('getTimeFramesByPeriod');
 
       const txEventService = Container.get(TransactionEventService);
-     
-      // console.time('init behavior worker');
-      // const behaviorWorker = await spawn<BehaviorCounterType>(new Worker("../../workers/behavior-stats"));
-      // console.timeEnd('init behavior worker');
-      
-      // console.time('init volume worker');
-      // const volumeWorker = await spawn<VolumeCounter>(new Worker("../../workers/volume"));
-      // console.timeEnd('init volume worker');
-
-      // console.time('init worker');
-      // const [behaviorWorker, volumeWorker] = await Promise.all([
-      //   spawn<BehaviorCounterType>(new Worker("../../workers/behavior/worker")),
-      //   spawn<VolumeCounterType>(new Worker("../../workers/volume/worker"))
-      // ]);
-      // console.timeEnd('init worker');
-
       const volumeWorker = Container.get(volumeCounterToken);
 
       console.time('getTxLogs');
@@ -188,17 +172,17 @@ export default class TokenController {
       const chartData = await volumeWorker.getChartData(timeFrames.map(tf => tf[0]), volumeFrames, txLogs);
       console.timeEnd('getChartData');
 
-      console.time('getPriceRanges');
-      const priceRanges = await volumeWorker.getPriceRanges(txLogs);
-      console.timeEnd('getPriceRanges');
+      // console.time('getPriceRanges');
+      // const priceRanges = await volumeWorker.getPriceRanges(txLogs);
+      // console.timeEnd('getPriceRanges');
 
-      console.timeEnd('Hello');
+      console.timeEnd('getVolume');
       const success = new SuccessResponse(res, {
         data: {
-          tx_logs: txLogs,
+          // tx_logs: txLogs,
+          // price_ranges: priceRanges,
           time_frames: timeFrames.map(tf => tf[0]),
           volume_frames: volumeFrames,
-          price_ranges: priceRanges,
           chart_data: chartData,
         },
       });
