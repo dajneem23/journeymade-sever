@@ -365,21 +365,24 @@ export default class TokenController {
       }).filter(item => item.signals.length > 0);
 
       const signals = rawSignals.map(({timeFrame, time_index, signals}) => {
-        return <ITokenSignalResponse>{
-          title: `Alert: ${signals.map(signal => signal.action).join(', ')}`,
-          description: '....',
-          time_frame: {
-            from: timeFrame[0],
-            to: timeFrame[1]
-          },
-          time_index: time_index,
-          details: signals,
-          lead_zone: {
-            tags: ['whale', 'smart_money'],
-            address: '0x123',
+        return signals.map(signal => {
+          return <ITokenSignalResponse>{
+            title: `Alert: ${signal.action}`,
+            type: signal.action,
+            description: '....',
+            time_frame: {
+              from: timeFrame[0],
+              to: timeFrame[1]
+            },
+            time_index: time_index,
+            details: signal,
+            lead_zone: {
+              tags: ['whale', 'smart_money'],
+              address: '0x123',
+            }
           }
-        }
-      });
+        })
+      }).flat();
 
       const success = new SuccessResponse(res, {
         data: {
