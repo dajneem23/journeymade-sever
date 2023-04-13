@@ -318,13 +318,6 @@ export default class TokenController {
     }
 
     try {
-      // const service = Container.get(TransactionEventService);
-      // const timeFrames = getTimeFramesByPeriod({
-      //   period: period as EPeriod,
-      //   limit: +limit,
-      //   to_time: +to_time,
-      // });
-
       console.time('getTimeFramesByPeriod');
       let subTimeFrameLimit = 24;
       switch (period) {
@@ -360,8 +353,6 @@ export default class TokenController {
       const volumeWorker = Container.get(volumeCounterToken);
       const signalWorker = Container.get(signalCounterToken);
 
-      console.time('getTxLogs');
-
       const txLogs = (
         await Promise.all(
           timeFrames.map(async (timeFrame) => {
@@ -382,7 +373,6 @@ export default class TokenController {
 
       const volumes = await volumeWorker.getChartData(timeFrames, txLogs);
 
-      console.timeEnd('getTxLogs');
       const fullSignals = await signalWorker.getSignals(
         volumes,
         timeFrames.map((tf) => tf[0]),

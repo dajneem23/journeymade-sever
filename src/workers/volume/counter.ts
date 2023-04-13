@@ -62,8 +62,8 @@ const counter = {
     const output: Output[] = txLogs
       .map((txLog) => {
         const { from_account_type, to_account_type } = txLog;
-        const isBuy = from_account_type === LIQUIDITY_POOL_TYPE && inWhitelist(txLog.to_account_tags);
-        const isSell = to_account_type === LIQUIDITY_POOL_TYPE && inWhitelist(txLog.from_account_tags);
+        const isBuy = from_account_type === LIQUIDITY_POOL_TYPE // && inWhitelist(txLog.to_account_tags);
+        const isSell = to_account_type === LIQUIDITY_POOL_TYPE // && inWhitelist(txLog.from_account_tags);
         
         const result = [];        
         if (isBuy) {
