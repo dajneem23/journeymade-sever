@@ -8,7 +8,7 @@ import {
   ITokenSignalResponse
 } from '@/interfaces';
 import TransactionEventService from '@/services/transactionEvent';
-import { getTimeFramesByPeriod, groupBy } from '@/utils';
+import { getTimeFramesByPeriod, groupBy, sortArray } from '@/utils';
 import { NextFunction, Request, Response } from 'express';
 import { Container, Service } from 'typedi';
 
@@ -173,7 +173,7 @@ export default class TokenController {
       // console.timeEnd('getVolumeFrames');
 
       console.time('getChartData');
-      const chartData = await volumeWorker.getChartData(timeFrames.map(tf => tf[0]), txLogs);
+      const chartData = await volumeWorker.getChartData(timeFrames, txLogs);
       console.timeEnd('getChartData');
 
       console.timeEnd('getVolume');
@@ -300,44 +300,36 @@ export default class TokenController {
       //   to_time: +to_time,
       // });
 
-      // const chartData = timeFrames.map((timeFrame, index) => {
-      //   return <ITokenSignalResponse>{
-      //     title: 'Alert: 123',
-      //     description: 'bullist',
-      //     time_frame: {
-      //       from: timeFrame[0],
-      //       to: timeFrame[1]
-      //     },
-      //     time_index: index,
-      //     holders: [
-      //       <ITokenHolderStatsResponse>{
-      //         name: 'whale',
-      //         count: 10,
-      //         volume: 100,
-      //       },
-      //       <ITokenHolderStatsResponse>{
-      //         name: 'smart_money',
-      //         count: 3,
-      //         volume: 20,
-      //       },
-      //       <ITokenHolderStatsResponse>{
-      //         name: 'vc',
-      //         count: 1,
-      //         volume: 5,
-      //       },
-      //     ],
-      //     lead_zone: {
-      //       tags: ['whale', 'smart_money'],
-      //       address: '0x123',
-      //     }
-      //   }
-      // });
+    
       console.time('getTimeFramesByPeriod');
-      const timeFrames = getTimeFramesByPeriod({
+      let subTimeFrameLimit = 24;
+      switch (period) {
+        case EPeriod['1h']:
+          subTimeFrameLimit = 24;
+          break;
+        case EPeriod['4h']:
+            subTimeFrameLimit = 42;
+            break;  
+        case EPeriod['1d']:
+          subTimeFrameLimit = 30;
+          break;
+        case EPeriod['7d']:
+          subTimeFrameLimit = 12;
+          break;
+      }
+      const mainTimeFrames = getTimeFramesByPeriod({
         period: period as EPeriod,
         limit: +limit,
         to_time: +to_time,
       });
+      const firstTimeFrame = mainTimeFrames[0];
+      const prevNTimeFrames = getTimeFramesByPeriod({
+        period: period as EPeriod,
+        limit: subTimeFrameLimit,
+        to_time: firstTimeFrame[0],
+      });
+      const timeFrames = [...mainTimeFrames, ...prevNTimeFrames]
+
       console.timeEnd('getTimeFramesByPeriod');
 
       const txEventService = Container.get(TransactionEventService);
@@ -345,40 +337,54 @@ export default class TokenController {
       const signalWorker = Container.get(signalCounterToken);
 
       console.time('getTxLogs');
-      const txLogGroupedByTimeFrame = (await Promise.all(
+
+      const txLogs = (await Promise.all(
         timeFrames.map(async (timeFrame) => {
-          // console.time(`${JSON.stringify(timeFrame)} getTxLogs`);
-          const value = await txEventService.getListByFilters({ 
+          const txLogsInTimeFrame = await txEventService.getListByFilters({ 
             symbol: token.symbol,
             addresses: token.chains?.map((token) => token.address) || [],
             min_usd_value: 0,
             time_frame: timeFrame,
             actions: ['swap'],
           });
-          // console.timeEnd(`${JSON.stringify(timeFrame)} getTxLogs`);
-
-          return await volumeWorker.getBuySellData(value, timeFrame);
+          return await volumeWorker.getBuySellData(txLogsInTimeFrame, timeFrame);                
         })
-      ));
+      )).flat();
+
+      const volumes = await volumeWorker.getChartData(timeFrames, txLogs);
+
       console.timeEnd('getTxLogs');
-      const txLogs = txLogGroupedByTimeFrame.flat();
-      
-      console.time('getVolumeFrames');
-      const volumeFrames = await volumeWorker.getVolumeFrames(txLogGroupedByTimeFrame);
-      console.timeEnd('getVolumeFrames');
+      const fullSignals = await signalWorker.getSignals(volumes, timeFrames.map(tf => tf[0]));
 
-      console.time('getChartData');
-      const volumes = await volumeWorker.getChartData(timeFrames.map(tf => tf[0]), volumeFrames, txLogs);
-      console.timeEnd('getChartData');
+      const rawSignals = mainTimeFrames.map((timeFrame, index) => {
+        return {
+          timeFrame,
+          time_index: index,
+          signals: fullSignals.filter((signal) => signal.time_frame.from === timeFrame[0] && signal.time_frame.to === timeFrame[1])
+        }
+      }).filter(item => item.signals.length > 0);
 
-      console.timeEnd('getVolume');
-
-      const signals = await signalWorker.getSignals(volumes, timeFrames.map(tf => tf[0]));
+      const signals = rawSignals.map(({timeFrame, time_index, signals}) => {
+        return <ITokenSignalResponse>{
+          title: `Alert: ${signals.map(signal => signal.action).join(', ')}`,
+          description: '....',
+          time_frame: {
+            from: timeFrame[0],
+            to: timeFrame[1]
+          },
+          time_index: time_index,
+          details: signals,
+          lead_zone: {
+            tags: ['whale', 'smart_money'],
+            address: '0x123',
+          }
+        }
+      });
 
       const success = new SuccessResponse(res, {
         data: {
-          time_frames: timeFrames.map(tf => tf[0]),
-          signals: signals
+          time_frames: mainTimeFrames.map(tf => tf[0]),
+          chart_data: signals,
         }
       });
 

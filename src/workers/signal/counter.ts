@@ -48,41 +48,66 @@ function inWhitelist(tags: string[]) {
   return tags.filter((tag) => ignoredTags.includes(tag))?.length === 0;
 }
 
-const counter = {
-  calculateEMA(usdValue, prevUsdValue, numOfTimeFrame) {
-    const k = 2 / (numOfTimeFrame + 1);
-    return usdValue * k + prevUsdValue * (1 - k);
-  },
+function calculateEMA(usdValue, prevEMAValue = 0, numOfTimeFrame) {
+  const k = 2 / (numOfTimeFrame + 1);
+  return usdValue * k + prevEMAValue * (1 - k);
+}
+
+const counter = {  
   getBuySellAlert(volumes) {
     
   },
   getSignals(volumes, timeFrames) {
+    const buyVolumes = volumes.map((volume) => {
+      return {
+        time_index: volume.time_index,
+        time_frame: volume.time_frame,
+        ...volume.buy
+      }
+    });
+    const sellVolumes = volumes.map((volume) => {
+      return {
+        time_index: volume.time_index,
+        time_frame: volume.time_frame,
+        ...volume.sell
+      }
+    });
+    const volumesByAction = {
+      buy: buyVolumes,
+      sell: sellVolumes
+    }
+    
+    const actionTypes = ['buy', 'sell'];
     const numOfTimeFrame = timeFrames.length;
-    const eMAValues = [];
-    const signals = [];
-    for (let i = 0; i < volumes.length; i++) {
-      const volume = volumes[i];
-      const prevVolume = volumes[i - 1];
-      const prevEMAValue = eMAValues[i - 1];
-      const eMAValue = this.calculateEMA(volume.usd_value, prevEMAValue, numOfTimeFrame);
-      eMAValues.push(eMAValue);
-      if (i < numOfTimeFrame) continue;
-      const isBuySignal = volume.usd_value > eMAValue && prevVolume.usd_value < prevEMAValue;
-      const isSellSignal = volume.usd_value < eMAValue && prevVolume.usd_value > prevEMAValue;
-      if (isBuySignal) {
-        signals.push({
+    const EMAValues = actionTypes.map(action => process(volumesByAction[action], action)).flat();
+
+    function process(volumeList, action) {
+      const EMAList = [];
+      for (let i = 0; i < volumeList.length; i++) {
+        const volume = volumeList[i];
+        const prevEMAValue = EMAList[0]?.ema_value;
+        const eMAValue = calculateEMA(volume.usd_value, prevEMAValue, numOfTimeFrame);
+        EMAList.unshift({
+          ema_value: eMAValue,
+          action: action,
           ...volume,
-          signal: 'buy',
+          from_time: volume.time_frame.from,
         });
       }
-      if (isSellSignal) {
-        signals.push({
-          ...volume,
-          signal: 'sell',
-        });
-      }
+
+      const minValue = volumeList.map((volume) => volume.usd_value).sort((a, b) => b - a)[5];
+      
+      /**
+       * Filter: volume > EMA and volume > minValue
+       */
+      const result = EMAList.filter((item) => {
+        return item.usd_value > item.ema_value && item.usd_value > minValue;
+      })
+
+      return result;
     }
 
+    return EMAValues;
   }
 };
 

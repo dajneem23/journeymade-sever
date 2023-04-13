@@ -123,8 +123,9 @@ const counter = {
     timeFrames.forEach((tf, tfIdx) => {
       dataGrid.push({
         time_frame: {
-          from: tf,
-          to: timeFrames[tfIdx + 1] || tf + (tf - timeFrames[tfIdx - 1]),
+          from: tf[0],
+          to: tf[1] 
+          // timeFrames[tfIdx + 1] || tf + (tf - timeFrames[tfIdx - 1]),
         },
         time_index: tfIdx,
 
@@ -189,6 +190,32 @@ const counter = {
         zone.buy.count > 0 ? sumArrayByField(zone.buy.logs, 'usd_value') : 0;
       zone.buy.price =
         zone.buy.amount > 0 ? zone.buy.usd_value / zone.buy.amount : 0;
+      const buyTagList = Array.from(
+          new Set(zone.buy.logs.map((log) => log.tags).flat()),
+        ).filter((t) => !!t);
+      zone.buy.tags = buyTagList.map((tag) => {
+          const count = zone.buy.logs.filter((log) => log.tags?.includes(tag)).length;
+          const amount =
+            count > 0
+              ? sumArrayByField(
+                  zone.buy.logs.filter((log) => log.tags?.includes(tag)),
+                  'amount',
+                ) / count
+              : 0;
+          const usd_value =
+            count > 0
+              ? sumArrayByField(
+                  zone.buy.logs.filter((log) => log.tags?.includes(tag)),
+                  'usd_value',
+                ) / count
+              : 0;
+          return {
+            id: tag,
+            count,
+            amount,
+            usd_value,
+          };
+        });  
 
       zone.sell.count = zone.sell.logs.length;
       zone.sell.amount =
@@ -197,7 +224,32 @@ const counter = {
         zone.sell.count > 0 ? sumArrayByField(zone.sell.logs, 'usd_value') : 0;
       zone.sell.price =
         zone.sell.amount > 0 ? zone.sell.usd_value / zone.sell.amount : 0;
-
+        const sellTagList = Array.from(
+          new Set(zone.sell.logs.map((log) => log.tags).flat()),
+        ).filter((t) => !!t);
+      zone.sell.tags = sellTagList.map((tag) => {
+          const count = zone.sell.logs.filter((log) => log.tags?.includes(tag)).length;
+          const amount =
+            count > 0
+              ? sumArrayByField(
+                  zone.sell.logs.filter((log) => log.tags?.includes(tag)),
+                  'amount',
+                ) / count
+              : 0;
+          const usd_value =
+            count > 0
+              ? sumArrayByField(
+                  zone.sell.logs.filter((log) => log.tags?.includes(tag)),
+                  'usd_value',
+                ) / count
+              : 0;
+          return {
+            id: tag,
+            count,
+            amount,
+            usd_value,
+          };
+        });  
     
       const tagList = Array.from(
         new Set(zone.logs.map((log) => log.tags).flat()),
