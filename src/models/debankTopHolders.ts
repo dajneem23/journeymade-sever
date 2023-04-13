@@ -11,6 +11,11 @@ const schema = new mongoose.Schema(
     id: String,
     addresses: [String],
     holders: Number,
+    stats: {
+      amount: Number,
+      usd_value: Number,
+      tags: Object,
+    },
   },
   {
     timestamps: {
@@ -18,7 +23,7 @@ const schema = new mongoose.Schema(
       createdAt: false,
     },
     versionKey: false,
-    strict: false
+    strict: false,
   },
 );
 

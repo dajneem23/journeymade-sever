@@ -21,7 +21,7 @@ export default class TokenService {
     limit,
   }: ITokenOTD): Promise<{ items: IToken[]; itemCount: number }> {
     const filters = {
-      enabled: true
+      enabled: true,
     };
     if (symbols && symbols.length > 0) {
       filters['symbol'] = { $in: symbols };
@@ -48,9 +48,9 @@ export default class TokenService {
     return await ioredis.get(`token:${id}`);
   }
 
-  public async getByID(id) {    
+  public async getByID(id) {
     const ioredis = Container.get(ioRedisToken);
-    
+
     const cached = await ioredis.get(`token:${id}`);
     let token;
     if (cached) {
@@ -58,7 +58,7 @@ export default class TokenService {
         token = JSON.parse(cached);
         return <ITokenResponse>{
           ...token,
-        }
+        };
       } catch (e) {
         this.logger.error(e);
       }
@@ -66,17 +66,17 @@ export default class TokenService {
       return;
     }
 
-    let tokens
+    let tokens;
     try {
       tokens = await this.tokenModel.find({ id }).lean().exec();
-      if (!tokens || tokens.length === 0) {      
+      if (!tokens || tokens.length === 0) {
         return;
       }
     } catch (e) {
       this.logger.error(e);
       return;
     }
-    
+
     return <ITokenResponse>{
       id: tokens[0].id,
       name: tokens[0].name,
@@ -92,7 +92,7 @@ export default class TokenService {
           listedIn: t.listedIn,
         };
       }),
-    }
+    };
   }
 
   public async insert(tokens: IToken[]): Promise<any> {
@@ -116,4 +116,5 @@ export default class TokenService {
   public async delete(symbol: string): Promise<any> {
     return await this.tokenModel.findOneAndDelete({ symbol: symbol }).lean();
   }
+
 }

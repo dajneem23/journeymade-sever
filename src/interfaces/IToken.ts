@@ -8,6 +8,9 @@ export interface IToken {
   logoURI: string;
   coingeckoId: string;
   listedIn: string[];
+  ids: {
+    [key: string]: string;
+  };
 }
 export interface ITokenOTD {
   symbols: string[];
@@ -22,13 +25,18 @@ export interface ITokenResponse {
   coingeckoId: string;
   logoURI: string;
 
-  chains: string[] | {
-    id: number;
-    address: string;
-    decimals: number;
-    listedIn?: string[];
-  }[];
+  chains:
+    | string[]
+    | {
+        id: number;
+        address: string;
+        decimals: number;
+        listedIn?: string[];
+      }[];
   addresses?: string[];
+  ids: {
+    [key: string]: string;
+  };
 }
 
 export interface ITokenDetailResponse {
@@ -54,9 +62,9 @@ export interface ITokenDetailResponse {
 }
 
 export interface ITokenHolderStatsResponse {
-  name: string,
-  count: number,
-  volume: number,
+  name: string;
+  count: number;
+  volume: number;
 }
 
 export interface ITokenSignalResponse {
@@ -66,13 +74,13 @@ export interface ITokenSignalResponse {
   time_frame: {
     from: number;
     to: number;
-  },
+  };
   time_index: number;
   period?: string;
   holders?: ITokenHolderStatsResponse[];
   details?: any;
   lead_zone?: {
-    tags?: string[],
-    address?: string,
-  }
+    tags?: string[];
+    address?: string;
+  };
 }

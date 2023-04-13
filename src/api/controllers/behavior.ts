@@ -42,17 +42,17 @@ export default class BehaviorController {
 
     try {
       const now = dayjs();
-      const { 
-        to_time = now.unix(), 
+      const {
+        to_time = now.unix(),
         period,
         limit = TimeFramesLimit,
       } = req.query;
 
       const timeFrames = getTimeFramesByPeriod({
-        period: period as EPeriod, 
+        period: period as EPeriod,
         limit: +limit,
         to_time: +to_time,
-      });  
+      });
 
       const txEventService = Container.get(TransactionEventService);
       const accountSnapshotService = Container.get(AccountSnapshotService);
@@ -62,7 +62,7 @@ export default class BehaviorController {
       // console.time('getData');
       const txLogs = (await Promise.all(
         timeFrames.map(async (timeFrame) => {
-          const txEvents = await txEventService.getListByFilters({ 
+          const txEvents = await txEventService.getListByFilters({
             symbol: token.symbol,
             addresses: token.chains?.map((chain) => chain.address) || [],
             min_usd_value: 1000,
@@ -87,12 +87,12 @@ export default class BehaviorController {
             // if (found) console.log('found', found?.stats?.total_net_usd_value)
             tx.balance_snapshot = found ? found.stats?.total_net_usd_value : null;
           })
-          
+
           return group;
         })
       )).flat();
       // console.timeEnd('getData');
-   
+
       // console.time('volumeFrames');
       const volumeFrames = await behaviorWorker.getVolumeFrames(txLogs);
       // console.timeEnd('volumeFrames');
@@ -136,33 +136,33 @@ export default class BehaviorController {
 
     try {
       const now = dayjs();
-      const { 
-        to_time = now.unix(), 
+      const {
+        to_time = now.unix(),
         period,
         limit = TimeFramesLimit,
       } = req.query;
 
       const timeFrames = getTimeFramesByPeriod({
-        period: period as EPeriod, 
+        period: period as EPeriod,
         limit: +limit,
         to_time: +to_time,
-      });  
+      });
 
       const txEventService = Container.get(TransactionEventService);
       const behaviorWorker = Container.get(behaviorCounterToken);
       const activityScoreWorker = Container.get(activityScoreCounterToken);
       const volumeWorker = Container.get(volumeCounterToken);
-      
+
       console.time('txLogs');
       const txLogs = (await Promise.all(
         timeFrames.map(async (timeFrame) => {
-          const value = await txEventService.getListByFilters({ 
+          const value = await txEventService.getListByFilters({
             symbol: token.symbol,
             addresses: token.chains?.map((chain) => chain.address) || [],
             min_usd_value: 1000,
             time_frame: timeFrame,
             actions: ['swap'],
-          });        
+          });
 
           return await volumeWorker.getBuySellData(value, timeFrame);
           // return await behaviorWorker.getDataInTimeFrame(value, timeFrame);
@@ -180,7 +180,7 @@ export default class BehaviorController {
       console.time('segmentFrames');
       const segmentFrames = await activityScoreWorker.getSegmentFrames();
       console.timeEnd('segmentFrames');
-      
+
       console.time('getScore');
       const chartData = await activityScoreWorker.getScore(timeFrames.map(tf => tf[0]), segmentFrames, txLogs, topHolderAddressList);
       console.timeEnd('getScore');
@@ -220,29 +220,29 @@ export default class BehaviorController {
 
     try {
       const now = dayjs();
-      const { 
-        to_time = now.unix(), 
+      const {
+        to_time = now.unix(),
       } = req.query;
 
       const timeFrames = getTimeFramesByPeriod({
-        period: EPeriod['1h'], 
+        period: EPeriod['1h'],
         limit: 24,
         to_time: +to_time,
-      });  
+      });
 
       const txEventService = Container.get(TransactionEventService);
       const volumeWorker = Container.get(volumeCounterToken);
-      
+
       console.time('txLogs');
       const txLogs = (await Promise.all(
         timeFrames.map(async (timeFrame) => {
-          const value = await txEventService.getListByFilters({ 
+          const value = await txEventService.getListByFilters({
             symbol: token.symbol,
             addresses: token.chains?.map((chain) => chain.address) || [],
             min_usd_value: 1,
             time_frame: timeFrame,
             actions: ['swap', 'add', 'remove'],
-          });        
+          });
 
           return await volumeWorker.getBuySellData(value, timeFrame);
         })
