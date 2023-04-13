@@ -25,16 +25,14 @@ type TAction = {
   amount: number;
   usd_value: number;
   price: number;
+  change_percentage?: number;
   tags: any[];
   logs: any[];
 };
 
 type TGridZoneData = {
   time_frame: { from: number; to: number };
-  // volume_frame: { from: number; to: number };
-
   time_index: number;
-  // volume_index: number;
 
   buy: TAction;
   sell: TAction;
@@ -47,6 +45,17 @@ function inWhitelist(tags: string[]) {
 
   return tags.filter((tag) => ignoredTags.includes(tag))?.length === 0;
 }
+
+const getChangedPercentage = (current, prev, field) => {
+  let result = 0;
+  if (prev && +prev[field] > 0) {
+    result = Number(
+      (((+current[field] - +prev[field]) / +prev[field]) * 100).toFixed(3),
+    );
+  }
+
+  return result;
+};
 
 const counter = {
   getBuySellData(txLogs, timeFrame) {
@@ -125,7 +134,6 @@ const counter = {
         time_frame: {
           from: tf[0],
           to: tf[1] 
-          // timeFrames[tfIdx + 1] || tf + (tf - timeFrames[tfIdx - 1]),
         },
         time_index: tfIdx,
 
@@ -282,6 +290,14 @@ const counter = {
       delete zone.buy.logs;
       delete zone.sell.logs;
     });
+
+    dataGrid.forEach((item, index) => {
+      if (index > 0) {
+        item.change_percentage = getChangedPercentage(item, dataGrid[index - 1], 'usd_value');
+        item.buy.change_percentage = getChangedPercentage(item.buy, dataGrid[index - 1].buy, 'usd_value');
+        item.sell.change_percentage = getChangedPercentage(item.sell, dataGrid[index - 1].sell, 'usd_value');
+      }
+    })
 
     return dataGrid.filter(zone => zone.count > 0);
   },

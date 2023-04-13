@@ -21,7 +21,11 @@ import { EPeriod } from '../../interfaces/EPeriod';
 import DebankTopHoldersService from '../../services/debankTopHolders';
 import TokenService from '../../services/token';
 
-import { behaviorCounterToken, signalCounterToken, volumeCounterToken } from '@/loaders/worker';
+import {
+  behaviorCounterToken,
+  signalCounterToken,
+  volumeCounterToken,
+} from '@/loaders/worker';
 
 @Service()
 export default class TokenController {
@@ -190,7 +194,7 @@ export default class TokenController {
         data: {
           // tx_logs: txLogs,
           // volume_frames: volumeFrames,
-          time_frames: timeFrames.map(tf => tf[0]),
+          time_frames: timeFrames.map((tf) => tf[0]),
           chart_data: chartData,
         },
       });
@@ -321,7 +325,6 @@ export default class TokenController {
       //   to_time: +to_time,
       // });
 
-
       console.time('getTimeFramesByPeriod');
       let subTimeFrameLimit = 24;
       switch (period) {
@@ -329,8 +332,8 @@ export default class TokenController {
           subTimeFrameLimit = 24;
           break;
         case EPeriod['4h']:
-            subTimeFrameLimit = 42;
-            break;
+          subTimeFrameLimit = 42;
+          break;
         case EPeriod['1d']:
           subTimeFrameLimit = 30;
           break;
@@ -349,7 +352,7 @@ export default class TokenController {
         limit: subTimeFrameLimit,
         to_time: firstTimeFrame[0],
       });
-      const timeFrames = [...mainTimeFrames, ...prevNTimeFrames]
+      const timeFrames = [...mainTimeFrames, ...prevNTimeFrames];
 
       console.timeEnd('getTimeFramesByPeriod');
 
@@ -359,57 +362,83 @@ export default class TokenController {
 
       console.time('getTxLogs');
 
-      const txLogs = (await Promise.all(
-        timeFrames.map(async (timeFrame) => {
-          const txLogsInTimeFrame = await txEventService.getListByFilters({
-            symbol: token.symbol,
-            addresses: token.chains?.map((token) => token.address) || [],
-            min_usd_value: 0,
-            time_frame: timeFrame,
-            actions: ['swap'],
-          });
-          return await volumeWorker.getBuySellData(txLogsInTimeFrame, timeFrame);
-        })
-      )).flat();
+      const txLogs = (
+        await Promise.all(
+          timeFrames.map(async (timeFrame) => {
+            const txLogsInTimeFrame = await txEventService.getListByFilters({
+              symbol: token.symbol,
+              addresses: token.chains?.map((token) => token.address) || [],
+              min_usd_value: 0,
+              time_frame: timeFrame,
+              actions: ['swap'],
+            });
+            return await volumeWorker.getBuySellData(
+              txLogsInTimeFrame,
+              timeFrame,
+            );
+          }),
+        )
+      ).flat();
 
       const volumes = await volumeWorker.getChartData(timeFrames, txLogs);
 
       console.timeEnd('getTxLogs');
-      const fullSignals = await signalWorker.getSignals(volumes, timeFrames.map(tf => tf[0]));
+      const fullSignals = await signalWorker.getSignals(
+        volumes,
+        timeFrames.map((tf) => tf[0]),
+      );
 
-      const rawSignals = mainTimeFrames.map((timeFrame, index) => {
-        return {
-          timeFrame,
-          time_index: index,
-          signals: fullSignals.filter((signal) => signal.time_frame.from === timeFrame[0] && signal.time_frame.to === timeFrame[1])
-        }
-      }).filter(item => item.signals.length > 0);
-
-      const signals = rawSignals.map(({timeFrame, time_index, signals}) => {
-        return signals.map(signal => {
-          return <ITokenSignalResponse>{
-            title: `Alert: ${signal.action}`,
-            type: signal.action,
-            description: '....',
-            time_frame: {
-              from: timeFrame[0],
-              to: timeFrame[1]
-            },
-            time_index: time_index,
-            details: signal,
-            lead_zone: {
-              tags: ['whale', 'smart_money'],
-              address: '0x123',
-            }
-          }
+      const rawSignals = mainTimeFrames
+        .map((timeFrame, index) => {
+          return {
+            timeFrame,
+            time_index: index,
+            signals: fullSignals.filter(
+              (signal) =>
+                signal.time_frame.from === timeFrame[0] &&
+                signal.time_frame.to === timeFrame[1],
+            ),
+          };
         })
-      }).flat();
+        .filter((item) => item.signals.length > 0);
+
+      const signals = (
+        await Promise.all(
+          rawSignals.map(async ({ timeFrame, time_index, signals }) => {
+            return await Promise.all(
+              signals.map(async (signal) => {
+                return <ITokenSignalResponse>{
+                  title: `Alert: ${signal.action}`,
+                  type: signal.action,
+                  description: '....',
+                  time_frame: {
+                    from: timeFrame[0],
+                    to: timeFrame[1],
+                  },
+                  time_index: time_index,
+                  volume: {
+                    total: signal.parent.usd_value,
+                    total_change_percentage: signal.parent.change_percentage,
+                    buy: signal.parent.buy.usd_value,
+                    buy_change_percentage: signal.parent.buy.change_percentage,
+                    sell: signal.parent.sell.usd_value,
+                    sell_change_percentage:
+                      signal.parent.sell.change_percentage,
+                  },
+                  details: signal,
+                  ...(await signalWorker.getLeader(txLogs, signal)),
+                };
+              }),
+            );
+          }),
+        )
+      ).flat();
 
       const success = new SuccessResponse(res, {
         data: {
-          time_frames: mainTimeFrames.map(tf => tf[0]),
+          time_frames: mainTimeFrames.map((tf) => tf[0]),
           chart_data: signals,
-        }
+        },
       });
 
       success.send();

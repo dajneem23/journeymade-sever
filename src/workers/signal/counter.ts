@@ -1,3 +1,4 @@
+import { groupBy } from '../../utils/groupBy';
 import { VolumeRangeOptions } from '../../constants';
 import { EAccountTags } from '../../interfaces';
 import { sumArrayByField } from '../../utils/sumArrayByField';
@@ -54,9 +55,6 @@ function calculateEMA(usdValue, prevEMAValue = 0, numOfTimeFrame) {
 }
 
 const counter = {  
-  getBuySellAlert(volumes) {
-    
-  },
   getSignals(volumes, timeFrames) {
     const topN = 5;
     const buyVolumes = volumes.map((volume) => {
@@ -94,6 +92,7 @@ const counter = {
           ...volume,
           from_time: volume.time_frame.from,
           min_usd_value: volumeList.filter((item) => item.time_frame.from <= volume.time_frame.from).map((item) => item.usd_value).sort((a, b) => b - a)[topN],
+          parent: volumes.find((item) => item.time_frame.from === volume.time_frame.from)
         });
       }
 
@@ -108,7 +107,35 @@ const counter = {
     }
 
     return EMAValues;
-  }
+  },
+
+  getLeader(txLogs, signal) {
+    const { time_frame, action } = signal;
+    const signalTxLogs = txLogs.filter((item) => {
+      return item.time >= time_frame.from && item.time <= time_frame.to;
+    });
+
+    const group = groupBy(signalTxLogs, 'address')
+    const list = Object.keys(group).map((address) => {
+      return {
+        address,
+        volume: sumArrayByField(group[address], 'usd_value'),
+        buy_volume: sumArrayByField(group[address].filter((item) => item.action === 'buy'), 'usd_value'),
+        sell_volume: sumArrayByField(group[address].filter((item) => item.action === 'sell'), 'usd_value'),
+        tags: group[address][0].tags,
+      }
+    })
+
+    const leader = list.sort((a, b) => b.volume - a.volume)[0];
+    const leadBuyer = list.sort((a, b) => b.buy_volume - a.buy_volume)[0];
+    const leadSeller = list.sort((a, b) => b.sell_volume - a.sell_volume)[0];
+
+    return {
+      lead_zone: leader,
+      lead_buyer: leadBuyer,
+      lead_seller: leadSeller
+    }
+  },
 };
 
 export type SignalCounterType = typeof counter;
