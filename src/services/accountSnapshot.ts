@@ -23,18 +23,20 @@ export default class AccountSnapshotService {
   }): Promise<IAccountSnapshot[]> {
     const filter = {};
 
-    if (addresses && addresses.length > 0) {
-      Object.assign(filter, { address: { $in: addresses } });
-    }
-
     if (time) {
+      const limitTime = dayjs.unix(time).add(-1, 'day').unix();
       const timeFilter = {
-        timestamp: { $lte: time }
+        timestamp: { $lte: time, $gt: limitTime }
       };
       Object.assign(filter, timeFilter);
     }
 
+    if (addresses && addresses.length > 0) {
+      Object.assign(filter, { address: { $in: addresses } });
+    }
+
     const cacheDuration = 60 * 30; // 30 mins
+    console.log("🚀 ~ file: accountSnapshot.ts:53 ~ AccountSnapshotService ~ filter:", filter)
 
     const query = () => this.accountSnapshotModel
       .find(filter)

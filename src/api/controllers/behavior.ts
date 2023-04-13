@@ -59,47 +59,50 @@ export default class BehaviorController {
       const behaviorWorker = Container.get(behaviorCounterToken);
       const volumeWorker = Container.get(volumeCounterToken);
 
-      // console.time('getData');
+      console.time('get txLogs');
       const txLogs = (await Promise.all(
         timeFrames.map(async (timeFrame) => {
           const txEvents = await txEventService.getListByFilters({
             symbol: token.symbol,
             addresses: token.chains?.map((chain) => chain.address) || [],
-            min_usd_value: 0,
+            min_usd_value: 10,
             time_frame: timeFrame,
             actions: ['swap'],
           });
 
           const group = await volumeWorker.getBuySellData(txEvents, timeFrame);
-
-          const addressList = group.map((tx) => tx.address);
-          if (addressList.length === 0) return group;
-
-          const addressSnapshots = await accountSnapshotService.getAccountSnapshot({
-            addresses: addressList,
-            time: timeFrame[0],
-            offset: 0,
-            limit: 1000
-          }) || []
-
-          group.forEach((tx) => {
-            const found = addressSnapshots.find((snapshot) => snapshot.address === tx.address)
-            // if (found) console.log('found', found?.stats?.total_net_usd_value)
-            tx.balance_snapshot = found ? found.stats?.total_net_usd_value : null;
-          })
-
           return group;
+
+          // console.time(`${JSON.stringify(timeFrame)} - accountSnapshotService`);
+          // const addressList = group.filter(g => g.usd_value > 1000).map((tx) => tx.address);
+          // if (addressList.length === 0) return group;
+
+          // const addressSnapshots = await accountSnapshotService.getAccountSnapshot({
+          //   addresses: Array.from(new Set(addressList)),
+          //   time: timeFrame[0],
+          //   offset: 0,
+          //   limit: 100
+          // }) || []
+          // console.timeEnd(`${JSON.stringify(timeFrame)} - accountSnapshotService`);
+
+          // group.forEach((tx) => {
+          //   const found = addressSnapshots.find((snapshot) => snapshot.address === tx.address)
+          //   // if (found) console.log('found', found?.stats?.total_net_usd_value)
+          //   tx.balance_snapshot = found ? found.stats?.total_net_usd_value : null;
+          // })
+
+          // return group;
         })
       )).flat();
-      // console.timeEnd('getData');
+      console.timeEnd('get txLogs');
 
-      // console.time('volumeFrames');
+      console.time('volumeFrames');
       const volumeFrames = await behaviorWorker.getVolumeFrames(txLogs);
-      // console.timeEnd('volumeFrames');
+      console.timeEnd('volumeFrames');
 
-      // console.time('zoneData');
+      console.time('zoneData');
       const zoneData = await behaviorWorker.getVolumeZoneData(timeFrames.map(tf => tf[0]), volumeFrames, txLogs);
-      // console.timeEnd('zoneData');
+      console.timeEnd('zoneData');
 
       const success = new SuccessResponse(res, {
         data: {
@@ -159,7 +162,7 @@ export default class BehaviorController {
           const value = await txEventService.getListByFilters({
             symbol: token.symbol,
             addresses: token.chains?.map((chain) => chain.address) || [],
-            min_usd_value: 0,
+            min_usd_value: 10,
             time_frame: timeFrame,
             actions: ['swap'],
           });

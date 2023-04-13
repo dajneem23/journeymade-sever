@@ -169,7 +169,7 @@ export default class TokenController {
           const value = await txEventService.getListByFilters({
             symbol: token.symbol,
             addresses: token.chains?.map((token) => token.address) || [],
-            min_usd_value: 0,
+            min_usd_value: 1,
             time_frame: timeFrame,
             actions: ['swap'],
           });
@@ -359,7 +359,7 @@ export default class TokenController {
             const txLogsInTimeFrame = await txEventService.getListByFilters({
               symbol: token.symbol,
               addresses: token.chains?.map((token) => token.address) || [],
-              min_usd_value: 0,
+              min_usd_value: 10,
               time_frame: timeFrame,
               actions: ['swap'],
             });
