@@ -140,7 +140,7 @@ const counter = {
       zone.activity_trend_score = zone.usd_value > 0 ? (zone.buy.usd_value - zone.sell.usd_value)/zone.usd_value : 0;
     })
 
-    return dataGrid //.filter(zone => zone.count > 0);
+    return dataGrid.filter(zone => zone.count > 0);
   },
 };
 

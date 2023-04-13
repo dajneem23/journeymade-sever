@@ -246,7 +246,7 @@ const counter = {
       delete zone.sell.logs;
     });
 
-    return dataGrid //.filter(zone => zone.count > 0);
+    return dataGrid.filter(zone => zone.count > 0);
   },
 };
 

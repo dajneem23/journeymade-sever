@@ -172,7 +172,7 @@ const counter = {
       })
     })
 
-    return zones //.filter(zone => zone.count > 0);
+    return zones.filter(zone => zone.count > 0);
   },
 };
 
