@@ -152,6 +152,7 @@ export default class TokenController {
       console.time('getTxLogs');
       const txLogGroupedByTimeFrame = (await Promise.all(
         timeFrames.map(async (timeFrame) => {
+          // console.time(`${JSON.stringify(timeFrame)} getTxLogs`);
           const value = await txEventService.getListByFilters({ 
             symbol: token.symbol,
             addresses: token.chains?.map((token) => token.address) || [],
@@ -159,6 +160,7 @@ export default class TokenController {
             time_frame: timeFrame,
             actions: ['swap'],
           });
+          // console.timeEnd(`${JSON.stringify(timeFrame)} getTxLogs`);
 
           return await volumeWorker.getBuySellData(value, timeFrame);
         })

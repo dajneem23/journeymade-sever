@@ -20,7 +20,7 @@ mongoose.connection.on('reconnected', () => {
 
 // print mongoose logs in dev env
 if (config.nodeEnv === 'development') {
-  // mongoose.set('debug', true);
+  mongoose.set('debug', true);
 }
 
 mongoose.set('strictQuery', false);

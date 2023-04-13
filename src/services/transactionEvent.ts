@@ -310,8 +310,8 @@ export default class TransactionEventService {
     min_usd_value?: number, 
     time_frame?, 
     actions?: string[]
-  }) {
-    let cacheDuration = 60 * 30; // 30 mins
+  }, opts?) {
+    let cacheDuration = 60 * 60 * 24; // 24h
     let cacheKey;    
 
     if (symbol) {
@@ -321,10 +321,8 @@ export default class TransactionEventService {
       }
 
       const now = dayjs().unix();
-      if (time_frame[1] >= now && time_frame[0] >= now) {
-        cacheDuration = 60;
-      } else if (dayjs().diff(dayjs.unix(time_frame[0]), 'minute') < 30) {
-        cacheDuration = 60 * 5; // 5 mins
+      if (time_frame[1] >= now) {
+        cacheDuration = 60 * 3;
       }
     }
 
@@ -332,21 +330,24 @@ export default class TransactionEventService {
       block_at: {
         $gte: time_frame[0],
         $lte: time_frame[1],
-      },
+      },      
+      token: { $in: addresses },
       usd_value: {
         $gt: min_usd_value || 0,
       },
-      token: { $in: addresses },
     };
     if (actions?.length > 0) {
       filter['tx_action'] = { $in: actions };
     }
 
+    const selectOpts = {
+      _id: 0,
+      ...(opts?.select || {})
+    }
+    
     const query = () => this.transactionEventModel
       .find(filter)
-      .select({
-        _id: 0,
-      })
+      .select(selectOpts)
       .lean()
 
     const result = cacheKey ? await (query() as any)
