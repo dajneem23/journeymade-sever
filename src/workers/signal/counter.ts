@@ -55,6 +55,34 @@ const counter = {
   },
   getBuySellAlert(volumes) {
     
+  },
+  getSignals(volumes, timeFrames) {
+    const numOfTimeFrame = timeFrames.length;
+    const eMAValues = [];
+    const signals = [];
+    for (let i = 0; i < volumes.length; i++) {
+      const volume = volumes[i];
+      const prevVolume = volumes[i - 1];
+      const prevEMAValue = eMAValues[i - 1];
+      const eMAValue = this.calculateEMA(volume.usd_value, prevEMAValue, numOfTimeFrame);
+      eMAValues.push(eMAValue);
+      if (i < numOfTimeFrame) continue;
+      const isBuySignal = volume.usd_value > eMAValue && prevVolume.usd_value < prevEMAValue;
+      const isSellSignal = volume.usd_value < eMAValue && prevVolume.usd_value > prevEMAValue;
+      if (isBuySignal) {
+        signals.push({
+          ...volume,
+          signal: 'buy',
+        });
+      }
+      if (isSellSignal) {
+        signals.push({
+          ...volume,
+          signal: 'sell',
+        });
+      }
+    }
+
   }
 };
 

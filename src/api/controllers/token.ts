@@ -21,7 +21,7 @@ import { EPeriod } from '../../interfaces/EPeriod';
 import DebankTopHoldersService from '../../services/debankTopHolders';
 import TokenService from '../../services/token';
 
-import { behaviorCounterToken, volumeCounterToken } from '@/loaders/worker';
+import { behaviorCounterToken, signalCounterToken, volumeCounterToken } from '@/loaders/worker';
 
 @Service()
 export default class TokenController {
@@ -342,6 +342,7 @@ export default class TokenController {
 
       const txEventService = Container.get(TransactionEventService);
       const volumeWorker = Container.get(volumeCounterToken);
+      const signalWorker = Container.get(signalCounterToken);
 
       console.time('getTxLogs');
       const txLogGroupedByTimeFrame = (await Promise.all(
@@ -367,15 +368,17 @@ export default class TokenController {
       console.timeEnd('getVolumeFrames');
 
       console.time('getChartData');
-      const chartData = await volumeWorker.getChartData(timeFrames.map(tf => tf[0]), volumeFrames, txLogs);
+      const volumes = await volumeWorker.getChartData(timeFrames.map(tf => tf[0]), volumeFrames, txLogs);
       console.timeEnd('getChartData');
 
       console.timeEnd('getVolume');
 
+      const signals = await signalWorker.getSignals(volumes, timeFrames.map(tf => tf[0]));
+
       const success = new SuccessResponse(res, {
         data: {
           time_frames: timeFrames.map(tf => tf[0]),
-          chart_data: chartData
+          signals: signals
         }
       });
 
