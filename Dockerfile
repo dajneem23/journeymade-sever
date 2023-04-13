@@ -48,4 +48,4 @@ COPY --from=builder /usr/src/app/node_modules ./node_modules
 
 EXPOSE 3001
 
-CMD [ "node", "server.js" ]
+CMD [ "NODE_OPTIONS=--max-old-space-size=8192", "node", "server.js" ]
