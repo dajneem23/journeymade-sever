@@ -77,6 +77,7 @@ export interface ITokenSignalResponse {
   time_index: number;
   period?: string;
   holders?: ITokenHolderStatsResponse[];
+  details?: any;
   lead_zone?: {
     tags?: string[];
     address?: string;

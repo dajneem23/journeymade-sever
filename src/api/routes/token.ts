@@ -58,7 +58,7 @@ export default (app: Router) => {
           page: Joi.number(),
         }),
       }),
-      apiCache(),
+      apiCache(),   // TODO
     ],
     controller.getVolume,
   );
