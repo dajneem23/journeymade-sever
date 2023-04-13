@@ -7,4 +7,7 @@ export interface IDebankTopHolders {
   id: string;
   addresses: string[];
   holders: IDebankHolder[];
+  stats: {
+    [key: string]: any;
+  };
 }

@@ -5,7 +5,7 @@ import {
   ITokenDetailResponse,
   ITokenHolderStatsResponse,
   ITokenResponse,
-  ITokenSignalResponse
+  ITokenSignalResponse,
 } from '@/interfaces';
 import TransactionEventService from '@/services/transactionEvent';
 import { getTimeFramesByPeriod, groupBy } from '@/utils';
@@ -25,7 +25,7 @@ import { behaviorCounterToken, volumeCounterToken } from '@/loaders/worker';
 
 @Service()
 export default class TokenController {
-  constructor() {}  
+  constructor() {}
 
   public async getById(req: Request, res: Response, next: NextFunction) {
     const logger: Logger = Container.get('logger');
@@ -35,13 +35,13 @@ export default class TokenController {
 
     try {
       const service = Container.get(TokenService);
-      const token  = await service.getByID(id);
+      const token = await service.getByID(id);
       if (!token) {
         const error = new ErrorResponse(res, {
           message: 'Token not found',
           code: 404,
           data: {},
-          status: 404
+          status: 404,
         });
         error.send();
         return;
@@ -52,7 +52,7 @@ export default class TokenController {
 
       const result = <ITokenDetailResponse>{
         ...token,
-        market
+        market,
       };
       const success = new SuccessResponse(res, {
         data: result,
@@ -113,19 +113,28 @@ export default class TokenController {
     logger.debug('Calling get endpoint with query: %o', req.query);
 
     const { id } = req.params;
-    console.log("🚀 ~ file: token.ts:116 ~ TokenController ~ getVolume ~ id:", id)
+    console.log(
+      '🚀 ~ file: token.ts:116 ~ TokenController ~ getVolume ~ id:',
+      id,
+    );
     const now = dayjs();
-    const { 
+    const {
       to_time = now.unix(),
-      period = EPeriod['1h'], page = 1, limit = TimeFramesLimit } = req.query;
+      period = EPeriod['1h'],
+      page = 1,
+      limit = TimeFramesLimit,
+    } = req.query;
     const offset = +req['skip'] || 0;
 
     console.time('getVolume');
     console.time('tokenService');
     const tokenService = Container.get(TokenService);
-    const token  = await tokenService.getByID(id);
+    const token = await tokenService.getByID(id);
     if (!token) {
-      console.log("🚀 ~ file: token.ts:128 ~ TokenController ~ getVolume ~ token:", token)
+      console.log(
+        '🚀 ~ file: token.ts:128 ~ TokenController ~ getVolume ~ token:',
+        token,
+      );
       const error = new ErrorResponse(res, {
         message: 'Token not found',
         code: 404,
@@ -136,7 +145,7 @@ export default class TokenController {
       return;
     }
     console.timeEnd('tokenService');
-    
+
     try {
       console.time('getTimeFramesByPeriod');
       const timeFrames = getTimeFramesByPeriod({
@@ -150,9 +159,9 @@ export default class TokenController {
       const volumeWorker = Container.get(volumeCounterToken);
 
       console.time('getTxLogs');
-      const txLogGroupedByTimeFrame = (await Promise.all(
+      const txLogGroupedByTimeFrame = await Promise.all(
         timeFrames.map(async (timeFrame) => {
-          const value = await txEventService.getListByFilters({ 
+          const value = await txEventService.getListByFilters({
             symbol: token.symbol,
             addresses: token.chains?.map((token) => token.address) || [],
             min_usd_value: 0,
@@ -161,24 +170,30 @@ export default class TokenController {
           });
 
           return await volumeWorker.getBuySellData(value, timeFrame);
-        })
-      ));
+        }),
+      );
       console.timeEnd('getTxLogs');
       const txLogs = txLogGroupedByTimeFrame.flat();
-      
+
       console.time('getVolumeFrames');
-      const volumeFrames = await volumeWorker.getVolumeFrames(txLogGroupedByTimeFrame);
+      const volumeFrames = await volumeWorker.getVolumeFrames(
+        txLogGroupedByTimeFrame,
+      );
       console.timeEnd('getVolumeFrames');
 
       console.time('getChartData');
-      const chartData = await volumeWorker.getChartData(timeFrames.map(tf => tf[0]), volumeFrames, txLogs);
+      const chartData = await volumeWorker.getChartData(
+        timeFrames.map((tf) => tf[0]),
+        volumeFrames,
+        txLogs,
+      );
       console.timeEnd('getChartData');
 
       console.timeEnd('getVolume');
       const success = new SuccessResponse(res, {
         data: {
           // tx_logs: txLogs,
-          time_frames: timeFrames.map(tf => tf[0]),
+          time_frames: timeFrames.map((tf) => tf[0]),
           volume_frames: volumeFrames,
           chart_data: chartData,
         },
@@ -196,17 +211,22 @@ export default class TokenController {
 
     const { id } = req.params;
     const now = dayjs();
-    const { to_time = now.unix(), period = EPeriod['1h'], page = 1, limit = TimeFramesLimit } = req.query;
+    const {
+      to_time = now.unix(),
+      period = EPeriod['1h'],
+      page = 1,
+      limit = TimeFramesLimit,
+    } = req.query;
     const offset = +req['skip'] || 0;
 
     const tokenService = Container.get(TokenService);
-    const token  = await tokenService.getByID(id);
+    const token = await tokenService.getByID(id);
     if (!token) {
       const error = new ErrorResponse(res, {
         message: 'Token not found',
         code: 404,
         data: {},
-        status: 404
+        status: 404,
       });
       error.send();
       return;
@@ -219,47 +239,49 @@ export default class TokenController {
         limit: +limit,
         to_time: +to_time,
       });
-
+      const { ids } = token;
+      console.log(
+        '🚀 ~ file: token.ts:217 ~ TokenController ~ getHolderStats ~ ids',
+        ids,
+      );
       // // TODO:
-      // const topHolders = await service.getByID(id) || await service.getByID(tokens[0].symbol.toLowerCase());
-      // const topHolderAddressList = topHolders?.holders?.map((t) => t.user_address);
-      // console.log("🚀 ~ file: token.ts:236 ~ TokenController ~ getHolderStats ~ topHolders:", topHolderAddressList);
-
-      const items = [
-        <ITokenHolderStatsResponse>{
-          name: 'whale',
-          count: 10,
-          volume: 100,
-        },
-        <ITokenHolderStatsResponse>{
-          name: 'smart_money',
-          count: 3,
-          volume: 20,
-        },
-        <ITokenHolderStatsResponse>{
-          name: 'vc',
-          count: 1,
-          volume: 5,
-        },
-        <ITokenHolderStatsResponse>{
-          name: 'market_maker',
-          count: 2,
-          volume: 8,
-        },
-        <ITokenHolderStatsResponse>{
-          name: 'kol',
-          count: 3,
-          volume: 8,
-        },
-        <ITokenHolderStatsResponse>{
-          name: 'token_fan',
-          count: 2,
-          volume: 8,
-        },
-      ];
+      const stats =
+        ids?.debank_id && (await service.getStatsById(ids.debank_id));
+      // const items = [
+      //   <ITokenHolderStatsResponse>{
+      //     name: 'whale',
+      //     count: 10,
+      //     volume: 100,
+      //   },
+      //   <ITokenHolderStatsResponse>{
+      //     name: 'smart_money',
+      //     count: 3,
+      //     volume: 20,
+      //   },
+      //   <ITokenHolderStatsResponse>{
+      //     name: 'vc',
+      //     count: 1,
+      //     volume: 5,
+      //   },
+      //   <ITokenHolderStatsResponse>{
+      //     name: 'market_maker',
+      //     count: 2,
+      //     volume: 8,
+      //   },
+      //   <ITokenHolderStatsResponse>{
+      //     name: 'kol',
+      //     count: 3,
+      //     volume: 8,
+      //   },
+      //   <ITokenHolderStatsResponse>{
+      //     name: 'token_fan',
+      //     count: 2,
+      //     volume: 8,
+      //   },
+      // ];
 
       const success = new SuccessResponse(res, {
-        data: items,
+        data: stats?.stats,
       });
 
       success.send();
@@ -274,17 +296,22 @@ export default class TokenController {
 
     const { id } = req.params;
     const now = dayjs();
-    const { to_time = now.unix(), period = EPeriod['1h'], page = 1, limit = TimeFramesLimit } = req.query;
+    const {
+      to_time = now.unix(),
+      period = EPeriod['1h'],
+      page = 1,
+      limit = TimeFramesLimit,
+    } = req.query;
     const offset = +req['skip'] || 0;
 
     const tokenService = Container.get(TokenService);
-     const token  = await tokenService.getByID(id);
+    const token = await tokenService.getByID(id);
     if (!token) {
       const error = new ErrorResponse(res, {
         message: 'Token not found',
         code: 404,
         data: {},
-        status: 404
+        status: 404,
       });
       error.send();
       return;
@@ -304,7 +331,7 @@ export default class TokenController {
           description: 'bullist',
           time_frame: {
             from: timeFrame[0],
-            to: timeFrame[1]
+            to: timeFrame[1],
           },
           time_index: index,
           holders: [
@@ -327,15 +354,15 @@ export default class TokenController {
           lead_zone: {
             tags: ['whale', 'smart_money'],
             address: '0x123',
-          }
-        }
+          },
+        };
       });
 
       const success = new SuccessResponse(res, {
         data: {
-          time_frames: timeFrames.map(tf => tf[0]),
-          chart_data: chartData
-        }
+          time_frames: timeFrames.map((tf) => tf[0]),
+          chart_data: chartData,
+        },
       });
 
       success.send();
