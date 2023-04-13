@@ -69,6 +69,7 @@ export interface ITokenHolderStatsResponse {
 
 export interface ITokenSignalResponse {
   title: string;
+  type?: string;
   description?: string;
   time_frame: {
     from: number;
