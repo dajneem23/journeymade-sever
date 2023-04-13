@@ -31,10 +31,10 @@ type TAction = {
 
 type TGridZoneData = {
   time_frame: { from: number; to: number };
-  volume_frame: { from: number; to: number };
+  // volume_frame: { from: number; to: number };
 
   time_index: number;
-  volume_index: number;
+  // volume_index: number;
 
   buy: TAction;
   sell: TAction;
@@ -117,59 +117,49 @@ const counter = {
     ).slice().reverse();
   },
 
-  getChartData(timeFrames, volumeFrames, txLogs) {
+  getChartData(timeFrames, txLogs) {
     const dataGrid: TGridZoneData[] = [];
 
     timeFrames.forEach((tf, tfIdx) => {
-      volumeFrames.forEach((vf, vfIdx) => {
-        dataGrid.push({
-          time_frame: {
-            from: tf,
-            to: timeFrames[tfIdx + 1] || tf + (tf - timeFrames[tfIdx - 1]),
-          },
-          volume_frame: {
-            from: vf,
-            to: volumeFrames[vfIdx + 1] || vf + (vf - volumeFrames[vfIdx - 1]),
-          },
+      dataGrid.push({
+        time_frame: {
+          from: tf,
+          to: timeFrames[tfIdx + 1] || tf + (tf - timeFrames[tfIdx - 1]),
+        },
+        time_index: tfIdx,
 
-          time_index: tfIdx,
-          volume_index: vfIdx,
+        count: 0,
+        amount: 0,
+        usd_value: 0,
+        price: 0,
+        tags: [],
+        logs: [],
 
+        buy: {
           count: 0,
           amount: 0,
           usd_value: 0,
           price: 0,
           tags: [],
           logs: [],
+        },
 
-          buy: {
-            count: 0,
-            amount: 0,
-            usd_value: 0,
-            price: 0,
-            tags: [],
-            logs: [],
-          },
-
-          sell: {
-            count: 0,
-            amount: 0,
-            usd_value: 0,
-            price: 0,
-            tags: [],
-            logs: [],
-          },
-        } as TGridZoneData);
-      });
+        sell: {
+          count: 0,
+          amount: 0,
+          usd_value: 0,
+          price: 0,
+          tags: [],
+          logs: [],
+        },
+      } as TGridZoneData);
     });
 
     txLogs.forEach((txLog) => {
       const foundIndex = dataGrid.findIndex(
         (zone) =>
           txLog.time >= zone.time_frame.from &&
-          txLog.time <= zone.time_frame.to &&
-          txLog.usd_value >= zone.volume_frame.from &&
-          txLog.usd_value < zone.volume_frame.to,
+          txLog.time <= zone.time_frame.to
       );
 
       if (foundIndex === -1) {
@@ -208,12 +198,7 @@ const counter = {
       zone.sell.price =
         zone.sell.amount > 0 ? zone.sell.usd_value / zone.sell.amount : 0;
 
-      zone.volume_index +=
-        zone.usd_value > 0
-          ? (zone.usd_value - zone.volume_frame.from) /
-            (zone.volume_frame.to - zone.volume_frame.from)
-          : 0;
-
+    
       const tagList = Array.from(
         new Set(zone.logs.map((log) => log.tags).flat()),
       ).filter((t) => !!t);
