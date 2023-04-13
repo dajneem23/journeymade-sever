@@ -58,6 +58,7 @@ const counter = {
     
   },
   getSignals(volumes, timeFrames) {
+    const topN = 5;
     const buyVolumes = volumes.map((volume) => {
       return {
         time_index: volume.time_index,
@@ -92,16 +93,15 @@ const counter = {
           action: action,
           ...volume,
           from_time: volume.time_frame.from,
+          min_usd_value: volumeList.filter((item) => item.time_frame.from <= volume.time_frame.from).map((item) => item.usd_value).sort((a, b) => b - a)[topN],
         });
       }
 
-      const minValue = volumeList.map((volume) => volume.usd_value).sort((a, b) => b - a)[5];
-      
       /**
-       * Filter: volume > EMA and volume > minValue
+       * Filter: volume > EMA and volume > min_usd_value
        */
       const result = EMAList.filter((item) => {
-        return item.usd_value > item.ema_value && item.usd_value > minValue;
+        return item.usd_value > item.ema_value && item.usd_value > item.min_usd_value;
       })
 
       return result;
