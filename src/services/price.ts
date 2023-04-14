@@ -5,6 +5,7 @@ import {
   EventDispatcher,
   EventDispatcherInterface,
 } from '@/decorators/eventDispatcher';
+import { PipelineStage } from 'mongoose';
 
 @Service()
 export default class PriceService {
@@ -19,40 +20,53 @@ export default class PriceService {
     from_time,
     to_time,
   }: IPriceOTD) {
+    const filters: PipelineStage[] = [
+      {
+        $match: {
+          token_id: token_id,
+          timestamp: {
+            $gt: from_time,
+            $lte: to_time,
+          },
+        },
+      },
+      {
+        $project: {
+          symbol: 1,
+          price: 1,
+          usd_value: 1,
+          price_gt_0: {
+            $cond: { if: { $gt: ['$price', 0] }, then: '$price', else: 0 },
+          },
+        },
+      },
+      {
+        $sort: {
+          timestamp: 1
+        }  
+      },
+      {
+        $group: {
+          _id: '$symbol',
+          price: { $last: '$price_gt_0' },
+          high: { $max: '$price_gt_0' },
+          low: { $min: '$price_gt_0' },
+          "open": {
+            "$first": "$price_gt_0"
+          },
+          "close": {
+            "$last": "$price_gt_0"
+          },
+        },
+      },
+    ]
     const value = await this.priceModel
-      .aggregate([
-        {
-          $match: {
-            token_id: token_id,
-            timestamp: {
-              $gt: from_time,
-              $lte: to_time,
-            },
-          },
-        },
-        {
-          $project: {
-            symbol: 1,
-            price: 1,
-            usd_value: 1,
-            price_gt_0: {
-              $cond: { if: { $gt: ['$price', 0] }, then: '$price', else: 0 },
-            },
-          },
-        },
-        {
-          $group: {
-            _id: '$symbol',
-            price: { $avg: '$price_gt_0' },
-            high: { $max: '$price_gt_0' },
-            low: { $min: '$price_gt_0' },
-          },
-        },
-      ])
+      .aggregate(filters)
       .exec();
 
     return value;
   }
+      
 
   public async insert(prices: IPrice[]): Promise<any> {
     const updateOps = prices.map((price) => {

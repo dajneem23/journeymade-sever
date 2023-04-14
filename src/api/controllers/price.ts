@@ -46,7 +46,7 @@ export default class PriceController {
             from_time: timestamp[0],
             to_time: timestamp[1],
           });
-          const { price, high, low } = (value && value[0]) || {};
+          const { price, high, low, open, close } = (value && value[0]) || {};
 
           return {
             from_time: timestamp[0],
@@ -58,6 +58,8 @@ export default class PriceController {
             price: +price,
             high: +high,
             low: +low,
+            open: +open,
+            close: +close,
             time_index: index
           };
         }),
