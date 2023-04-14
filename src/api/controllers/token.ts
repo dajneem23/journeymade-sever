@@ -338,7 +338,11 @@ export default class TokenController {
         period: period as EPeriod,
         limit: +limit,
         to_time: +to_time,
-      });
+      }).slice(0, +limit);
+      console.log(
+        '🚀 ~ file: token.ts:342 ~ TokenController ~ getSignals ~ mainTimeFrames:',
+        mainTimeFrames,
+      );
       const firstTimeFrame = mainTimeFrames[0];
       const prevNTimeFrames = getTimeFramesByPeriod({
         period: period as EPeriod,
@@ -395,31 +399,36 @@ export default class TokenController {
       const signals = (
         await Promise.all(
           rawSignals.map(async ({ timeFrame, time_index, signals }) => {
-            return await Promise.all(
-              signals.map(async (signal) => {
-                return <ITokenSignalResponse>{
-                  title: `Alert: ${signal.action}`,
-                  type: signal.action,
-                  description: '....',
-                  time_frame: {
-                    from: timeFrame[0],
-                    to: timeFrame[1],
-                  },
-                  time_index: time_index,
-                  volume: {
-                    total: signal.parent.usd_value,
-                    total_change_percentage: signal.parent.change_percentage,
-                    buy: signal.parent.buy.usd_value,
-                    buy_change_percentage: signal.parent.buy.change_percentage,
-                    sell: signal.parent.sell.usd_value,
-                    sell_change_percentage:
-                      signal.parent.sell.change_percentage,
-                  },
-                  details: signal,
-                  ...(await signalWorker.getLeader(txLogs, signal)),
-                };
-              }),
-            );
+            return <ITokenSignalResponse>{
+              title: `Alert: ${signals
+                .map((signal) => signal.action)
+                .join(', ')}`,
+              type: signals.map((signal) => signal.action).join(', '),
+              description: '....',
+              time_frame: {
+                from: timeFrame[0],
+                to: timeFrame[1],
+              },
+              time_index: time_index,
+              signals: await Promise.all(
+                signals.map(async (signal) => {
+                  return {
+                    volume: {
+                      total: signal.parent.usd_value,
+                      total_change_percentage: signal.parent.change_percentage,
+                      buy: signal.parent.buy.usd_value,
+                      buy_change_percentage:
+                        signal.parent.buy.change_percentage,
+                      sell: signal.parent.sell.usd_value,
+                      sell_change_percentage:
+                        signal.parent.sell.change_percentage,
+                    },
+                    // ...signal,
+                    ...(await signalWorker.getLeader(txLogs, signal)),
+                  };
+                }),
+              ),
+            };
           }),
         )
       ).flat();
