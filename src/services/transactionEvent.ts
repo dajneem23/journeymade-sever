@@ -363,4 +363,21 @@ export default class TransactionEventService {
 
     return removeDuplicateObjects(resultWithUniqueKey, 'unique_key');
   }
+
+  public async getByTxHash({ tx_hash }) {
+    const query = () => this.transactionEventModel
+    .find({ tx_hash })
+    .lean()
+
+    const result = await query().exec();
+
+    const resultWithUniqueKey = result.map(item => {
+      return {
+        ...item,
+        unique_key: `${item.tx_hash}-${item.log_index}`,
+      }
+    })
+
+    return removeDuplicateObjects(resultWithUniqueKey, 'unique_key');
+  }
 }

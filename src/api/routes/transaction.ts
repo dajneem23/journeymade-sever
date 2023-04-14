@@ -26,27 +26,6 @@ export default (app: Router) => {
     controller.getList,
   );  
 
-  // route.post(
-  //   '/',
-  //   celebrate({
-  //     body: Joi.object({
-  //       transactions: Joi.array().required(),
-  //     }),
-  //   }),
-  //   controller.add,
-  // );
-
-  // route.delete(
-  //   '/',
-  //   celebrate({
-  //     body: Joi.object({
-  //       id: Joi.string().required(),
-  //     }),
-  //   }),
-  //   controller.delete,
-  // );
-
-
   /**
    * Tx event
    */
@@ -65,5 +44,15 @@ export default (app: Router) => {
   route.get(
     '/event/blocks',
     controller.getEventBlocks,
+  );
+
+  route.get(
+    '/:hash/logs',
+    celebrate({
+      params: Joi.object({
+        hash: Joi.string().required()
+      }),
+    }),
+    controller.getLogsByTxHash,
   );
 };
