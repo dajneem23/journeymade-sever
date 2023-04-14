@@ -181,9 +181,9 @@ export default class TokenController {
       console.timeEnd('getTxLogs');
       const txLogs = txLogGroupedByTimeFrame.flat();
 
-      // console.time('getVolumeFrames');
-      // const volumeFrames = await volumeWorker.getVolumeFrames(txLogGroupedByTimeFrame);
-      // console.timeEnd('getVolumeFrames');
+      console.time('getVolumeFrames');
+      const volumeFrames = await volumeWorker.getVolumeFrames(txLogGroupedByTimeFrame);
+      console.timeEnd('getVolumeFrames');
 
       console.time('getChartData');
       const chartData = await volumeWorker.getChartData(timeFrames, txLogs);
@@ -193,7 +193,7 @@ export default class TokenController {
       const success = new SuccessResponse(res, {
         data: {
           // tx_logs: txLogs,
-          // volume_frames: volumeFrames,
+          volume_frames: volumeFrames,
           time_frames: timeFrames.map((tf) => tf[0]),
           chart_data: chartData,
         },
