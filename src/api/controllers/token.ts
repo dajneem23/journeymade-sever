@@ -339,10 +339,10 @@ export default class TokenController {
         limit: +limit,
         to_time: +to_time,
       }).slice(0, +limit);
-      console.log(
-        '🚀 ~ file: token.ts:342 ~ TokenController ~ getSignals ~ mainTimeFrames:',
-        mainTimeFrames,
-      );
+      // console.log(
+      //   '🚀 ~ file: token.ts:342 ~ TokenController ~ getSignals ~ mainTimeFrames:',
+      //   mainTimeFrames,
+      // );
       const firstTimeFrame = mainTimeFrames[0];
       const prevNTimeFrames = getTimeFramesByPeriod({
         period: period as EPeriod,
