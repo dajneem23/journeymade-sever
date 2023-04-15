@@ -403,7 +403,7 @@ export default class TokenController {
               title: `Alert: ${signals
                 .map((signal) => signal.action)
                 .join(', ')}`,
-              type: signals.map((signal) => signal.action).join(', '),
+              type: signals.length > 1 ? 'multiple' : signals[0].action,
               description: '....',
               time_frame: {
                 from: timeFrame[0],
