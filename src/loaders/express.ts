@@ -29,7 +29,7 @@ export default ({ app }: { app: express.Application }) => {
 
   // Limit request from the same API
   const limiter = rateLimit({
-    max: 100,
+    max: 1000,
     windowMs: 5 * 60 * 1000, // 5 minutes
     message: 'Too Many Request from this IP, please try again in an hour',
   });

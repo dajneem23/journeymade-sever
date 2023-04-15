@@ -123,6 +123,7 @@ const counter = {
         buy_volume: sumArrayByField(group[address].filter((item) => item.action === 'buy'), 'usd_value'),
         sell_volume: sumArrayByField(group[address].filter((item) => item.action === 'sell'), 'usd_value'),
         tags: group[address][0].tags,
+        chain_id: group[address][0].chain_id,
       }
     })
 
