@@ -216,11 +216,13 @@ export default class TransactionEventService {
   }
 
   public async getVolume({ address_list, timestamp }) {
+    const addressOptions = [...address_list, ...address_list.map((address) => address.toLowerCase())];
+    
     return await this.transactionEventModel
       .aggregate([
         {
           $match: {
-            token: { $in: address_list },
+            token: { $in: addressOptions },
             block_at: {
               $gte: timestamp[0],
               $lte: timestamp[1],
@@ -326,12 +328,13 @@ export default class TransactionEventService {
       }
     }
 
+    const addressOptions = [...addresses, ...addresses.map((address) => address.toLowerCase())];
     const filter = {
       block_at: {
         $gte: time_frame[0],
         $lte: time_frame[1],
       },      
-      token: { $in: addresses },
+      token: { $in: addressOptions },
       usd_value: {
         $gt: min_usd_value || 0,
       },
