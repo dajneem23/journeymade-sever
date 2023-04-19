@@ -324,7 +324,7 @@ export default class TransactionEventService {
 
       const now = dayjs().unix();
       if (time_frame[1] >= now) {
-        cacheDuration = 60 * 3;
+        cacheDuration = 60 * 1;
       }
     }
 
