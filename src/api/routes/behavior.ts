@@ -45,7 +45,7 @@ export default (app: Router) => {
         }),
       }),
       apiCache({
-        duration: '3 minutes'
+        duration: '1 minutes'
       }),
     ],    
     controller.getLogs,
