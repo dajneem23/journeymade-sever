@@ -75,11 +75,7 @@ export default class TokenController {
     const { symbols, page = 1, limit = 50 } = req.query;
     try {
       const serviceInstance = Container.get(TokenService);
-      const { itemCount, items } = await serviceInstance.getTokenList({
-        symbols: symbols ? (symbols as string).split(',') : [],
-        offset: +req['skip'] || 0,
-        limit: 1000,
-      });
+      const { items } = await serviceInstance.getEnabledTokenList();
 
       const tokens = groupBy(items, 'id');
       const tokenIds = Object.keys(tokens);
@@ -151,13 +147,11 @@ export default class TokenController {
     console.timeEnd('tokenService');
 
     try {
-      console.time('getTimeFramesByPeriod');
       const timeFrames = getTimeFramesByPeriod({
         period: period as EPeriod,
         limit: +limit,
         to_time: +to_time,
       });
-      console.timeEnd('getTimeFramesByPeriod');
 
       const txEventService = Container.get(TransactionEventService);
       const volumeWorker = Container.get(volumeCounterToken);
@@ -182,7 +176,9 @@ export default class TokenController {
       const txLogs = txLogGroupedByTimeFrame.flat();
 
       console.time('getVolumeFrames');
-      const volumeFrames = await volumeWorker.getVolumeFrames(txLogGroupedByTimeFrame);
+      const volumeFrames = await volumeWorker.getVolumeFrames(
+        txLogGroupedByTimeFrame,
+      );
       console.timeEnd('getVolumeFrames');
 
       console.time('getChartData');
@@ -318,40 +314,35 @@ export default class TokenController {
     }
 
     try {
-      console.time('getTimeFramesByPeriod');
-      let subTimeFrameLimit = 24;
+      let prevTimeFramesCount = 24;
       switch (period) {
         case EPeriod['1h']:
-          subTimeFrameLimit = 24;
+          prevTimeFramesCount = 24;
           break;
         case EPeriod['4h']:
-          subTimeFrameLimit = 42;
+          prevTimeFramesCount = 42;
           break;
         case EPeriod['1d']:
-          subTimeFrameLimit = 30;
+          prevTimeFramesCount = 30;
           break;
         case EPeriod['7d']:
-          subTimeFrameLimit = 12;
+          prevTimeFramesCount = 12;
           break;
       }
       const mainTimeFrames = getTimeFramesByPeriod({
         period: period as EPeriod,
         limit: +limit,
         to_time: +to_time,
-      }).slice(0, +limit);
-      // console.log(
-      //   '🚀 ~ file: token.ts:342 ~ TokenController ~ getSignals ~ mainTimeFrames:',
-      //   mainTimeFrames,
-      // );
-      const firstTimeFrame = mainTimeFrames[0];
-      const prevNTimeFrames = getTimeFramesByPeriod({
-        period: period as EPeriod,
-        limit: subTimeFrameLimit,
-        to_time: firstTimeFrame[0],
       });
-      const timeFrames = [...mainTimeFrames, ...prevNTimeFrames];
 
-      console.timeEnd('getTimeFramesByPeriod');
+      const firstTimeFrame = mainTimeFrames[0];
+      const prevTimeFrames = getTimeFramesByPeriod({
+        period: period as EPeriod,
+        limit: prevTimeFramesCount + 1,
+        to_time: firstTimeFrame[0],
+      }).slice(0, prevTimeFramesCount);
+
+      const timeFrames = [...prevTimeFrames, ...mainTimeFrames];
 
       const txEventService = Container.get(TransactionEventService);
       const volumeWorker = Container.get(volumeCounterToken);
@@ -375,11 +366,14 @@ export default class TokenController {
         )
       ).flat();
 
-      const volumes = await volumeWorker.getChartData(timeFrames, txLogs);
+      const dataByTimeFrame = await volumeWorker.getChartData(
+        timeFrames,
+        txLogs,
+      );
 
-      const fullSignals = await signalWorker.getSignals(
-        volumes,
-        timeFrames.map((tf) => tf[0]),
+      const { EMAValues } = await signalWorker.getRawSignals(
+        dataByTimeFrame,
+        prevTimeFramesCount,
       );
 
       const rawSignals = mainTimeFrames
@@ -387,7 +381,7 @@ export default class TokenController {
           return {
             timeFrame,
             time_index: index,
-            signals: fullSignals.filter(
+            signals: EMAValues.filter(
               (signal) =>
                 signal.time_frame.from === timeFrame[0] &&
                 signal.time_frame.to === timeFrame[1],
@@ -433,6 +427,7 @@ export default class TokenController {
         )
       ).flat();
 
+      // TODO:
       const success = new SuccessResponse(res, {
         data: {
           time_frames: mainTimeFrames.map((tf) => tf[0]),

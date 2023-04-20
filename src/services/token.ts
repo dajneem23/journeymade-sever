@@ -42,6 +42,25 @@ export default class TokenService {
       itemCount,
     };
   }
+  
+  public async getEnabledTokenList(): Promise<{ items: IToken[] }> {
+    const filters = {
+      enabled: true,
+      stablecoin: { $exists: false }
+    };
+  
+    const [items] = await Promise.all([
+      this.tokenModel
+        .find(filters)
+        .select({ updated_at: 0, _id: 0 })
+        .lean()
+        .exec(),
+    ]);
+
+    return {
+      items,
+    };
+  }
 
   public async getCachedTokenById(id) {
     const ioredis = Container.get(ioRedisToken);
