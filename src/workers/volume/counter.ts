@@ -113,6 +113,7 @@ const counter = {
 
     return output;
   },
+  
   getVolumeFrames(groupedTxLogs) {
     const max = Math.max(
       ...groupedTxLogs.map((txLogs) => {

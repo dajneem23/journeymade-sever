@@ -320,12 +320,16 @@ export default class TransactionEventService {
       min_usd_value,
       time_frame,
       actions,
+      limit = 100000,
+      offset
     }: {
       symbol?: string;
       addresses;
       min_usd_value?: number;
       time_frame?;
       actions?: string[];
+      limit?: number;
+      offset?: number;
     },
     opts?,
   ) {
@@ -344,10 +348,9 @@ export default class TransactionEventService {
       }
     }
 
-    const addressOptions = [
-      ...addresses,
-      ...addresses.map((address) => address.toLowerCase()),
-    ];
+    const addressOptions = Array.from(new Set([...addresses,
+      ...addresses.map((address) => address.toLowerCase())])
+      );
     const filter = {
       block_at: {
         $gte: time_frame[0],
@@ -355,7 +358,7 @@ export default class TransactionEventService {
       },
       token: { $in: addressOptions },
       usd_value: {
-        $gt: min_usd_value || 0,
+        $gte: min_usd_value || 1,
       },
     };
     if (actions?.length > 0) {
@@ -368,7 +371,8 @@ export default class TransactionEventService {
     };
 
     const query = () =>
-      this.transactionEventModel.find(filter).select(selectOpts).lean();
+      this.transactionEventModel.find(filter).select(selectOpts).limit(limit).lean();
+      // console.log("🚀 ~ file: transactionEvent.ts:375 ~ TransactionEventService ~ filter:", filter)
 
     const result = cacheKey
       ? await (query() as any)

@@ -18,6 +18,8 @@ export default (app: Router) => {
         query: Joi.object({
           from_time: Joi.number(),
           to_time: Joi.number(),
+          action: Joi.string().valid('buy', 'sell', 'add', 'remove', 'transfer'),
+          from_usd_value: Joi.number().min(1).max(1000000),
           page: Joi.number(),
           limit: Joi.number(),
         }),
