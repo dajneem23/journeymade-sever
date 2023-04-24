@@ -8,5 +8,6 @@ export * from './getModelName'
 export * from './getTimeFramesByPeriod'
 export * from './getRecachegooseKey'
 export * from './removeDuplicateObjects'
+export * from './flattenArray'
 
 export * from '../core/appError'

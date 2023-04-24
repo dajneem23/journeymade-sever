@@ -7,7 +7,11 @@ import {
   EventDispatcherInterface,
 } from '@/decorators/eventDispatcher';
 import dayjs from '@/utils/dayjs';
-import { getRecachegooseKey, getTimeFramesByPeriod, removeDuplicateObjects } from '@/utils';
+import {
+  getRecachegooseKey,
+  getTimeFramesByPeriod,
+  removeDuplicateObjects,
+} from '@/utils';
 
 @Service()
 export default class TransactionEventService {
@@ -216,8 +220,11 @@ export default class TransactionEventService {
   }
 
   public async getVolume({ address_list, timestamp }) {
-    const addressOptions = [...address_list, ...address_list.map((address) => address.toLowerCase())];
-    
+    const addressOptions = [
+      ...address_list,
+      ...address_list.map((address) => address.toLowerCase()),
+    ];
+
     return await this.transactionEventModel
       .aggregate([
         {
@@ -306,15 +313,24 @@ export default class TransactionEventService {
       .exec();
   }
 
-  public async getListByFilters({ symbol, addresses, min_usd_value, time_frame, actions }: {
-    symbol?: string, 
-    addresses, 
-    min_usd_value?: number, 
-    time_frame?, 
-    actions?: string[]
-  }, opts?) {
+  public async getListByFilters(
+    {
+      symbol,
+      addresses,
+      min_usd_value,
+      time_frame,
+      actions,
+    }: {
+      symbol?: string;
+      addresses;
+      min_usd_value?: number;
+      time_frame?;
+      actions?: string[];
+    },
+    opts?,
+  ) {
     let cacheDuration = 60 * 60 * 24; // 24h
-    let cacheKey;    
+    let cacheKey;
 
     if (symbol) {
       cacheKey = `${symbol}:${time_frame[0]}-${time_frame[1]}:${min_usd_value}`;
@@ -328,12 +344,15 @@ export default class TransactionEventService {
       }
     }
 
-    const addressOptions = [...addresses, ...addresses.map((address) => address.toLowerCase())];
+    const addressOptions = [
+      ...addresses,
+      ...addresses.map((address) => address.toLowerCase()),
+    ];
     const filter = {
       block_at: {
         $gte: time_frame[0],
         $lte: time_frame[1],
-      },      
+      },
       token: { $in: addressOptions },
       usd_value: {
         $gt: min_usd_value || 0,
@@ -345,42 +364,43 @@ export default class TransactionEventService {
 
     const selectOpts = {
       _id: 0,
-      ...(opts?.select || {})
-    }
-    
-    const query = () => this.transactionEventModel
-      .find(filter)
-      .select(selectOpts)
-      .lean()
+      ...(opts?.select || {}),
+    };
 
-    const result = cacheKey ? await (query() as any)
-    .cache(cacheDuration, getRecachegooseKey({ module: 'tx-event', id: cacheKey}))
-    .exec() : await query().exec();
+    const query = () =>
+      this.transactionEventModel.find(filter).select(selectOpts).lean();
 
-    const resultWithUniqueKey = result.map(item => {
+    const result = cacheKey
+      ? await (query() as any)
+          .cache(
+            cacheDuration,
+            getRecachegooseKey({ module: 'tx-event', id: cacheKey }),
+          )
+          .exec()
+      : await query().exec();
+
+    const resultWithUniqueKey = result.map((item) => {
       return {
         ...item,
         unique_key: `${item.tx_hash}-${item.log_index}`,
-      }
-    })
+      };
+    });
 
     return removeDuplicateObjects(resultWithUniqueKey, 'unique_key');
   }
 
   public async getByTxHash({ tx_hash }) {
-    const query = () => this.transactionEventModel
-    .find({ tx_hash })
-    .lean()
+    const query = () => this.transactionEventModel.find({ tx_hash }).lean();
 
     const result = await query().exec();
 
-    const resultWithUniqueKey = result.map(item => {
+    const resultWithUniqueKey = result.map((item) => {
       return {
         ...item,
         unique_key: `${item.tx_hash}-${item.log_index}`,
-      }
-    })
+      };
+    });
 
     return removeDuplicateObjects(resultWithUniqueKey, 'unique_key');
-  }
+  }  
 }

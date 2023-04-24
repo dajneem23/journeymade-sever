@@ -2,7 +2,14 @@ import { celebrate, Joi } from 'celebrate';
 import { Router } from 'express';
 import Container from 'typedi';
 import TokenController from '../controllers/token';
+import {
+  addToken,
+  getHolderStats,
+  getTokenDetails,
+  getTokenList,
+} from '../controllers/token/index';
 import middleware from '../middleware';
+import isAuth from '../middleware/isAuth';
 
 const route = Router();
 const { apiCache } = middleware;
@@ -15,9 +22,6 @@ export default (app: Router) => {
   route.get(
     '/',
     [
-      apiCache({
-        duration: '60 minutes'
-      }),
       celebrate({
         query: Joi.object({
           symbols: Joi.string(),
@@ -25,23 +29,36 @@ export default (app: Router) => {
           page: Joi.number(),
         }),
       }),
+      apiCache({
+        duration: '60 minutes',
+      }),
     ],
-    controller.getList,
+    getTokenList,
   );
 
   route.get(
     '/:id',
-    [     
+    [
       celebrate({
         params: Joi.object({
           id: Joi.string().required().max(120),
         }),
       }),
       apiCache({
-        duration: '15 minutes'
+        duration: '15 minutes',
       }),
     ],
-    controller.getById,
+    getTokenDetails,
+  );
+
+  route.get(
+    '/:id/holder-stats',
+    [
+      apiCache({
+        duration: '15 minutes',
+      }),
+    ],
+    getHolderStats,
   );
 
   route.get(
@@ -58,12 +75,10 @@ export default (app: Router) => {
           page: Joi.number(),
         }),
       }),
-      apiCache(),   // TODO
+      apiCache(), // TODO
     ],
     controller.getVolume,
   );
-
-  route.get('/:id/holder-stats', controller.getHolderStats);
 
   route.get(
     '/:id/signals',
@@ -81,19 +96,29 @@ export default (app: Router) => {
     controller.getSignals,
   );
 
-  // route.post(
-  //   '/',
-  //   celebrate({
-  //     body: Joi.object({
-  //       tokens: Joi.array().required().items({
-  //         symbol: Joi.string().required(),
-  //         name: Joi.string().required(),
-  //         contract_ids: Joi.object().required(),
-  //       })
-  //     }),
-  //   }),
-  //   controller.add,
-  // );
+  route.post(
+    '/',
+    [
+      celebrate({
+        body: Joi.object({
+          tokens: Joi.array()
+            .items({
+              id: Joi.string().required(),
+              name: Joi.string().required(),
+              symbol: Joi.string().required(),
+              decimals: Joi.number().required(),
+              address: Joi.string().required(),
+              chainId: Joi.number().required(),
+              logoURI: Joi.string().required(),
+              coingeckoId: Joi.string().required(),
+              listedIn: Joi.array().required(),
+            })
+            .required(),
+        }),
+      }),
+    ],
+    addToken as any,
+  );
 
   // route.delete(
   //   '/',

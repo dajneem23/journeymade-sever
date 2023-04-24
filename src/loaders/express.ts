@@ -14,6 +14,12 @@ import routes from '@/api';
 import config from '@/config';
 import swagger from './swagger';
 import { TimeFramesLimit } from '@/constants';
+import attachMetadata, { Metadata } from '../api/middleware/attachMetadata';
+
+
+export type CustomRequestType = express.Request & {
+  metadata: Metadata
+}
 
 export default ({ app }: { app: express.Application }) => {
   // Allow Cross-Origin requests
@@ -54,8 +60,11 @@ export default ({ app }: { app: express.Application }) => {
   // Routes
   app.use(paginate.middleware(TimeFramesLimit, 50));
 
+  // attachMetadata
+  app.use(attachMetadata);
+  
   // Load API routes
-  app.use(`${config.api.prefix}/${config.api.version}`, routes());
+  app.use(`${config.api.prefix}/${config.api.version}`, routes());  
   
   // handle undefined Routes
   app.use('*', (req, res, next) => {

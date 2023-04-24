@@ -6,8 +6,8 @@ import Logger from './loaders/logger';
 
 require('events').defaultMaxListeners = 15;
 
-const ee = new EventEmitter();
-setMaxListeners(16, ee);
+const eventEmitter = new EventEmitter();
+setMaxListeners(50, eventEmitter);
 
 async function startServer() {
   const app = express();

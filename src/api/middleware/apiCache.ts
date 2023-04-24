@@ -1,6 +1,7 @@
 import { Container } from 'typedi';
 import { Logger } from 'winston';
 import apicache from 'apicache'
+import config from '@/config';
 
 /**
  * Attach user to req.currentUser
@@ -27,6 +28,8 @@ const cacheOptions = (opts?) => {
   let duration = opts?.duration;
 
   return async (req, res, next) => {
+    if (!config.isProduction) return next();
+    
     if (!duration && req?.query?.period) {
       const period: string = req.query.period;
       if (period.toLowerCase().includes("h")) {

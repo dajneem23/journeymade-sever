@@ -10,19 +10,26 @@ import group from './routes/group';
 import groupFootprint from './routes/groupFootprint';
 import signal from './routes/signal';
 import behavior from './routes/behavior';
+import metric from './routes/metric';
+import cache from './routes/cache';
+import admin from './routes/admin';
 
 export default () => {
   const app = Router();
-  tag(app);
-  token(app);
-  transaction(app);
-  account(app);
-  price(app);
   base(app);
+  cache(app);
+  token(app);
+  price(app);
+  transaction(app);
+  metric(app);
+  signal(app);
+
+  tag(app);
+  account(app);
   group(app);
   groupFootprint(app);
-  signal(app);
   behavior(app);
+  admin(app);
 
   return app;
 };

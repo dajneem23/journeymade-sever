@@ -68,6 +68,7 @@ export default class TokenService {
   }
 
   public async getByID(id) {
+    console.log("🚀 ~ file: token.ts:71 ~ TokenService ~ getByID ~ id:", id)
     const ioredis = Container.get(ioRedisToken);
 
     const cached = await ioredis.get(`token:${id}`);
@@ -119,7 +120,7 @@ export default class TokenService {
       return {
         updateOne: {
           filter: {
-            symbol: token.symbol,
+            id: token.id,
           },
           update: {
             $set: token,

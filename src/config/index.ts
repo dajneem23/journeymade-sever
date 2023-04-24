@@ -23,6 +23,7 @@ dotenv.config();
 
 export default {
   nodeEnv: process.env.NODE_ENV,
+  isProduction: isProduction,
 
   port: parseInt(process.env.PORT, 10),
 
@@ -71,5 +72,9 @@ export default {
   telegram: {
     botToken: process.env.TELEGRAM_BOT_TOKEN,
     chatId: process.env.TELEGRAM_CHAT_ID,
+  },
+
+  cron: {
+    VOLUME: '*/1 * * * *',
   },
 };

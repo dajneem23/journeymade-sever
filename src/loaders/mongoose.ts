@@ -43,11 +43,11 @@ const mongoLoader = async () => {
   await new Promise((resolve) => {    
     mongoose
       .connect(config.mongoDbURI, {
-        maxPoolSize: 100,
+        maxPoolSize: 200,
         keepAlive: true,
         socketTimeoutMS: 90000,
         serverSelectionTimeoutMS: 90000,
-        waitQueueTimeoutMS: 300000,
+        waitQueueTimeoutMS: 90000,
       })
       .then(() => {
         logger.info('MongoDB connected!');

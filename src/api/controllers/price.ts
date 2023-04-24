@@ -85,33 +85,33 @@ export default class PriceController {
     }
   }
 
-  public async add(req: Request, res: Response, next: NextFunction) {
-    const logger: Logger = Container.get('logger');
-    logger.debug('Calling add endpoint with body: %o', req.body);
+  // public async add(req: Request, res: Response, next: NextFunction) {
+  //   const logger: Logger = Container.get('logger');
+  //   logger.debug('Calling add endpoint with body: %o', req.body);
 
-    const { prices } = req.body;
-    if (!prices) throw new AppError(400, 'fail', 'accounts is required');
+  //   const { prices } = req.body;
+  //   if (!prices) throw new AppError(400, 'fail', 'accounts is required');
 
-    try {
-      const insertData = prices.map((price) => {
-        return <IPrice>{
-          symbol: price.symbol,
-          price: +price.price,
-          timestamp: +price.timestamp,
-          volume: price.volume && +price.volume,
-        };
-      });
+  //   try {
+  //     const insertData = prices.map((price) => {
+  //       return <IPrice>{
+  //         symbol: price.symbol,
+  //         price: +price.price,
+  //         timestamp: +price.timestamp,
+  //         volume: price.volume && +price.volume,
+  //       };
+  //     });
 
-      const serviceInstance = Container.get(PriceService);
-      await serviceInstance.insert(insertData);
+  //     const serviceInstance = Container.get(PriceService);
+  //     await serviceInstance.insert(insertData);
 
-      const success = new SuccessResponse(res, {
-        data: {},
-      });
+  //     const success = new SuccessResponse(res, {
+  //       data: {},
+  //     });
 
-      success.send();
-    } catch (err) {
-      next(err);
-    }
-  }
+  //     success.send();
+  //   } catch (err) {
+  //     next(err);
+  //   }
+  // }
 }

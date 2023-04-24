@@ -10,7 +10,10 @@ import {
   ITransactionEvent,
   IDebankTopHolders,
   ICoinMarket,
-  IAccountSnapshot
+  IAccountSnapshot,
+  ITokenVolume,
+  IBlock,
+  IRawTx
 } from '@/interfaces';
 
 import {
@@ -31,6 +34,10 @@ declare global {
     export type DebankTopHoldersModel = Model<IDebankTopHolders & Document>;
     export type CoinMarketModel = Model<ICoinMarket & Document>;
     export type AccountSnapshotModel = Model<IAccountSnapshot & Document>;
+    export type BlockModel = Model<IBlock & Document>;
+    export type RawTxModel = Model<IRawTx & Document>;
+
+    export type VolumeModel = Model<ITokenVolume & Document>;
   }
 }
 

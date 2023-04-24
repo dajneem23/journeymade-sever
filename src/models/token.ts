@@ -8,6 +8,7 @@ import mongoose, { Document } from 'mongoose';
  */
 const schema = new mongoose.Schema(
   {
+    id: String,
     symbol: String,
     name: String,
     address: String,

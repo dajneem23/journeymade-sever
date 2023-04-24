@@ -19,3 +19,16 @@ export const VolumeRangeOptions = [
 
 
 export const TimeFramesLimit = 12;
+
+export const ChainList = [
+  {
+    name: 'Ethereum',
+    key: 'eth',
+    id: 1,
+  },
+  {
+    name: 'Binance Smart Chain',
+    key: 'bnb',
+    id: 56,
+  },
+];
