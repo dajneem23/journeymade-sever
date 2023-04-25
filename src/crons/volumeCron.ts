@@ -11,19 +11,21 @@ import sequentially from '@/utils/sequentially';
 import Container from 'typedi';
 const CronJob = require('cron').CronJob;
 
-require('events').EventEmitter.defaultMaxListeners = 100;
+require('events').EventEmitter.defaultMaxListeners = 200;
 
 async function calculateVolume({ token, timeFrames, volumeLogs, period }) {
   const volumeService = Container.get(VolumeService);
   const txEventService = Container.get(TransactionEventService);
   const volumeWorker = Container.get(volumeCounterToken);
+  const now = dayjs();
 
   const timeFrameFormData = timeFrames.filter((t) => {
     const timeFrame = volumeLogs.find(
       (v) =>
         v.token_address === token.address &&
         v.from_time === t[0] &&
-        v.to_time === t[1],
+        v.to_time === t[1] &&
+        t[1] <= now.add(-30, 'minute').unix(),
     );
     return !timeFrame;
   });
@@ -74,7 +76,7 @@ async function calculateVolume({ token, timeFrames, volumeLogs, period }) {
   await volumeService.bulkSave(updateData);
 
   console.log(`calculateVolume:${token.address}-${token.id}: ${updateData.length}`);
-  
+
   return updateData.length;
 }
 
@@ -91,8 +93,8 @@ async function calculateVolumeCron() {
     const now = dayjs();
     const timeFrames = getTimeFramesByPeriod({
       period,
-      limit: 48,
-      to_time: now.add(-30, 'minute').unix(), // get logs of > 30 mins ago
+      limit: 200,
+      to_time: now.unix(), // get logs of > 30 mins ago
     });
 
     const tokenService = Container.get(TokenService);
