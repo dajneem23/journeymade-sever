@@ -57,4 +57,29 @@ export default class VolumeService {
 
     return await this.volumeModel.find(filter).select(selectOpts).lean().exec();
   }
+
+  public async getListByTokenId(
+    {
+      token_id,
+      from_time,
+      to_time,
+    }: {
+      token_id: string;
+      from_time: number,
+      to_time: number
+    },
+    opts?,
+  ) {
+    const filter = {
+      token_id,
+      from_time: { $gte: from_time },
+      to_time: { $lte: to_time }
+    };
+    const selectOpts = {
+      _id: 0,
+      ...(opts?.select || {}),
+    };
+
+    return await this.volumeModel.find(filter).select(selectOpts).lean().exec();
+  }
 }
