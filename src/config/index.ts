@@ -75,6 +75,6 @@ export default {
   },
 
   cron: {
-    VOLUME: '*/1 * * * *',
+    VOLUME: '*/5 * * * *',
   },
 };

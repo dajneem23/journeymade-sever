@@ -48,6 +48,7 @@
     "chalk-table": "^1.0.2",
     "compression": "^1.7.4",
     "cors": "^2.8.5",
+    "cron": "^2.3.0",
     "dayjs": "^1.11.7",
     "dotenv": "^16.0.3",
     "dotenv-safe": "^8.2.0",

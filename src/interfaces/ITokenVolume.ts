@@ -16,6 +16,7 @@ export type ITokenVolume = IActionData & {
   token_address: string;
   from_time: number;
   to_time: number;
+  period: string;
 
   chain: string;
   chain_id: number;

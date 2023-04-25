@@ -50,7 +50,7 @@ export default async ({ expressApp }) => {
   });
   logger.info('✌️ Dependency Injector loaded');
 
-  await crons();
+  crons();
 
   await expressLoader({ app: expressApp });
   logger.info('✌️ Express loaded');
