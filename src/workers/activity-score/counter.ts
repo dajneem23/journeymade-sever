@@ -196,7 +196,7 @@ const counter = {
       } else {
         const denominator = net > 0 ? max : min;
        
-        zone.activity_trend_score = denominator !== 0 ? net / denominator : 0;
+        zone.activity_trend_score = denominator !== 0 ? net / Math.abs(denominator) : 0;
       }
 
       // zone.activity_trend_score = zone.usd_value > 0 ? (zone.buy.usd_value - zone.sell.usd_value)/zone.usd_value : 0;
