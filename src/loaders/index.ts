@@ -19,9 +19,7 @@ export default async ({ expressApp }) => {
 
   await workerLoader();
 
-  // await pgLoader();
-
-  logger.info('✌️ DB loaded and connected!');
+  await pgLoader();
 
   // TODO
   const injectModels = [

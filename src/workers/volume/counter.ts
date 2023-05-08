@@ -127,6 +127,13 @@ const counter = {
     ).slice().reverse();
   },
 
+  getVolumeFrameOptions(max: number) {
+    return (
+      VolumeRangeOptions.find((o) => max <= o[0] && max > o[1]) ||
+      VolumeRangeOptions[VolumeRangeOptions.length - 1]
+    ).slice().reverse();
+  },
+
   getChartData(timeFrames, txLogs) {
     const dataGrid: TGridZoneData[] = [];
 

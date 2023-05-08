@@ -8,7 +8,7 @@ type IActionData = {
   amount: number;
   usd_value: number;
   price?: number;
-  tags: string[];
+  tags?: string[];
   change_percentage?: number;
 }
 
@@ -27,3 +27,17 @@ export type ITokenVolume = IActionData & {
   buy: IActionData;
   sell: IActionData;
 }
+
+export type IChartDataVolume = IActionData & {
+  time_bucket: string;
+  timestamp: number;
+  time_index?: number;
+  period: string;
+  buy: IActionData;
+  sell: IActionData;
+  open_price?: number;
+  close_price?: number;
+  high_price?: number;
+  low_price?: number;
+}
+

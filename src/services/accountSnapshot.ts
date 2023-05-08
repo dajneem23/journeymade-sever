@@ -35,7 +35,7 @@ export default class AccountSnapshotService {
       Object.assign(filter, { address: { $in: addresses } });
     }
 
-    const cacheDuration = 60 * 30; // 30 mins
+    const cacheDuration = 60  // * 30; // 30 mins
     console.log("🚀 ~ file: accountSnapshot.ts:53 ~ AccountSnapshotService ~ filter:", filter)
 
     const query = () => this.accountSnapshotModel

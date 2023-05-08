@@ -15,3 +15,4 @@ export enum EPeriod {
   '30d' = '30d',
   '90d' = '90d',
 }
+

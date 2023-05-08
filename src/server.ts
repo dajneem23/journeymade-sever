@@ -4,10 +4,10 @@ import express from 'express';
 import config from './config';
 import Logger from './loaders/logger';
 
-require('events').defaultMaxListeners = 15;
+require('events').defaultMaxListeners = 30;
 
 const eventEmitter = new EventEmitter();
-setMaxListeners(50, eventEmitter);
+setMaxListeners(100, eventEmitter);
 
 async function startServer() {
   const app = express();

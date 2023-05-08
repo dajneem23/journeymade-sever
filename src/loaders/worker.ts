@@ -9,7 +9,11 @@ export const activityScoreCounterToken = new Token<any>('_activityScoreCounter')
 export const signalCounterToken = new Token<any>('_signalCounter');
 
 export default async function workerLoader() {
-  const [behaviorWorker, volumeWorker, activityScoreWorker, signalWorker] = await Promise.all([
+  const [behaviorWorker, 
+    volumeWorker, 
+    activityScoreWorker, 
+    signalWorker
+  ] = await Promise.all([
     spawn<BehaviorCounterType>(new Worker("../workers/behavior/worker")),
     spawn<VolumeCounterType>(new Worker("../workers/volume/worker")),
     spawn<ActivityScoreCounterType>(new Worker("../workers/activity-score/worker")),
@@ -21,7 +25,11 @@ export default async function workerLoader() {
   Container.set(activityScoreCounterToken, activityScoreWorker);
   Container.set(signalCounterToken, signalWorker);
 
-  if (behaviorWorker && volumeWorker && activityScoreWorker) {
+  if (behaviorWorker 
+    && volumeWorker 
+    && activityScoreWorker 
+    && signalWorker
+    ) {
     logger.info('loaded workers!');
   }
  

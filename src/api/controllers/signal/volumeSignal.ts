@@ -34,7 +34,7 @@ export async function volumeSignal(
     page = 1,
     limit = TimeFramesLimit,
   } = req.query;
-  const prevTimeFrameCount = PREV_TIME_FRAMES_COUNT_OPTIONS[period as string];
+  const prevTimeFrameCount = PREV_TIME_FRAMES_COUNT_OPTIONS[period as string] || PREV_TIME_FRAMES_COUNT_OPTIONS['1h'];
 
   try {
     const mainTimeFrames = getTimeFramesByPeriod({

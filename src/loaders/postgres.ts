@@ -26,6 +26,7 @@ const pgPool = new Pool({
   ssl: {
     rejectUnauthorized: false,
   },
+  max: 20,
   idleTimeoutMillis: 0,
   connectionTimeoutMillis: 0,
 });

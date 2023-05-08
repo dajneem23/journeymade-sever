@@ -33,9 +33,9 @@ const cacheOptions = (opts?) => {
     if (!duration && req?.query?.period) {
       const period: string = req.query.period;
       if (period.toLowerCase().includes("h")) {
-        duration = "5 minutes"
+        duration = "2 minutes"
       } else if (period.toLowerCase().includes("d")) {
-        duration = "30 minutes"
+        duration = "5 minutes"
       }
     }
 

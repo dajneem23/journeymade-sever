@@ -333,7 +333,7 @@ export default class TransactionEventService {
     },
     opts?,
   ) {
-    let cacheDuration = 60 * 60 * 24; // 24h
+    let cacheDuration = 60 // 60 * 60 * 24; // 24h
     let cacheKey;
 
     if (symbol) {

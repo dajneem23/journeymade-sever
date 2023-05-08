@@ -9,5 +9,6 @@ export * from './getTimeFramesByPeriod'
 export * from './getRecachegooseKey'
 export * from './removeDuplicateObjects'
 export * from './flattenArray'
+export * from './timeBucketHelper'
 
 export * from '../core/appError'
