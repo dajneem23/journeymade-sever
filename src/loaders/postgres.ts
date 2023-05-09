@@ -27,8 +27,8 @@ const pgPool = new Pool({
     rejectUnauthorized: false,
   },
   max: 20,
-  idleTimeoutMillis: 0,
-  connectionTimeoutMillis: 0,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 2000,
 });
 
 const pgLoader = async () => {

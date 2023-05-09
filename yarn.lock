@@ -5000,7 +5000,7 @@ pg-int8@1.0.1:
 
 pg-pool@^3.6.0:
   version "3.6.0"
-  resolved "https://registry.npmjs.org/pg-pool/-/pg-pool-3.6.0.tgz"
+  resolved "https://registry.yarnpkg.com/pg-pool/-/pg-pool-3.6.0.tgz#3190df3e4747a0d23e5e9e8045bcd99bda0a712e"
   integrity sha512-clFRf2ksqd+F497kWFyM21tMjeikn60oGDmqMT8UBrynEwVEX/5R5xd2sdvdo1cZCFlguORNpVuqxIj+aK4cfQ==
 
 pg-protocol@^1.6.0:

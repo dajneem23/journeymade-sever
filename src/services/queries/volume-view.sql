@@ -13,14 +13,14 @@ WITH TOKEN_PRICE AS (
     ), BUY_VOLUME AS (
         SELECT *
         FROM
-            get_volume_by_token($6, $2, $3, $4, $5)
+            get_volume_by_token_from_view($2, $3)
         WHERE
             ACTION_TYPE = 'buy'
     ),
     SELL_VOLUME AS (
         SELECT *
         FROM
-            get_volume_by_token($6, $2, $3, $4, $5)
+            get_volume_by_token_from_view($2, $3)
         WHERE ACTION_TYPE = 'sell'
     )
 SELECT

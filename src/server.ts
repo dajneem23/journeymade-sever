@@ -4,6 +4,8 @@ import express from 'express';
 import config from './config';
 import Logger from './loaders/logger';
 
+process.env.TZ = 'Etc/Universal';
+
 require('events').defaultMaxListeners = 30;
 
 const eventEmitter = new EventEmitter();

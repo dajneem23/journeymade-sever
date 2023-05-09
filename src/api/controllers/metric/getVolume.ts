@@ -21,7 +21,7 @@ export async function getVolume(
   
   const token = req.metadata.token;
   
-  const now = dayjs().utc();
+  const now = dayjs();
   const {
     to_time = now.unix(),
     period = EPeriod['1h'],
@@ -33,8 +33,9 @@ export async function getVolume(
   console.time('getVolume');
 
   try {
-    const volumeService =Container.get(VolumeService);
-    const data = await volumeService.getVolumeFromPgDB({
+    const volumeService = Container.get(VolumeService);
+    const handler = to_time === now.unix() ? volumeService.getLatestVolume : volumeService.getHistoricalVolume;
+    const data = await handler({
       token_id: token.id,
       period: period as string,
       limit: +limit,
