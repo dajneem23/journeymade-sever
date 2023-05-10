@@ -34,7 +34,8 @@ export async function getVolume(
 
   try {
     const volumeService = Container.get(VolumeService);
-    const handler = to_time === now.unix() ? volumeService.getLatestVolume : volumeService.getHistoricalVolume;
+    const handler = volumeService.getHistoricalVolume;
+    //  to_time === now.unix() ? volumeService.getLatestVolume : volumeService.getHistoricalVolume;
     const data = await handler({
       token_id: token.id,
       period: period as string,

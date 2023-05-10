@@ -25,7 +25,7 @@ export default (app: Router) => {
       }),
       validateTokenId.fromReqParams,
       apiCache({
-        duration: '60 minutes',
+        duration: '5 minutes',
       }),
     ],
     getVolume,
