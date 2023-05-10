@@ -129,7 +129,6 @@ export default class VolumeService {
 
     sql = sql.replaceAll('$4', `'${dayjs.unix(fromTime).utc().format('YYYY-MM-DD HH:mm:ss')}'`);
     sql = sql.replaceAll('$5', `'${dayjs.unix(toTime).utc().format('YYYY-MM-DD HH:mm:ss')}'`);
-    sql = sql.replaceAll('$6', `'${interval}'`);
 
     try {      
       const raws: Array<any> = await new Promise((resolve, reject) => {
@@ -185,7 +184,6 @@ export default class VolumeService {
           count: +raw.total_count,
           amount: +raw.total_amount,
           usd_value: +raw.total_usd_value,
-          price: +raw.close_price,
           buy: {
             count: +raw.buy_count,
             amount: +raw.buy_amount,
@@ -198,11 +196,6 @@ export default class VolumeService {
             usd_value: +raw.sell_usd_value,
             change_percentage: changePercentage?.sell,
           },
-          open_price: +raw.open_price,
-          close_price: +raw.close_price,
-          high_price: +raw.high_price,
-          low_price: +raw.low_price,
-
           change_percentage: changePercentage?.total,
         }
       }).filter(Boolean);
