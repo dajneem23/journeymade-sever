@@ -124,7 +124,7 @@ export default class VolumeService {
 
     const fromTime = timeFrames[0][0];
     const toTime = timeFrames[timeFrames.length - 1][1];
-    const basePeriod = period.includes('d') ? '1m' : period.includes('h') ? '1h' : '5m';
+    const basePeriod = period.includes('d') ? '1d' : period.includes('h') ? '1h' : '5m';
     const tableName = `volume_${basePeriod}`;
 
     sql = sql.replaceAll('$4', `'${dayjs.unix(fromTime).utc().format('YYYY-MM-DD HH:mm:ss')}'`);

@@ -25,7 +25,7 @@ export default (app: Router) => {
       }),
       validateTokenId.fromReqParams,
       apiCache({
-        duration: '5 minutes',
+        duration: '3 minutes',
       }),
     ],
     getVolume,
@@ -48,7 +48,7 @@ export default (app: Router) => {
       }),
       validateTokenId.fromReqParams,
       apiCache({
-        duration: '10 minutes',
+        duration: '3 minutes',
       }),
     ],
     getActivityTrendScore
