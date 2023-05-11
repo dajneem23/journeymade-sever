@@ -58,7 +58,7 @@ export async function getPriceList(req: CustomRequestType, res: Response, next: 
       }),
     );
 
-    const values = data.map((item) => [item.price, item.high, item.low]).flat().filter(p => p > 0);
+    const values = data.map((item) => [item.price, item.close]).flat().filter(p => p > 0);
     const min = Math.min(...values);
     const max = Math.max(...values);
 
