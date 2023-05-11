@@ -33,12 +33,19 @@ export function getTimeFramesByPeriod({
   const timestamps = [];
   let to 
 
-  if (unit === 'minute') {
-    to = to_time ? dayjs.unix(to_time).add(step, 'minute') : dayjs().add(step, 'minute');
-    const minute = Math.ceil(to.minute() / step) * step - 1;
-    to = to.minute(minute).second(59);
-  } else {
-    to = to_time ? dayjs.unix(to_time).add(step, unit).endOf(unit) : dayjs().add(step, unit).endOf(unit);
+  switch (unit) {
+    case 'minute':
+      to = to_time ? dayjs.unix(to_time).add(step, 'minute') : dayjs().add(step, 'minute');
+      to = to.minute(Math.ceil(to.minute() / step) * step - 1).second(59);
+      break;
+    case 'hour':
+      to = to_time ? dayjs.unix(to_time).add(step, unit).endOf(unit) : dayjs().add(step, unit).endOf(unit);
+      to = to.hour(Math.ceil(to.hour() / step) * step - 1);
+      break;
+    case 'day':
+      to = to_time ? dayjs.unix(to_time).add(step, unit).endOf(unit) : dayjs().add(step, unit).endOf(unit);
+      to = to.day(Math.ceil(to.day() / step) * step - 1);  
+      break;
   }
 
   while (timestamps.length <= limit) {
