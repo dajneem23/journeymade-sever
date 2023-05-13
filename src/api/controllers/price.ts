@@ -51,10 +51,10 @@ export default class PriceController {
           return {
             from_time: timestamp[0],
             to_time: timestamp[1],
-            from_time_str: dayjs
-              .unix(timestamp[0])
-              .format('YYYY-MM-DD HH:mm:ss'),
-            to_time_str: dayjs.unix(timestamp[1]).format('YYYY-MM-DD HH:mm:ss'),
+            // from_time_str: dayjs
+            //   .unix(timestamp[0])
+            //   .format('YYYY-MM-DD HH:mm:ss'),
+            // to_time_str: dayjs.unix(timestamp[1]).format('YYYY-MM-DD HH:mm:ss'),
             price: +price,
             high: +high,
             low: +low,
@@ -73,7 +73,7 @@ export default class PriceController {
         data: {          
           items: data,
           price_ranges: {
-            min: min - (max - min) * 0.25,
+            min: min - (max - min) * 0.25 > 0 ? min - (max - min) * 0.25 : 0,
             max: max + (max - min) * 0.25,
           }
         },

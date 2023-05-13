@@ -58,7 +58,7 @@ export default ({ app }: { app: express.Application }) => {
   app.use(hpp());
 
   // Routes
-  app.use(paginate.middleware(TimeFramesLimit, 50));
+  app.use(paginate.middleware(TimeFramesLimit, 100));
 
   // attachMetadata
   app.use(attachMetadata);
