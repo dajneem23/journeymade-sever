@@ -5,10 +5,12 @@ import { TimeFramesLimit } from '@/constants';
 export function getTimeFramesByPeriod({
   period = EPeriod['1h'],
   limit = TimeFramesLimit,
+  from_time,
   to_time,
 }: {
   period: EPeriod;
   limit?: number;
+  from_time?: number;
   to_time?: number;
 }) {
   const step = +period.substring(0, period.length - 1);
@@ -48,9 +50,16 @@ export function getTimeFramesByPeriod({
       break;
   }
 
-  while (timestamps.length <= limit) {
-    timestamps.unshift([to.add(-1 * step, unit).add(1, 'second').unix(), to.unix(), step, unit]);
-    to = to.add(-1 * step, unit);
+  if (from_time > 0 && from_time < to_time) {
+    while (from_time < to.unix()) {
+      timestamps.unshift([to.add(-1 * step, unit).add(1, 'second').unix(), to.unix(), step, unit]);
+      to = to.add(-1 * step, unit);
+    }
+  } else {
+    while (timestamps.length <= limit) {
+      timestamps.unshift([to.add(-1 * step, unit).add(1, 'second').unix(), to.unix(), step, unit]);
+      to = to.add(-1 * step, unit);
+    }
   }
 
   return timestamps //.slice(offset, offset + limit);

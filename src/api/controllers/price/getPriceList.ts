@@ -18,6 +18,7 @@ export async function getPriceList(req: CustomRequestType, res: Response, next: 
   try {
     const now = dayjs();
     const {
+      from_time,
       to_time = now.unix(),
       period,
       page = 1,
@@ -27,6 +28,7 @@ export async function getPriceList(req: CustomRequestType, res: Response, next: 
     const timestamps = getTimeFramesByPeriod({
       period: period as EPeriod,
       limit: +limit,
+      from_time: +from_time,
       to_time: +to_time,
     });
     
@@ -44,10 +46,10 @@ export async function getPriceList(req: CustomRequestType, res: Response, next: 
         return {
           from_time: timestamp[0],
           to_time: timestamp[1],
-          // from_time_str: dayjs
-          //   .unix(timestamp[0])
-          //   .format('YYYY-MM-DD HH:mm:ss'),
-          // to_time_str: dayjs.unix(timestamp[1]).format('YYYY-MM-DD HH:mm:ss'),
+          from_time_str: dayjs
+            .unix(timestamp[0])
+            .format('YYYY-MM-DD HH:mm:ss'),
+          to_time_str: dayjs.unix(timestamp[1]).format('YYYY-MM-DD HH:mm:ss'),
           price: +price,
           high: +high,
           low: +low,

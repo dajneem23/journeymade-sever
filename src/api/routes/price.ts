@@ -18,6 +18,7 @@ export default (app: Router) => {
           tokenId: Joi.string().required().max(120),
         }),
         query: Joi.object({
+          from_time: Joi.number(),
           to_time: Joi.number(),
           period: Joi.string().min(2).max(3),
           page: Joi.number(),
