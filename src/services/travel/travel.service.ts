@@ -1,6 +1,7 @@
 import { Service, Container, Token } from 'typedi';
 import OpenAIService from '../openai/openai';
 import config from '@/config';
+import { isJson } from '@/utils/json';
 
 @Service()
 export default class TravelService {
@@ -43,7 +44,7 @@ export default class TravelService {
         budget ? `Chuyến đi sẽ có giá dưới ${budget} đô la` : ''
       }. ${
         transportation ? `Chuyến đi sẽ bằng ${transportation}` : ''
-      }. Trả về với định dạng này: [{"day":"Day 1","locations":[{"name":"location name","description":"location description","duration":"location durations"},{"name":"location name 2","description":"location description 2","duration":"location durations 2"},..]},{"day":"Day 2","locations":[{"name":"location name","description":"location description","duration":"location durations"},{"name":"location name 2","description":"location description 2","duration":"location durations 2"},..]},...] và sử dụng tiếng Việt`;
+      }. Trả về với định dạng này: [{"day":"Day 1","locations":[{"name":"location name","description":"location description","duration":"location durations"},{"name":"location name 2","description":"location description 2","duration":"location durations 2"},..]},{"day":"Day 2","locations":[{"name":"location name","description":"location description","duration":"location durations"},{"name":"location name 2","description":"location description 2","duration":"location durations 2"},..]},...] với key sử dụng English và value sử dụng Tiếng Việt`;
       const completion = await this.openai.createCompletion({
         model: config.openai.model,
         prompt,
@@ -51,10 +52,10 @@ export default class TravelService {
       });
       const result = completion.data.choices[0].text;
       console.log(result);
-      const jsonfromstring = JSON.parse(result.match(/\[(.*)\]/)[0]);
-
+      const jsonfromstring = JSON.parse(result.match(/\[(.*)\]/)?.[0]);
+      const json = isJson(result);
       return {
-        data: jsonfromstring,
+        data: jsonfromstring || json,
         metadata,
         code: 200,
       };

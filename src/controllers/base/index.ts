@@ -2,7 +2,15 @@ import { ErrorResponse, SuccessResponse } from '@/core/responseTemplate';
 
 export function healthCheck(req, res, next) {
   try {
-    const success = new SuccessResponse(res, { data: 'OK', message: 'OK' });
+    const cpuUsage = process.cpuUsage();
+    const memoryUsage = process.memoryUsage();
+    const success = new SuccessResponse(res, {
+      data: {
+        cpuUsage,
+        memoryUsage,
+      },
+      message: 'OK',
+    });
     return success.send();
   } catch (err) {
     next(err);

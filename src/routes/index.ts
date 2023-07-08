@@ -8,9 +8,11 @@ import config from '@/config';
 
 export default ({ app }: { app: express.Application }) => {
   const router = Router();
-  app.use(`${config.api.prefix}/${config.api.version}`, router);
 
   base(app);
+
+  app.use(`${config.api.prefix}/${config.api.version}`, router);
+
   attachControllers(router, [TravelController]);
   return router;
 };
