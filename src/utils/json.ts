@@ -6,3 +6,12 @@ export const isJson = (str: string) => {
     return false;
   }
 };
+
+export const getJsonRegex = (str: string) => {
+  try {
+    const jsonfromstring = JSON.parse(str.match(/\[(.*)\]/)?.[0]);
+    return jsonfromstring;
+  } catch (error) {
+    return false;
+  }
+};
