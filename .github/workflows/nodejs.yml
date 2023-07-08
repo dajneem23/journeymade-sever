@@ -1,50 +1,50 @@
-name: Production
+# name: Production
 
-# 1
-# Controls when the workflow will run
-on:
-  # Triggers the workflow on push events but only for the master branch
-  push:
-    branches: [main]
+# # 1
+# # Controls when the workflow will run
+# on:
+#   # Triggers the workflow on push events but only for the master branch
+#   push:
+#     branches: [main]
 
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
-    inputs:
-      version:
-        description: 'Image version'
-        required: true
-#2
-env:
-  REGISTRY: 'registry.digitalocean.com/wikiblock'
-  IMAGE_NAME: 'onchain-api'
-  APP_ENV: 'production'
-  APP_NAME: 'onchain-api'
-  API_PREFIX: ''
-  APP_VERSION: '0.0.1'
-  APP_PORT: 3001
-  NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
+#   # Allows you to run this workflow manually from the Actions tab
+#   workflow_dispatch:
+#     inputs:
+#       version:
+#         description: 'Image version'
+#         required: true
+# #2
+# env:
+#   REGISTRY: 'registry.digitalocean.com/wikiblock'
+#   IMAGE_NAME: 'onchain-api'
+#   APP_ENV: 'production'
+#   APP_NAME: 'onchain-api'
+#   API_PREFIX: ''
+#   APP_VERSION: '0.0.1'
+#   APP_PORT: 3001
+#   NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
 
-#3
-jobs:
-  build_and_push:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout the repo
-        uses: actions/checkout@v3
+# #3
+# jobs:
+#   build_and_push:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Checkout the repo
+#         uses: actions/checkout@v3
 
-      - name: Build container image
-        run: docker build --build-arg NODE_AUTH_TOKEN='${{ secrets.NODE_AUTH_TOKEN }}' -t $(echo $REGISTRY)/$(echo $IMAGE_NAME):latest .
+#       - name: Build container image
+#         run: docker build --build-arg NODE_AUTH_TOKEN='${{ secrets.NODE_AUTH_TOKEN }}' -t $(echo $REGISTRY)/$(echo $IMAGE_NAME):latest .
 
-      - name: Install doctl
-        uses: digitalocean/action-doctl@v2
-        with:
-          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+#       - name: Install doctl
+#         uses: digitalocean/action-doctl@v2
+#         with:
+#           token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
 
-      - name: Log in to DigitalOcean Container Registry with short-lived credentials
-        run: doctl registry login --expiry-seconds 600
+#       - name: Log in to DigitalOcean Container Registry with short-lived credentials
+#         run: doctl registry login --expiry-seconds 600
 
-      - name: Remove all old images
-        run: if [ ! -z "$(doctl registry repository list | grep "$(echo $IMAGE_NAME)")" ]; then doctl registry repository delete-manifest $(echo $IMAGE_NAME) $(doctl registry repository list-tags $(echo $IMAGE_NAME) | grep -o "sha.*") --force; else echo "No repository"; fi
+#       - name: Remove all old images
+#         run: if [ ! -z "$(doctl registry repository list | grep "$(echo $IMAGE_NAME)")" ]; then doctl registry repository delete-manifest $(echo $IMAGE_NAME) $(doctl registry repository list-tags $(echo $IMAGE_NAME) | grep -o "sha.*") --force; else echo "No repository"; fi
 
-      - name: Push image to DigitalOcean Container Registry
-        run: docker push $(echo $REGISTRY)/$(echo $IMAGE_NAME):latest
+#       - name: Push image to DigitalOcean Container Registry
+#         run: docker push $(echo $REGISTRY)/$(echo $IMAGE_NAME):latest
