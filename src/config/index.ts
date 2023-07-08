@@ -63,18 +63,26 @@ export default {
   },
 
   redis: {
-    uri: isProduction ? (process.env.INTERNAL_REDIS_URI || process.env.REDIS_URI) : process.env.REDIS_URI,
+    uri: isProduction
+      ? process.env.INTERNAL_REDIS_URI || process.env.REDIS_URI
+      : process.env.REDIS_URI,
     port: +process.env.REDIS_PORT,
     host: process.env.REDIS_HOST,
     password: process.env.REDIS_PASSWORD,
   },
 
-  telegram: {
-    botToken: process.env.TELEGRAM_BOT_TOKEN,
-    chatId: process.env.TELEGRAM_CHAT_ID,
-  },
+  // telegram: {
+  //   botToken: process.env.TELEGRAM_BOT_TOKEN,
+  //   chatId: process.env.TELEGRAM_CHAT_ID,
+  // },
 
-  cron: {
-    VOLUME: '*/5 * * * *',
+  // cron: {
+  //   VOLUME: '*/5 * * * *',
+  // },
+
+  openai: {
+    secret: process.env.CHAT_GPT_SECRET,
+    max_tokens: 2048,
+    model: 'text-davinci-003',
   },
 };

@@ -1,43 +1,8 @@
 import { Document, Model } from 'mongoose';
-import {
-  IAccount,
-  IGroup,
-  IGroupFootprint,
-  IPortfolio,
-  IPrice,
-  ITag,
-  IToken,
-  ITransactionEvent,
-  IDebankTopHolders,
-  ICoinMarket,
-  IAccountSnapshot,
-  ITokenVolume,
-  IBlock,
-  IRawTx
-} from '@/interfaces';
-
-import {
-  ITransaction
-} from '@1foxglobal/onchain-data-model/lib/interfaces'
+import {} from '@/interfaces';
 
 declare global {
   namespace Models {
-    export type AccountModel = Model<IAccount & Document>;
-    export type GroupFootprintModel = Model<IGroupFootprint & Document>;
-    export type GroupModel = Model<IGroup & Document>;
-    export type PortfolioModel = Model<IPortfolio & Document>;
-    export type PriceModel = Model<IPrice & Document>;
-    export type TagModel = Model<ITag & Document>;
-    export type TokenModel = Model<IToken & Document>;
-    export type TransactionModel = Model<ITransaction & Document>;
-    export type TransactionEventModel = Model<ITransactionEvent & Document>;
-    export type DebankTopHoldersModel = Model<IDebankTopHolders & Document>;
-    export type CoinMarketModel = Model<ICoinMarket & Document>;
-    export type AccountSnapshotModel = Model<IAccountSnapshot & Document>;
-    export type BlockModel = Model<IBlock & Document>;
-    export type RawTxModel = Model<IRawTx & Document>;
-
-    export type VolumeModel = Model<ITokenVolume & Document>;
+    // export type AccountModel = Model<IAccount & Document>;
   }
 }
-

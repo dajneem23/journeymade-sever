@@ -46,6 +46,6 @@ COPY --from=builder /usr/src/app/node_modules ./node_modules
 
 # RUN yarn install --production
 
-EXPOSE 3001
+EXPOSE 3000
 
 CMD [ "node", "--max-old-space-size=8192", "server.js" ]

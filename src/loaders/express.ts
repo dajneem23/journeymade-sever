@@ -6,20 +6,19 @@ import helmet from 'helmet';
 import hpp from 'hpp';
 import xss from 'xss-clean';
 import paginate from 'express-paginate';
-import { errors } from 'celebrate'
+import { errors } from 'celebrate';
 
-import { globalErrHandler } from '@/api/controllers/base';
+import { globalErrHandler } from '@/controllers/base';
 import AppError from '@/core/appError';
-import routes from '@/api';
+import routes from '@/routes';
 import config from '@/config';
 import swagger from './swagger';
 import { TimeFramesLimit } from '@/constants';
-import attachMetadata, { Metadata } from '../api/middleware/attachMetadata';
-
+import attachMetadata, { Metadata } from '../middleware/attachMetadata';
 
 export type CustomRequestType = express.Request & {
-  metadata: Metadata
-}
+  metadata: Metadata;
+};
 
 export default ({ app }: { app: express.Application }) => {
   // Allow Cross-Origin requests
@@ -47,7 +46,7 @@ export default ({ app }: { app: express.Application }) => {
       limit: '15kb',
     }),
   );
-  
+
   // Data sanitization against Nosql query injection
   app.use(mongoSanitize());
 
@@ -62,15 +61,17 @@ export default ({ app }: { app: express.Application }) => {
 
   // attachMetadata
   app.use(attachMetadata);
-  
+
   // Load API routes
-  app.use(`${config.api.prefix}/${config.api.version}`, routes());  
-  
+  // app.use(`${config.api.prefix}/${config.api.version}`, routes());
+  routes({ app });
+
   // handle undefined Routes
   app.use('*', (req, res, next) => {
     const err = new AppError(404, 'fail', 'undefined route');
     next(err);
   });
+  app.use('/api-docs', swagger);
 
   app.use(errors());
 
